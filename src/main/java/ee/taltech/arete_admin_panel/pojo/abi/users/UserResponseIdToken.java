@@ -1,5 +1,6 @@
 package ee.taltech.arete_admin_panel.pojo.abi.users;
 
+import ee.taltech.arete_admin_panel.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -7,6 +8,7 @@ import lombok.Data;
 @Data
 public class UserResponseIdToken {
 	private long id;
-	private boolean isAdmin;
+	private User.Role role;
 	private String token;
+	private String username;
 }

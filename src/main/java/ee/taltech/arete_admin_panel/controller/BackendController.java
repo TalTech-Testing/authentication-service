@@ -1,5 +1,10 @@
 package ee.taltech.arete_admin_panel.controller;
 
+import ee.taltech.arete_admin_panel.algorithms.SHA512;
+import ee.taltech.arete_admin_panel.domain.User;
+import ee.taltech.arete_admin_panel.exception.UserNotFoundException;
+import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
+import ee.taltech.arete_admin_panel.pojo.abi.users.UserPostDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.service.TokenService;
 import ee.taltech.arete_admin_panel.service.UserService;
@@ -23,9 +28,17 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/auth")
-    public UserResponseIdToken getHome(@RequestParam() String username) {
-        LOG.info(String.format("Getting ID for user %s", username));
-        return tokenService.createResponse(userService.getHome(username));
+    @PostMapping(path = "/auth")
+    public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) {
+        User user = userService.getUser(userDto.getUsername());
+
+        SHA512 sha512 = new SHA512();
+        String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
+
+        if (!user.getPasswordHash().equals(passwordHash)) {
+            throw new UserWrongCredentials("Wrong login.");
+        }
+
+        return tokenService.createResponse(userService.getHome(user.getUsername()));
     }
 }

@@ -73,14 +73,9 @@ public class TokenService {
     public UserResponseIdToken createResponse(long id) {
 
         String token;
-        boolean isAdmin = false;
-        if (userService.getUser(id).getRole().equals(User.Role.ADMIN)) {
-            token = createAndSignAdminToken(id);
-            isAdmin = true;
-        } else {
-            token = createAndSignToken(id);
-        }
-        return new UserResponseIdToken(id, isAdmin, token);
+        User user = userService.getUser(id);
+        token = user.getRole().equals(User.Role.ADMIN) ? createAndSignAdminToken(id) : createAndSignToken(id);
+        return new UserResponseIdToken(id, user.getRole(), token, user.getUsername());
     }
 }
 
