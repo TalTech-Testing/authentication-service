@@ -3,10 +3,10 @@ package ee.taltech.arete_admin_panel.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 
-@ToString
 @Entity
 @Getter
 @Setter

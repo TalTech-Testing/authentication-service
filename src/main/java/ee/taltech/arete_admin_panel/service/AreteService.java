@@ -10,11 +10,13 @@ import arete.java.response.UnitTest;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class AreteService {
 
     private final StudentRepository studentRepository;
@@ -55,9 +57,9 @@ public class AreteService {
 
         getJob(response);
 
-        Student student = getStudent(response);
-
         Course course = getCourse(response);
+
+        Student student = getStudent(response, course);
 
         Slug slug = getSlug(response, course);
 
@@ -158,12 +160,20 @@ public class AreteService {
         return course;
     }
 
-    private Student getStudent(AreteResponse response) {
+    private Student getStudent(AreteResponse response, Course course) {
         Student student;
         Optional<Student> optionalStudent = studentRepository.findByUniid(response.getUniid());
         student = optionalStudent.orElseGet(() -> Student.builder()
                 .uniid(response.getUniid())
+                .firstTested(response.getTimestamp())
                 .build());
+
+        if (student.getGitRepo() == null && response.getGitStudentRepo() != null) {
+            student.setGitRepo(response.getGitTestRepo());
+        }
+
+        student.getCourses().add(course.getGitUrl());
+
         studentRepository.saveAndFlush(student);
         return student;
     }

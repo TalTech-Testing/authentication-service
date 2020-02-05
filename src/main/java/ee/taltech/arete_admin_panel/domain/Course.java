@@ -2,12 +2,12 @@ package ee.taltech.arete_admin_panel.domain;
 
 import com.sun.istack.NotNull;
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@ToString
 @Entity
 @Getter
 @Setter

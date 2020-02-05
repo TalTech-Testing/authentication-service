@@ -2,6 +2,7 @@ package ee.taltech.arete_admin_panel.domain;
 
 import com.sun.istack.NotNull;
 import lombok.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -23,9 +24,14 @@ public class Student {
     @NotNull
     private String uniid; // TalTech student identificator: envomp - Ago guarantee to be unique
 
+    private String gitRepo;
+
     @NotNull
-    @OneToMany(cascade = {CascadeType.MERGE})
+    private Long firstTested;
+
+    @NotNull
     @Builder.Default
-    private Set<Course> courses = new HashSet<>(); // only count unique ones
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<String> courses = new HashSet<>(); // only count unique ones
 
 }

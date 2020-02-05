@@ -8,7 +8,6 @@ import javax.persistence.Embeddable;
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
