@@ -17,33 +17,27 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "Jobs")
+@Table(name = "jobs")
 public class Job {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
     private String testingPlatform;
-
-    private String returnUrl;
 
     private String gitStudentRepo;
     //  or
     @Column(columnDefinition = "TEXT")
     private String source;
 
-    private String gitTestSource;
-    // or
-    @Column(columnDefinition = "TEXT")
-    private String testSource;
+    private String gitTestRepo;
 
     private String hash;
 
     private String uniid; // gitlab namespace: envomp
 
-    private String course; // gitlab namespace with path for tester: iti0102-2019/ex
+    private String root; // gitlab namespace with path for tester: iti0102-2019
 
     private String slug;
 
@@ -71,6 +65,8 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String consoleOutput;
 
+    @NotNull
+    @Builder.Default
     private Integer analyzed = 0;
 
 }

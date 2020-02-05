@@ -12,12 +12,11 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "Files")
+@Table(name = "files")
 @Entity
 @JsonClassDescription("File class")
 public class File {
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;

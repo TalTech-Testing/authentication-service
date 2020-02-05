@@ -1,5 +1,7 @@
 package ee.taltech.arete_admin_panel.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sun.istack.NotNull;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,11 +13,12 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "Users")
+@Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
 
+    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -25,11 +28,14 @@ public class User {
 
     private String color = "general";
 
+    @NotNull
     @Column(name = "password_hash")
     private String passwordHash;
 
+    @NotNull
     private String salt;
 
+    @NotNull
     private Role role;
 
     public enum Role {

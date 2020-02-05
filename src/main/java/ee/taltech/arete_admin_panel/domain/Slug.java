@@ -5,6 +5,8 @@ import com.sun.istack.NotNull;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @ToString
 @Entity
@@ -13,26 +15,20 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "submissions")
-public class Submission {
+@Table(name = "slugs")
+public class Slug {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @NotNull
-    private String testingPlatform;
+    private String name;
 
-    private String hash; // references to job.
-
-    private String uniid; // gitlab namespace: envomp
-
-    private String root; // gitlab path for student: iti0102-2019
-
-    private String gitStudentRepo;
-
-    private String gitTestSource;
-
-    private Long timestamp;
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.MERGE})
+    private Course course;
 
 }
+
+
