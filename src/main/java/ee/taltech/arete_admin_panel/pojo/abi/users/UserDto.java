@@ -10,14 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserDto {
 
-    private Long id;
     private String username;
-    private User.Role role;
 
-    public UserDto(User user) {
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.role = user.getRole();
-    }
+    private String token;
+
+    private String color;
 
 }

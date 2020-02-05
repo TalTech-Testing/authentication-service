@@ -6,6 +6,7 @@ import ee.taltech.arete_admin_panel.domain.Submission;
 import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.exception.UserNotFoundException;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
+import ee.taltech.arete_admin_panel.pojo.abi.users.UserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.UserPostDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.JobRepository;
@@ -54,6 +55,26 @@ public class BackendController {
 
         return tokenService.createResponse(userService.getHome(user.getUsername()));
     }
+
+
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping(path = "/user")
+    public void setUserProperties(@RequestBody UserDto userDto) {
+
+        User user = userService.getUser(userDto.getUsername());
+
+        if (!tokenService.verifyTokenIsCertainId(userDto.getToken(), user.getId())) {
+            throw new UserWrongCredentials("Bad token.");
+        }
+
+        if (userDto.getColor() != null) {
+            user.setColor(userDto.getColor());
+        }
+
+        userService.saveUser(user);
+
+    }
+
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submissions")

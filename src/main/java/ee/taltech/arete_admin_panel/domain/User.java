@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = "Users")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -22,6 +22,8 @@ public class User {
 
     @Column(unique = true)
     private String username;
+
+    private String color = "general";
 
     @Column(name = "password_hash")
     private String passwordHash;

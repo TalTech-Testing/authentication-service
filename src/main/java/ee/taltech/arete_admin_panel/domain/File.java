@@ -12,7 +12,7 @@ import javax.persistence.*;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "file")
+@Table(name = "Files")
 @Entity
 @JsonClassDescription("File class")
 public class File {

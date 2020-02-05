@@ -7,8 +7,11 @@ import lombok.Data;
 @AllArgsConstructor
 @Data
 public class UserResponseIdToken {
-	private long id;
-	private User.Role role;
-	private String token;
-	private String username;
+
+    private long id;
+    private User.Role role;
+    private String token;
+    private String username;
+    private String color;
+
 }

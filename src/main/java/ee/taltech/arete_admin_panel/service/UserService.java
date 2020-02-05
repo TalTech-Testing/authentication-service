@@ -81,6 +81,10 @@ public class UserService {
         return userRepository.findAll();
     }
 
+    public void saveUser(User user) {
+        userRepository.saveAndFlush(user);
+    }
+
     @Transactional
     public void removeUser(String username) {
         userRepository.deleteByUsername(username);

@@ -17,7 +17,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "job")
+@Table(name = "Jobs")
 public class Job {
 
     @Id
@@ -71,6 +71,6 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String consoleOutput;
 
-    private Boolean analyzed = false;
+    private Integer analyzed = 0;
 
 }
