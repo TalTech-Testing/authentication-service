@@ -1,17 +1,25 @@
-package ee.taltech.arete_admin_panel.pojo.abi.users;
+package ee.taltech.arete_admin_panel.pojo.abi.users.user;
 
 import ee.taltech.arete_admin_panel.domain.User;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.*;
 
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
 @AllArgsConstructor
-@Data
 public class UserResponseIdToken {
 
     private long id;
+
     private User.Role role;
+
     private String token;
+
     private String username;
+
     private String color;
 
 }
+
+

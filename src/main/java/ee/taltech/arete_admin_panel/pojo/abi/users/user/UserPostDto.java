@@ -1,4 +1,4 @@
-package ee.taltech.arete_admin_panel.pojo.abi.users;
+package ee.taltech.arete_admin_panel.pojo.abi.users.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,6 +12,7 @@ import lombok.Setter;
 public class UserPostDto {
 
     private String username;
+
     private String password;
 
 }

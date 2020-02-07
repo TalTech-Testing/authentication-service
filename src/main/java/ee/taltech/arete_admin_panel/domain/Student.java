@@ -32,6 +32,44 @@ public class Student {
     @NotNull
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
-    private Set<String> courses = new HashSet<>(); // only count unique ones
+    private Set<String> courses = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    private Integer totalCommits = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer totalTestsRan = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer totalTestsPassed = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer totalDiagnosticErrors = 0;
+
+    @NotNull
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    private Integer totalTestErrors = 0;
+
+    @NotNull
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<CodeError> testCodeErrors = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    private Integer failedCommits = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer commitsStyleOK = 0;
 
 }

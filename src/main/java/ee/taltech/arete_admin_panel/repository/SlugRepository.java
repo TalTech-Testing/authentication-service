@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface SlugRepository extends JpaRepository<Slug, Long> {
 
-    Optional<Slug> findByCourseAndName(@Param("course") Course course, @Param("name") String name);
+    Optional<Slug> findByCourseUrlAndName(@Param("courseUrl") String courseUrl, @Param("name") String name);
 
 }

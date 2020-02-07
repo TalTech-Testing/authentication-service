@@ -30,6 +30,10 @@ public class StudentDataSlug {
     private Slug slug;
 
     @NotNull
+    @ManyToOne(cascade = {CascadeType.MERGE})
+    private Course course;
+
+    @NotNull
     @Builder.Default
     private Integer totalCommits = 0;
 

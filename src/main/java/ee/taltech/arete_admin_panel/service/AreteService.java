@@ -53,57 +53,74 @@ public class AreteService {
 
     public void parseAreteResponse(AreteResponse response) {
 
-        getSubmission(response);
+        saveSubmission(response);
 
-        getJob(response);
+        saveJob(response);
 
         Course course = getCourse(response);
 
-        Student student = getStudent(response, course);
-
         Slug slug = getSlug(response, course);
 
-        getStudentDataSlug(response, student, slug);
+        Student student = getStudent(response, course, slug);
+
+        saveStudentDataSlug(response, student, slug, course);
 
     }
 
-    private void getStudentDataSlug(AreteResponse response, Student student, Slug slug) {
+    private void saveStudentDataSlug(AreteResponse response, Student student, Slug slug, Course course) {
         StudentDataSlug studentDataSlug;
         Optional<StudentDataSlug> optionalStudentDataSlug = studentDataSlugRepository.findByStudentAndSlug(student, slug);
         studentDataSlug = optionalStudentDataSlug.orElseGet(() -> StudentDataSlug.builder()
                 .slug(slug)
+                .course(course)
                 .student(student)
                 .build());
 
         if (response.getStyle() == 100) {
             studentDataSlug.setCommitsStyleOK(studentDataSlug.getCommitsStyleOK() + 1);
+            slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
+            course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
+            student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
         }
 
         int newDiagnosticErrors = response.getErrors().size();
         Map<String, Long> diagnosticErrors = response.getErrors().stream().map(Error::getKind).collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-        HashSet<CodeError> diagnosticErrorSet = new HashSet<>();
+
         for (String key : diagnosticErrors.keySet()) {
-            diagnosticErrorSet.add(new CodeError(key, Math.toIntExact(diagnosticErrors.get(key))));
+
+            updateDiagnosticCodeErrors(diagnosticErrors, key, studentDataSlug.getDiagnosticCodeErrors());
+
+            updateDiagnosticCodeErrors(diagnosticErrors, key, slug.getDiagnosticCodeErrors());
+
+            updateDiagnosticCodeErrors(diagnosticErrors, key, course.getDiagnosticCodeErrors());
+
+            updateDiagnosticCodeErrors(diagnosticErrors, key, student.getDiagnosticCodeErrors());
+
         }
-        studentDataSlug.getDiagnosticCodeErrors().addAll(diagnosticErrorSet);
 
         if (response.getFailed()) {
             studentDataSlug.setFailedCommits(studentDataSlug.getFailedCommits() + 1);
+            slug.setFailedCommits(slug.getFailedCommits() + 1);
+            course.setFailedCommits(course.getFailedCommits() + 1);
+            student.setFailedCommits(student.getFailedCommits() + 1);
         }
 
         try {
             Double score = Double.parseDouble(response.getTotalGrade());
+
             if (score > studentDataSlug.getHighestPercentage()) {
                 studentDataSlug.setHighestPercentage(score);
             }
+
         } catch (NumberFormatException ignored) {
         }
 
         int newTestErrors = 0;
         int newTestPassed = 0;
         int newTestsRan = 0;
+
         Map<String, Integer> testErrors = new HashMap<>();
-        Set<CodeError> codeErrorSet = new HashSet<>();
+
         for (TestContext testContext : response.getTestSuites()) {
             for (UnitTest unitTest : testContext.getUnitTests()) {
                 newTestsRan += 1;
@@ -122,29 +139,78 @@ public class AreteService {
         }
 
         for (String key : testErrors.keySet()) {
-            codeErrorSet.add(new CodeError(key, testErrors.get(key)));
+
+            updateCodeErrors(testErrors, key, studentDataSlug.getTestCodeErrors());
+
+            updateCodeErrors(testErrors, key, slug.getTestCodeErrors());
+
+            updateCodeErrors(testErrors, key, course.getTestCodeErrors());
+
+            updateCodeErrors(testErrors, key, student.getTestCodeErrors());
+
         }
 
-        studentDataSlug.getTestCodeErrors().addAll(codeErrorSet);
-
         studentDataSlug.setTotalCommits(studentDataSlug.getTotalCommits() + 1);
+        slug.setTotalCommits(slug.getTotalCommits() + 1);
+        course.setTotalCommits(course.getTotalCommits() + 1);
+        student.setTotalCommits(student.getTotalCommits() + 1);
+
         studentDataSlug.setTotalDiagnosticErrors(studentDataSlug.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
+
         studentDataSlug.setTotalTestErrors(studentDataSlug.getTotalTestErrors() + newTestErrors);
+        slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
+        course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
+        student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
+
         studentDataSlug.setTotalTestsPassed(studentDataSlug.getTotalTestsPassed() + newTestPassed);
+        slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
+        course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
+        student.setTotalTestsPassed(student.getTotalTestsPassed() + newTestPassed);
+
         studentDataSlug.setTotalTestsRan(studentDataSlug.getTotalTestsRan() + newTestsRan);
+        slug.setTotalTestsRan(slug.getTotalTestsRan() + newTestsRan);
+        course.setTotalTestsRan(course.getTotalTestsRan() + newTestsRan);
+        student.setTotalTestsRan(student.getTotalTestsRan() + newTestsRan);
 
         studentDataSlugRepository.saveAndFlush(studentDataSlug);
+        studentRepository.saveAndFlush(student);
+        slugRepository.saveAndFlush(slug);
+        courseRepository.saveAndFlush(course);
+
+    }
+
+    private void updateCodeErrors(Map<String, Integer> testErrors, String key, Set<CodeError> testCodeErrors) {
+        if (testCodeErrors.stream().anyMatch(x -> x.getErrorType().equals(key))) {
+            testCodeErrors.stream().filter(error -> error.getErrorType().equals(key)).forEachOrdered(error -> error.setRepetitions(Math.toIntExact(error.getRepetitions() + testErrors.get(key))));
+        } else {
+            testCodeErrors.add(new CodeError(key, Math.toIntExact(testErrors.get(key))));
+        }
+    }
+
+    private void updateDiagnosticCodeErrors(Map<String, Long> diagnosticErrors, String key, Set<CodeError> diagnosticCodeErrors) {
+        if (diagnosticCodeErrors.stream().anyMatch(x -> x.getErrorType().equals(key))) {
+            diagnosticCodeErrors.stream().filter(error -> error.getErrorType().equals(key)).forEachOrdered(error -> error.setRepetitions(Math.toIntExact(error.getRepetitions() + diagnosticErrors.get(key))));
+        } else {
+            diagnosticCodeErrors.add(new CodeError(key, Math.toIntExact(diagnosticErrors.get(key))));
+        }
     }
 
     private Slug getSlug(AreteResponse response, Course course) {
         Slug slug;
-        Optional<Slug> optionalSlug = slugRepository.findByCourseAndName(course, response.getSlug());
+        Optional<Slug> optionalSlug = slugRepository.findByCourseUrlAndName(course.getGitUrl(), response.getSlug());
         slug = optionalSlug.orElseGet(() -> Slug.builder()
-                .course(course)
+                .courseUrl(course.getGitUrl())
                 .name(response.getSlug())
                 .build());
 
         slugRepository.saveAndFlush(slug);
+
+        course.getSlugs().add(slug);
+        courseRepository.saveAndFlush(course);
+
         return slug;
     }
 
@@ -160,7 +226,7 @@ public class AreteService {
         return course;
     }
 
-    private Student getStudent(AreteResponse response, Course course) {
+    private Student getStudent(AreteResponse response, Course course, Slug slug) {
         Student student;
         Optional<Student> optionalStudent = studentRepository.findByUniid(response.getUniid());
         student = optionalStudent.orElseGet(() -> Student.builder()
@@ -173,12 +239,15 @@ public class AreteService {
         }
 
         student.getCourses().add(course.getGitUrl());
-
         studentRepository.saveAndFlush(student);
+
+        slug.getStudents().add(student);
+        slugRepository.saveAndFlush(slug);
+
         return student;
     }
 
-    private void getJob(AreteResponse response) {
+    private void saveJob(AreteResponse response) {
         Job job = Job.builder()
                 .output(response.getOutput().replace("\n", "<br>"))
                 .consoleOutput(response.getConsoleOutputs().stream().map(ConsoleOutput::getContent).collect(Collectors.joining()).replace("\n", "<br>"))
@@ -202,7 +271,7 @@ public class AreteService {
         jobRepository.saveAndFlush(job);
     }
 
-    private void getSubmission(AreteResponse response) {
+    private void saveSubmission(AreteResponse response) {
         Submission submission = Submission.builder()
                 .uniid(response.getUniid())
                 .hash(response.getHash())

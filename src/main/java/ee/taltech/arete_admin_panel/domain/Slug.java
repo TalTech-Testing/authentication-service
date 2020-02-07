@@ -26,9 +26,49 @@ public class Slug {
     private String name;
 
     @NotNull
-    @ManyToOne(cascade = {CascadeType.MERGE})
-    private Course course;
+    private String courseUrl;
+
+    @NotNull
+    @Builder.Default
+    @OneToMany(cascade = {CascadeType.MERGE})
+    private Set<Student> students = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    private Integer totalCommits = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer totalTestsRan = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer totalTestsPassed = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer totalDiagnosticErrors = 0;
+
+    @NotNull
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    private Integer totalTestErrors = 0;
+
+    @NotNull
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<CodeError> testCodeErrors = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    private Integer failedCommits = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer commitsStyleOK = 0;
 
 }
-
-

@@ -2,7 +2,7 @@ package ee.taltech.arete_admin_panel.repository;
 
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.taltech.arete_admin_panel.pojo.abi.users.UserPostDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserPostDto;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.UserService;
 import lombok.extern.slf4j.Slf4j;

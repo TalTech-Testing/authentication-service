@@ -1,9 +1,21 @@
 package ee.taltech.arete_admin_panel.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
-import ee.taltech.arete_admin_panel.pojo.abi.users.*;
+import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.course.EmptyCourseDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.course.FullCourseDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.slug.EmptySlugDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.slug.FullSlugDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.EmptyStudentDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentDataSlugTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserPostDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.*;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.TokenService;
@@ -13,15 +25,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController()
 @RequestMapping("/admin")
 public class BackendController {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final UserService userService;
     private final TokenService tokenService;
@@ -98,44 +111,72 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/students")
-    public List<Student> getStudents() {
+    public List<StudentTableDto> getStudents() {
 
-        return studentRepository.findAll();
+        return studentRepository.findAll().stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class)).collect(Collectors.toList());
 
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/student/{name}")
-    public StudentDto getStudent(@PathVariable("name") String name) {
-
-        Optional<Student> student = studentRepository.findByUniid(name);
+    @GetMapping(path = "/student/{id}")
+    public EmptyStudentDto getStudent(@PathVariable("id") Long id) {
+        Optional<Student> student = studentRepository.findById(id);
         assert student.isPresent();
-        StudentDto studentDto = new StudentDto();
+        EmptyStudentDto emptyStudentDto = new EmptyStudentDto();
         for (String courseUrl : student.get().getCourses()) {
             Optional<Course> courseOptional = courseRepository.findByGitUrl(courseUrl);
             if (courseOptional.isPresent()) {
                 Course course = courseOptional.get();
-                CourseDto courseDto = new CourseDto();
+                EmptyCourseDto emptyCourseDto = new EmptyCourseDto();
+                emptyCourseDto.setName(course.getName());
                 for (Slug slug : course.getSlugs()) {
                     Optional<StudentDataSlug> data = studentDataSlugRepository.findByStudentAndSlug(student.get(), slug);
                     if (data.isPresent()) {
-                        SlugDto slugDto = new SlugDto(slug.getName(), data.get());
-                        courseDto.getSlugs().add(slugDto);
+                        EmptySlugDto emptySlugDto = new EmptySlugDto(slug.getName(), objectMapper.convertValue(data.get(), StudentDataSlugTableDto.class));
+                        emptyCourseDto.getSlugs().add(emptySlugDto);
                     }
                 }
-                studentDto.getCourses().add(courseDto);
+                emptyStudentDto.getCourses().add(emptyCourseDto);
             }
 
         }
-        return studentDto;
+        return emptyStudentDto;
 
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/exercises")
-    public List<Course> getExercises() {
+    @GetMapping(path = "/courses")
+    public List<CourseTableDto> getCourses() {
 
-        return courseRepository.findAll();
+        return courseRepository.findAll().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList());
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/course/{id}")
+    public FullCourseDto getCourses(@PathVariable("id") Long id) {
+
+        Optional<Course> courseOptional = courseRepository.findById(id);
+        assert courseOptional.isPresent();
+        return objectMapper.convertValue(courseOptional.get(), FullCourseDto.class);
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/slugs")
+    public List<SlugTableDto> getSlugs() {
+
+        return slugRepository.findAll().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList());
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/slug/{id}")
+    public FullSlugDto getSlugs(@PathVariable("id") Long id) {
+
+        Optional<Slug> slugOptional = slugRepository.findById(id);
+        assert slugOptional.isPresent();
+        return objectMapper.convertValue(slugOptional.get(), FullSlugDto.class);
 
     }
 
