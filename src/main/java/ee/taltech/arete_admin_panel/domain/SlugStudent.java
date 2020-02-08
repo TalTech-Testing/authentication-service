@@ -21,7 +21,7 @@ public class SlugStudent {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotNull
     @ManyToOne(cascade = {CascadeType.ALL})

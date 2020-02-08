@@ -19,7 +19,7 @@ public class Student {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Size(min = 1)
     @NotNull
@@ -40,7 +40,6 @@ public class Student {
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> slugs = new HashSet<>();
-
 
     @NotNull
     @Builder.Default

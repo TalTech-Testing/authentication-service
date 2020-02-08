@@ -11,17 +11,17 @@ import javax.validation.constraints.NotNull;
 @Getter
 @Setter
 @Builder
-@Table(name = "user")
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "users")
 public class User {
 
-    @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @NotNull
+    @Column(unique = true)
     private String username;
 
     private String color = "general";
