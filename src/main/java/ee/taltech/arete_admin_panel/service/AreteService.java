@@ -1,22 +1,23 @@
 package ee.taltech.arete_admin_panel.service;
 
 import arete.java.AreteClient;
-import arete.java.request.AreteRequest;
-import arete.java.response.AreteResponse;
-import arete.java.response.ConsoleOutput;
 import arete.java.response.Error;
-import arete.java.response.TestContext;
-import arete.java.response.UnitTest;
+import arete.java.response.*;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional
+@Transactional(propagation = Propagation.REQUIRES_NEW)
+@EnableAsync
 public class AreteService {
 
     private final StudentRepository studentRepository;
@@ -25,33 +26,54 @@ public class AreteService {
 
     private final SlugRepository slugRepository;
 
-    private final StudentDataSlugRepository studentDataSlugRepository;
-
     private final JobRepository jobRepository;
 
     private final SubmissionRepository submissionRepository;
 
-    private AreteClient areteClient = new AreteClient("localhost:8098");
+    private final SlugStudentRepository slugStudentRepository;
 
-    public AreteService(StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, StudentDataSlugRepository studentDataSlugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository) {
+    private final CourseStudentRepository courseStudentRepository;
+
+    private AreteClient areteClient = new AreteClient("http://localhost:8098");
+
+    private Queue<AreteResponse> jobQueue = new LinkedList<>();
+
+    private Boolean halted = false;
+
+    public AreteService(StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository, SlugStudentRepository slugStudentRepository, CourseStudentRepository courseStudentRepository) {
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
         this.slugRepository = slugRepository;
-        this.studentDataSlugRepository = studentDataSlugRepository;
         this.jobRepository = jobRepository;
         this.submissionRepository = submissionRepository;
+        this.slugStudentRepository = slugStudentRepository;
+        this.courseStudentRepository = courseStudentRepository;
     }
 
-    public void testRequest() {
-        parseAreteResponse(areteClient.requestSync(AreteRequest.builder()
-                .uniid("envomp")
-                .gitStudentRepo("git@gitlab.cs.ttu.ee:envomp/iti0102-2019.git")
-                .testingPlatform("python")
-                .gitTestSource("https://gitlab.cs.ttu.ee/iti0102-2019/ex")
-                .build()));
+    public void enqueueAreteResponse(AreteResponse response) {
+        jobQueue.add(response);
+    }
+
+
+    @Async
+    @Scheduled(fixedRate = 100)
+    public void asyncRunJob() {
+
+        AreteResponse response = jobQueue.poll();
+
+        if (response != null && !halted) {
+            try {
+                halted = true;
+                parseAreteResponse(response);
+            } catch (Exception e) {
+            } finally {
+                halted = false;
+            }
+        }
     }
 
     public void parseAreteResponse(AreteResponse response) {
+        setDefaultValuesIfNull(response);
 
         saveSubmission(response);
 
@@ -63,24 +85,52 @@ public class AreteService {
 
         Student student = getStudent(response, course, slug);
 
-        saveStudentDataSlug(response, student, slug, course);
+        SlugStudent slugStudent = getSlugStudent(slug, student);
+
+        CourseStudent courseStudent = getCourseStudent(course, student);
+
+        updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
 
     }
 
-    private void saveStudentDataSlug(AreteResponse response, Student student, Slug slug, Course course) {
-        StudentDataSlug studentDataSlug;
-        Optional<StudentDataSlug> optionalStudentDataSlug = studentDataSlugRepository.findByStudentAndSlug(student, slug);
-        studentDataSlug = optionalStudentDataSlug.orElseGet(() -> StudentDataSlug.builder()
-                .slug(slug)
-                .course(course)
-                .student(student)
-                .build());
+    private void setDefaultValuesIfNull(AreteResponse response) {
+        if (response.getUniid() == null) {
+            response.setUniid("NaN");
+        }
+
+        if (response.getErrors() == null) {
+            response.setErrors(new ArrayList<>());
+        }
+
+        if (response.getFiles() == null) {
+            response.setFiles(new ArrayList<>());
+        }
+
+        if (response.getTestFiles() == null) {
+            response.setTestFiles(new ArrayList<>());
+        }
+
+        if (response.getTestSuites() == null) {
+            response.setTestSuites(new ArrayList<>());
+        }
+
+        if (response.getConsoleOutputs() == null) {
+            response.setConsoleOutputs(new ArrayList<>());
+        }
+
+        if (response.getOutput() == null) {
+            response.setOutput("no output");
+        }
+    }
+
+    private void updateStudentSlugCourse(AreteResponse response, Student student, Slug slug, Course course, SlugStudent slugStudent, CourseStudent courseStudent) {
 
         if (response.getStyle() == 100) {
-            studentDataSlug.setCommitsStyleOK(studentDataSlug.getCommitsStyleOK() + 1);
             slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
             course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
             student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
+            slugStudent.setCommitsStyleOK(slugStudent.getCommitsStyleOK() + 1);
+            courseStudent.setCommitsStyleOK(courseStudent.getCommitsStyleOK() + 1);
         }
 
         int newDiagnosticErrors = response.getErrors().size();
@@ -88,32 +138,20 @@ public class AreteService {
 
         for (String key : diagnosticErrors.keySet()) {
 
-            updateDiagnosticCodeErrors(diagnosticErrors, key, studentDataSlug.getDiagnosticCodeErrors());
-
             updateDiagnosticCodeErrors(diagnosticErrors, key, slug.getDiagnosticCodeErrors());
-
             updateDiagnosticCodeErrors(diagnosticErrors, key, course.getDiagnosticCodeErrors());
-
             updateDiagnosticCodeErrors(diagnosticErrors, key, student.getDiagnosticCodeErrors());
-
         }
 
         if (response.getFailed()) {
-            studentDataSlug.setFailedCommits(studentDataSlug.getFailedCommits() + 1);
+
             slug.setFailedCommits(slug.getFailedCommits() + 1);
             course.setFailedCommits(course.getFailedCommits() + 1);
             student.setFailedCommits(student.getFailedCommits() + 1);
+            slugStudent.setFailedCommits(slugStudent.getFailedCommits() + 1);
+            courseStudent.setFailedCommits(courseStudent.getFailedCommits() + 1);
         }
 
-        try {
-            Double score = Double.parseDouble(response.getTotalGrade());
-
-            if (score > studentDataSlug.getHighestPercentage()) {
-                studentDataSlug.setHighestPercentage(score);
-            }
-
-        } catch (NumberFormatException ignored) {
-        }
 
         int newTestErrors = 0;
         int newTestPassed = 0;
@@ -140,45 +178,63 @@ public class AreteService {
 
         for (String key : testErrors.keySet()) {
 
-            updateCodeErrors(testErrors, key, studentDataSlug.getTestCodeErrors());
-
             updateCodeErrors(testErrors, key, slug.getTestCodeErrors());
-
             updateCodeErrors(testErrors, key, course.getTestCodeErrors());
-
             updateCodeErrors(testErrors, key, student.getTestCodeErrors());
-
         }
 
-        studentDataSlug.setTotalCommits(studentDataSlug.getTotalCommits() + 1);
         slug.setTotalCommits(slug.getTotalCommits() + 1);
         course.setTotalCommits(course.getTotalCommits() + 1);
         student.setTotalCommits(student.getTotalCommits() + 1);
+        slugStudent.setTotalCommits(slugStudent.getTotalCommits() + 1);
+        courseStudent.setTotalCommits(courseStudent.getTotalCommits() + 1);
 
-        studentDataSlug.setTotalDiagnosticErrors(studentDataSlug.getTotalDiagnosticErrors() + newDiagnosticErrors);
         slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
         course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
         student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        slugStudent.setTotalDiagnosticErrors(slugStudent.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        courseStudent.setTotalDiagnosticErrors(courseStudent.getTotalDiagnosticErrors() + newDiagnosticErrors);
 
-        studentDataSlug.setTotalTestErrors(studentDataSlug.getTotalTestErrors() + newTestErrors);
         slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
         course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
         student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
+        slugStudent.setTotalTestErrors(slugStudent.getTotalTestErrors() + newTestErrors);
+        courseStudent.setTotalTestErrors(courseStudent.getTotalTestErrors() + newTestErrors);
 
-        studentDataSlug.setTotalTestsPassed(studentDataSlug.getTotalTestsPassed() + newTestPassed);
         slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
         course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
         student.setTotalTestsPassed(student.getTotalTestsPassed() + newTestPassed);
+        slugStudent.setTotalTestsPassed(slugStudent.getTotalTestsPassed() + newTestPassed);
+        courseStudent.setTotalTestsPassed(courseStudent.getTotalTestsPassed() + newTestPassed);
 
-        studentDataSlug.setTotalTestsRan(studentDataSlug.getTotalTestsRan() + newTestsRan);
         slug.setTotalTestsRan(slug.getTotalTestsRan() + newTestsRan);
         course.setTotalTestsRan(course.getTotalTestsRan() + newTestsRan);
         student.setTotalTestsRan(student.getTotalTestsRan() + newTestsRan);
+        slugStudent.setTotalTestsRan(slugStudent.getTotalTestsRan() + newTestsRan);
+        courseStudent.setTotalTestsRan(courseStudent.getTotalTestsRan() + newTestsRan);
 
-        studentDataSlugRepository.saveAndFlush(studentDataSlug);
-        studentRepository.saveAndFlush(student);
-        slugRepository.saveAndFlush(slug);
+        try {
+            Double percentage = Double.valueOf(response.getTotalGrade());
+            if (percentage > slugStudent.getHighestPercent()) {
+                slugStudent.setHighestPercent(percentage);
+            }
+        } catch (Exception ignored) {
+        }
+
+        if (response.getTimestamp() > slugStudent.getLatestSubmission()) {
+            slugStudent.setLatestSubmission(response.getTimestamp());
+        }
+        if (response.getTimestamp() > courseStudent.getLatestSubmission()) {
+            courseStudent.setLatestSubmission(response.getTimestamp());
+        }
+
+        course.getStudents().add(courseStudent);
+        slug.getStudents().add(slugStudent);
+
+        slugStudentRepository.saveAndFlush(slugStudent);
         courseRepository.saveAndFlush(course);
+        slugRepository.saveAndFlush(slug);
+        studentRepository.saveAndFlush(student);
 
     }
 
@@ -206,11 +262,6 @@ public class AreteService {
                 .name(response.getSlug())
                 .build());
 
-        slugRepository.saveAndFlush(slug);
-
-        course.getSlugs().add(slug);
-        courseRepository.saveAndFlush(course);
-
         return slug;
     }
 
@@ -222,7 +273,6 @@ public class AreteService {
                 .name(response.getRoot())
                 .build());
 
-        courseRepository.saveAndFlush(course);
         return course;
     }
 
@@ -239,12 +289,36 @@ public class AreteService {
         }
 
         student.getCourses().add(course.getGitUrl());
+        student.getSlugs().add(slug.getName());
+        return student;
+    }
+
+    private SlugStudent getSlugStudent(Slug slug, Student student) {
+        slugRepository.saveAndFlush(slug);
         studentRepository.saveAndFlush(student);
 
-        slug.getStudents().add(student);
-        slugRepository.saveAndFlush(slug);
+        SlugStudent slugStudent;
+        Optional<SlugStudent> optionalSlugStudent = slugStudentRepository.findByStudentAndSlug(student, slug);
+        slugStudent = optionalSlugStudent.orElseGet(() -> SlugStudent.builder()
+                .slug(slug)
+                .student(student)
+                .build());
 
-        return student;
+        return slugStudent;
+    }
+
+    private CourseStudent getCourseStudent(Course course, Student student) {
+        courseRepository.saveAndFlush(course);
+        studentRepository.saveAndFlush(student);
+
+        CourseStudent courseStudent;
+        Optional<CourseStudent> optionalCourseStudent = courseStudentRepository.findByStudentAndCourse(student, course);
+        courseStudent = optionalCourseStudent.orElseGet(() -> CourseStudent.builder()
+                .course(course)
+                .student(student)
+                .build());
+
+        return courseStudent;
     }
 
     private void saveJob(AreteResponse response) {
@@ -254,6 +328,7 @@ public class AreteService {
                 .timestamp(response.getTimestamp())
                 .uniid(response.getUniid())
                 .slug(response.getSlug())
+                .root(response.getRoot())
                 .testingPlatform(response.getTestingPlatform())
                 .priority(response.getPriority())
                 .hash(response.getHash())
@@ -265,7 +340,6 @@ public class AreteService {
                 .dockerTimeout(response.getDockerTimeout())
                 .dockerExtra(response.getDockerExtra())
                 .systemExtra(response.getSystemExtra())
-                .analyzed(0)
                 .build();
 
         jobRepository.saveAndFlush(job);

@@ -2,6 +2,8 @@ package ee.taltech.arete_admin_panel.pojo.abi.users.slug;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ee.taltech.arete_admin_panel.domain.CodeError;
+import ee.taltech.arete_admin_panel.domain.Course;
+import ee.taltech.arete_admin_panel.domain.SlugStudent;
 import ee.taltech.arete_admin_panel.domain.Student;
 import lombok.*;
 
@@ -19,9 +21,9 @@ public class FullSlugDto {
 
     String name;
 
-    String courseUrl;
+    Set<SlugStudent> students;
 
-    Set<Student> students;
+    String courseUrl;
 
     int totalCommits;
 

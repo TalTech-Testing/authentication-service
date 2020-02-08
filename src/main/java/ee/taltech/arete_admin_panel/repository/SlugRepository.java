@@ -1,6 +1,5 @@
 package ee.taltech.arete_admin_panel.repository;
 
-import ee.taltech.arete_admin_panel.domain.Course;
 import ee.taltech.arete_admin_panel.domain.Slug;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.query.Param;

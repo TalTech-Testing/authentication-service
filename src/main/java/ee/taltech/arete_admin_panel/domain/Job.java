@@ -1,14 +1,9 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.sun.istack.NotNull;
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Entity
@@ -17,13 +12,14 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "jobs")
+@Table(name = "job")
 public class Job {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotNull
     private String testingPlatform;
 
     private String gitStudentRepo;
@@ -31,14 +27,20 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String source;
 
+    @NotNull
     private String gitTestRepo;
 
+    @NotNull
     private String hash;
 
-    private String uniid; // gitlab namespace: envomp
+    @NotNull
+    @Builder.Default
+    private String uniid = "NaN"; // gitlab namespace: envomp
 
+    @NotNull
     private String root; // gitlab namespace with path for tester: iti0102-2019
 
+    @NotNull
     private String slug;
 
     private String commitMessage;
@@ -53,10 +55,12 @@ public class Job {
 
     private Integer dockerTimeout;
 
+    @NotNull
     private Long timestamp;
 
     private Integer priority;
 
+    @NotNull
     private Boolean failed;
 
     @Column(columnDefinition = "TEXT")

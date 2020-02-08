@@ -1,9 +1,9 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import com.sun.istack.NotNull;
 import lombok.*;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter

@@ -1,19 +1,17 @@
 package ee.taltech.arete_admin_panel.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.NotNull;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Builder
+@Table(name = "user")
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -23,7 +21,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(unique = true)
+    @NotNull
     private String username;
 
     private String color = "general";
@@ -38,11 +36,6 @@ public class User {
     @NotNull
     private Role role;
 
-    public enum Role {
-        USER,
-        ADMIN
-    }
-
     public User(String username, String password) {
         SHA512 sha512 = new SHA512();
         String salt = sha512.generateHash();
@@ -51,6 +44,11 @@ public class User {
         this.passwordHash = passwordHash;
         this.salt = salt;
         this.role = Role.USER;
+    }
+
+    public enum Role {
+        USER,
+        ADMIN
     }
 
 }

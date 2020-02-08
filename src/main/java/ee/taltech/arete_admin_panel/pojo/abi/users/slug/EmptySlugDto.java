@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.pojo.abi.users.slug;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentDataSlugTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.FullStudentDto;
 import lombok.*;
 
 @Getter
@@ -14,6 +14,6 @@ public class EmptySlugDto {
 
     String slug;
 
-    StudentDataSlugTableDto studentDataSlug;
+    FullStudentDto studentDataSlug;
 
 }

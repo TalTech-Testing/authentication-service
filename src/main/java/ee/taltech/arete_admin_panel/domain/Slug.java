@@ -1,11 +1,9 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.NotNull;
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,7 +13,7 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "slugs")
+@Table(name = "slug")
 public class Slug {
 
     @Id
@@ -26,12 +24,12 @@ public class Slug {
     private String name;
 
     @NotNull
-    private String courseUrl;
+    @Builder.Default
+    @OneToMany(cascade = {CascadeType.ALL})
+    private Set<SlugStudent> students = new HashSet<>();
 
     @NotNull
-    @Builder.Default
-    @OneToMany(cascade = {CascadeType.MERGE})
-    private Set<Student> students = new HashSet<>();
+    private String courseUrl;
 
     @NotNull
     @Builder.Default

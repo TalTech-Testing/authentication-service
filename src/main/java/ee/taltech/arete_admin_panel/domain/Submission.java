@@ -1,11 +1,9 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sun.istack.NotNull;
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
@@ -13,7 +11,7 @@ import javax.persistence.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "submissions")
+@Table(name = "submission")
 public class Submission {
 
     @Id
@@ -23,16 +21,22 @@ public class Submission {
     @NotNull
     private String testingPlatform;
 
+    @NotNull
     private String hash; // references to job.
 
-    private String uniid; // gitlab namespace: envomp
+    @Builder.Default
+    @NotNull
+    private String uniid = "NaN"; // gitlab namespace: envomp
 
+    @NotNull
     private String root; // gitlab path for student: iti0102-2019
 
     private String gitStudentRepo;
 
+    @NotNull
     private String gitTestSource;
 
+    @NotNull
     private Long timestamp;
 
 }

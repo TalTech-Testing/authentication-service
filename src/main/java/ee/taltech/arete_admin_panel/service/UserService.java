@@ -7,7 +7,6 @@ import ee.taltech.arete_admin_panel.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,16 +22,21 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void addSuperUser(UserPostDto user) {
-        User user1 = new User(user.getUsername(), user.getPassword());
-        user1.setRole(User.Role.ADMIN);
-        User savedUser = userRepository.save(user1);
-        LOG.info(savedUser.toString() + " successfully saved into DB as admin");
+    public void addSuperUser(String username, String passwordHash, String salt) {
+        User savedUser = userRepository.save(
+                User.builder()
+                        .username(username)
+                        .passwordHash(passwordHash)
+                        .salt(salt)
+                        .role(User.Role.ADMIN)
+                        .build());
+
+        LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
     }
 
     public long addUser(UserPostDto user) {
         User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword()));
-        LOG.info(savedUser.toString() + " successfully saved into DB");
+        LOG.info(savedUser.getUsername() + " successfully saved into DB");
         return savedUser.getId();
     }
 
@@ -83,7 +87,6 @@ public class UserService {
         userRepository.saveAndFlush(user);
     }
 
-    @Transactional
     public void removeUser(String username) {
         userRepository.deleteByUsername(username);
     }

@@ -1,10 +1,10 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import com.sun.istack.NotNull;
 import lombok.*;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,7 +12,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@Table(name = "students")
+@Table(name = "student")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
@@ -21,8 +21,10 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Size(min = 1)
     @NotNull
-    private String uniid; // TalTech student identificator: envomp - Ago guarantee to be unique
+    @Builder.Default
+    private String uniid = "NaN"; // TalTech student identificator: envomp - Ago guarantee to be unique
 
     private String gitRepo;
 
@@ -33,6 +35,12 @@ public class Student {
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<String> courses = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<String> slugs = new HashSet<>();
+
 
     @NotNull
     @Builder.Default
