@@ -10,6 +10,7 @@ services:
       POSTGRES_USER: arete
       POSTGRES_DB: arete
       POSTGRES_PASSWORD: arete
+    network_mode: "host"
     ports:
       - "5433:5432"
 
@@ -17,6 +18,7 @@ services:
     container_name: adminer_arete_ui
     image: adminer
     restart: unless-stopped
+    network_mode: "host"
     ports:
       - "8190:8080"
 
@@ -28,5 +30,6 @@ services:
       context: .
     depends_on:
       - arete_ui_back_db
+    network_mode: "host"
     ports:
       - "8001:8001"
