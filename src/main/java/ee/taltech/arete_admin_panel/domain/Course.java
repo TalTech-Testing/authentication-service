@@ -49,7 +49,7 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
 
     @NotNull
@@ -58,7 +58,7 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<CodeError> testCodeErrors = new HashSet<>();
 
     @NotNull

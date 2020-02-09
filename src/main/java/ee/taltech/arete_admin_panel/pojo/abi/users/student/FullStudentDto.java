@@ -24,6 +24,10 @@ public class FullStudentDto {
 
     Set<CodeError> testCodeErrors;
 
+    Set<String> courses;
+
+    Set<String> slugs;
+
     int totalCommits;
 
     int totalTestsRan;

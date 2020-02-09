@@ -33,12 +33,12 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<String> courses = new HashSet<>();
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<String> slugs = new HashSet<>();
 
     @NotNull
@@ -59,7 +59,7 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
 
     @NotNull
@@ -68,7 +68,7 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection
     private Set<CodeError> testCodeErrors = new HashSet<>();
 
     @NotNull
