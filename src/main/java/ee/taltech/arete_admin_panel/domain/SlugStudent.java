@@ -34,6 +34,11 @@ public class SlugStudent {
 
     @NotNull
     @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Long> timestamps = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
     private Double highestPercent = 0.0;
 
     @NotNull

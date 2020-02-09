@@ -213,6 +213,9 @@ public class AreteService {
         slugStudent.setTotalTestsRan(slugStudent.getTotalTestsRan() + newTestsRan);
         courseStudent.setTotalTestsRan(courseStudent.getTotalTestsRan() + newTestsRan);
 
+        slugStudent.getTimestamps().add(response.getTimestamp());
+        courseStudent.getTimestamps().add(response.getTimestamp());
+
         try {
             Double percentage = Double.valueOf(response.getTotalGrade());
             if (percentage > slugStudent.getHighestPercent()) {

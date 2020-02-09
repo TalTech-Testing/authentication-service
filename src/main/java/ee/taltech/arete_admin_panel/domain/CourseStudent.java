@@ -5,6 +5,8 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -27,6 +29,11 @@ public class CourseStudent {
     @NotNull
     @ManyToOne(cascade = {CascadeType.ALL})
     private Course course;
+
+    @NotNull
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Long> timestamps = new HashSet<>();
 
     @NotNull
     @Builder.Default
