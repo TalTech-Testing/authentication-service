@@ -37,6 +37,11 @@ public class CourseStudent {
 
     @NotNull
     @Builder.Default
+    @ElementCollection
+    private Set<String> slugs = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
     private Long latestSubmission = 0L;
 
     @NotNull
@@ -61,7 +66,7 @@ public class CourseStudent {
 
     @NotNull
     @Builder.Default
-    private Integer failedCommits = 0;
+    private Integer differentSlugs = 0;
 
     @NotNull
     @Builder.Default

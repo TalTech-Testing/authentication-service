@@ -6,10 +6,7 @@ import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.course.FullCourseDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.slug.FullSlugDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.student.FullStudentDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserPostDto;
@@ -124,11 +121,11 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/student/{id}")
-    public FullStudentDto getStudent(@PathVariable("id") Long id) {
+    public Student getStudent(@PathVariable("id") Long id) {
         LOG.info("Reading student by id {}", id);
         Optional<Student> studentOptional = studentRepository.findById(id);
         assert studentOptional.isPresent();
-        return objectMapper.convertValue(studentOptional.get(), FullStudentDto.class);
+        return studentOptional.get();
 
     }
 
@@ -143,12 +140,12 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{id}")
-    public FullCourseDto getCourses(@PathVariable("id") Long id) {
+    public Course getCourses(@PathVariable("id") Long id) {
 
         LOG.info("Reading course by id {}", id);
         Optional<Course> courseOptional = courseRepository.findById(id);
         assert courseOptional.isPresent();
-        return objectMapper.convertValue(courseOptional.get(), FullCourseDto.class);
+        return courseOptional.get();
 
     }
 
@@ -163,12 +160,12 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{id}")
-    public FullSlugDto getSlugs(@PathVariable("id") Long id) {
+    public Slug getSlugs(@PathVariable("id") Long id) {
 
         LOG.info("Reading slug by id {}", id);
         Optional<Slug> slugOptional = slugRepository.findById(id);
         assert slugOptional.isPresent();
-        return objectMapper.convertValue(slugOptional.get(), FullSlugDto.class);
+        return slugOptional.get();
 
     }
 

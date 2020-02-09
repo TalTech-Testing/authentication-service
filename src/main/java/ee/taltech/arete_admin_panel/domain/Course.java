@@ -63,7 +63,7 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    private Integer failedCommits = 0;
+    private Integer differentStudents = 0;
 
     @NotNull
     @Builder.Default

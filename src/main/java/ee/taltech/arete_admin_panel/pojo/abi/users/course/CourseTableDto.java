@@ -23,7 +23,7 @@ public class CourseTableDto {
 
     int totalDiagnosticErrors;
 
-    int failedCommits;
+    int differentStudents;
 
     int commitsStyleOK;
 

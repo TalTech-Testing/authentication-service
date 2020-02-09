@@ -25,7 +25,7 @@ public class StudentTableDto {
 
     int totalDiagnosticErrors;
 
-    int failedCommits;
+    int differentSlugs;
 
     int commitsStyleOK;
 

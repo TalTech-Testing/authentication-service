@@ -25,7 +25,7 @@ public class SlugTableDto {
 
     int totalDiagnosticErrors;
 
-    int failedCommits;
+    int differentStudents;
 
     int commitsStyleOK;
 

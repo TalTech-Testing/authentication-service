@@ -78,17 +78,19 @@ public class AreteService {
 
         saveJob(response);
 
-        Course course = getCourse(response);
+        if (!response.getFailed()) {
+            Course course = getCourse(response);
 
-        Slug slug = getSlug(response, course);
+            Slug slug = getSlug(response, course);
 
-        Student student = getStudent(response, course, slug);
+            Student student = getStudent(response, course, slug);
 
-        SlugStudent slugStudent = getSlugStudent(slug, student);
+            SlugStudent slugStudent = getSlugStudent(slug, student);
 
-        CourseStudent courseStudent = getCourseStudent(course, student);
+            CourseStudent courseStudent = getCourseStudent(course, student);
 
-        updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
+            updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
+        }
 
     }
 
@@ -141,16 +143,6 @@ public class AreteService {
             updateDiagnosticCodeErrors(diagnosticErrors, key, course.getDiagnosticCodeErrors());
             updateDiagnosticCodeErrors(diagnosticErrors, key, student.getDiagnosticCodeErrors());
         }
-
-        if (response.getFailed()) {
-
-            slug.setFailedCommits(slug.getFailedCommits() + 1);
-            course.setFailedCommits(course.getFailedCommits() + 1);
-            student.setFailedCommits(student.getFailedCommits() + 1);
-            slugStudent.setFailedCommits(slugStudent.getFailedCommits() + 1);
-            courseStudent.setFailedCommits(courseStudent.getFailedCommits() + 1);
-        }
-
 
         int newTestErrors = 0;
         int newTestPassed = 0;
@@ -231,7 +223,16 @@ public class AreteService {
         }
 
         course.getStudents().add(courseStudent);
+        course.setDifferentStudents(course.getStudents().size());
+
         slug.getStudents().add(slugStudent);
+        slug.setDifferentStudents(slug.getStudents().size());
+
+        courseStudent.getSlugs().add(slug.getName());
+        courseStudent.setDifferentSlugs(courseStudent.getSlugs().size());
+
+        student.setDifferentCourses(student.getCourses().size());
+        student.setDifferentSlugs(student.getSlugs().size());
 
         slugStudentRepository.saveAndFlush(slugStudent);
         courseRepository.saveAndFlush(course);

@@ -73,7 +73,11 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    private Integer failedCommits = 0;
+    private Integer differentSlugs = 0;
+
+    @NotNull
+    @Builder.Default
+    private Integer differentCourses = 0;
 
     @NotNull
     @Builder.Default
