@@ -23,6 +23,10 @@ public class FullSlugDto {
 
     Set<SlugStudent> students;
 
+    Set<CodeError> diagnosticCodeErrors;
+
+    Set<CodeError> testCodeErrors;
+
     String courseUrl;
 
     int totalCommits;
@@ -32,8 +36,6 @@ public class FullSlugDto {
     int totalTestsPassed;
 
     int totalDiagnosticErrors;
-
-    Set<CodeError> diagnosticCodeErrors;
 
     int totalTestErrors = 0;
 

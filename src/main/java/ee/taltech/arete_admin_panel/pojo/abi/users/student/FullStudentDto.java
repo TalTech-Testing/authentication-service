@@ -16,8 +16,13 @@ import java.util.Set;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FullStudentDto {
 
-
     long id;
+
+    String uniid;
+
+    Set<CodeError> diagnosticCodeErrors;
+
+    Set<CodeError> testCodeErrors;
 
     int totalCommits;
 
@@ -27,11 +32,7 @@ public class FullStudentDto {
 
     int totalDiagnosticErrors;
 
-    Set<CodeError> diagnosticCodeErrors;
-
     int totalTestErrors;
-
-    Set<CodeError> testCodeErrors;
 
     int failedCommits;
 

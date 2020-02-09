@@ -3,8 +3,6 @@ package ee.taltech.arete_admin_panel.pojo.abi.users.course;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import ee.taltech.arete_admin_panel.domain.CodeError;
 import ee.taltech.arete_admin_panel.domain.CourseStudent;
-import ee.taltech.arete_admin_panel.domain.SlugStudent;
-import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugDto;
 import lombok.*;
 
 import java.util.Set;
@@ -25,6 +23,10 @@ public class FullCourseDto {
 
     Set<CourseStudent> students;
 
+    Set<CodeError> diagnosticCodeErrors;
+
+    Set<CodeError> testCodeErrors;
+
     int totalCommits;
 
     int totalTestsRan;
@@ -33,11 +35,7 @@ public class FullCourseDto {
 
     int totalDiagnosticErrors;
 
-    Set<CodeError> diagnosticCodeErrors;
-
     Integer totalTestErrors;
-
-    Set<CodeError> testCodeErrors;
 
     int failedCommits;
 
