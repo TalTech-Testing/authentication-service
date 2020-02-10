@@ -23,9 +23,13 @@ public class SlugStudent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne(cascade = {CascadeType.ALL})
     private Student student;
+
+    @Builder.Default
+    private String uniid = "NaN";
 
     @JsonIgnore
     @NotNull

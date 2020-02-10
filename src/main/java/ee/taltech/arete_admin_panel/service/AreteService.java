@@ -206,6 +206,7 @@ public class AreteService {
 
         slugStudent.getTimestamps().add(response.getTimestamp());
         courseStudent.getTimestamps().add(response.getTimestamp());
+        student.getTimestamps().add(response.getTimestamp());
         student.setLastTested(response.getTimestamp());
 
         try {
