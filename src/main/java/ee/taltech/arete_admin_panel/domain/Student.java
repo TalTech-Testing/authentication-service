@@ -31,6 +31,8 @@ public class Student {
     @NotNull
     private Long firstTested;
 
+    private Long lastTested;
+
     @NotNull
     @Builder.Default
     @ElementCollection
