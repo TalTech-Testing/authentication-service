@@ -308,6 +308,7 @@ public class AreteService {
         slugStudent = optionalSlugStudent.orElseGet(() -> SlugStudent.builder()
                 .slug(slug)
                 .student(student)
+                .uniid(student.getUniid())
                 .build());
 
         return slugStudent;
@@ -322,6 +323,7 @@ public class AreteService {
         courseStudent = optionalCourseStudent.orElseGet(() -> CourseStudent.builder()
                 .course(course)
                 .student(student)
+                .uniid(student.getUniid())
                 .build());
 
         return courseStudent;
