@@ -15,7 +15,7 @@ public class StudentTableDto {
 
     String uniid;
 
-    long firstTested;
+    long lastTested;
 
     int totalCommits;
 
