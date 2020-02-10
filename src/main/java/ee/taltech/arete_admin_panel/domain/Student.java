@@ -31,6 +31,7 @@ public class Student {
     @NotNull
     private Long firstTested;
 
+    @NotNull
     private Long lastTested;
 
     @NotNull
