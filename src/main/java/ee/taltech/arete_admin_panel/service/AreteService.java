@@ -286,6 +286,7 @@ public class AreteService {
         student = optionalStudent.orElseGet(() -> Student.builder()
                 .uniid(response.getUniid())
                 .firstTested(response.getTimestamp())
+                .lastTested(response.getTimestamp())
                 .build());
 
         if (student.getGitRepo() == null && response.getGitStudentRepo() != null) {
