@@ -34,6 +34,7 @@ public class Student {
     @NotNull
     private Long lastTested;
 
+    @NotNull
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
     private Set<Long> timestamps = new HashSet<>();

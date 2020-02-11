@@ -26,6 +26,7 @@ public class CourseStudent {
     @ManyToOne(cascade = {CascadeType.ALL})
     private Student student;
 
+    @NotNull
     @Builder.Default
     private String uniid = "NaN";
 
