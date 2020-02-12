@@ -40,17 +40,21 @@ public class BackendController {
     private final JobRepository jobRepository;
     private final StudentRepository studentRepository;
     private final CourseRepository courseRepository;
+    private final CourseStudentRepository courseStudentRepository;
     private final SlugRepository slugRepository;
+    private final SlugStudentRepository slugStudentRepository;
     private final AreteService areteService;
 
-    public BackendController(UserService userService, TokenService tokenService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, AreteService areteService) {
+    public BackendController(UserService userService, TokenService tokenService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
         this.userService = userService;
         this.tokenService = tokenService;
         this.submissionRepository = submissionRepository;
         this.jobRepository = jobRepository;
         this.studentRepository = studentRepository;
         this.courseRepository = courseRepository;
+        this.courseStudentRepository = courseStudentRepository;
         this.slugRepository = slugRepository;
+        this.slugStudentRepository = slugStudentRepository;
         this.areteService = areteService;
     }
 
@@ -126,6 +130,26 @@ public class BackendController {
         Optional<Student> studentOptional = studentRepository.findById(id);
         assert studentOptional.isPresent();
         return studentOptional.get();
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/course/student/{id}")
+    public Student getCourseStudent(@PathVariable("id") Long id) {
+        LOG.info("Reading student by id {}", id);
+        Optional<CourseStudent> studentOptional = courseStudentRepository.findById(id);
+        assert studentOptional.isPresent();
+        return studentOptional.get().getStudent();
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/slug/student/{id}")
+    public Student getSlugStudent(@PathVariable("id") Long id) {
+        LOG.info("Reading student by id {}", id);
+        Optional<SlugStudent> studentOptional = slugStudentRepository.findById(id);
+        assert studentOptional.isPresent();
+        return studentOptional.get().getStudent();
 
     }
 

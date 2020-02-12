@@ -18,8 +18,7 @@ public class CorsConfiguration {
                                 "http://localhost:8080", // dev
                                 "http://localhost:8001", // back
                                 "http://localhost:8099", // front
-                                "http://localhost:8098", // tester
-                                "https://envomp-*.localhost.run") // view
+                                "http://localhost:8098") // tester
                         .allowedMethods("PUT", "DELETE", "GET", "POST")
                         .allowCredentials(true);
             }
