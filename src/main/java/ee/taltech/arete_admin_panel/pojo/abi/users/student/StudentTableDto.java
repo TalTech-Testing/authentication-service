@@ -27,6 +27,8 @@ public class StudentTableDto {
 
     int differentSlugs;
 
+    int differentCourses;
+
     int commitsStyleOK;
 
 }
