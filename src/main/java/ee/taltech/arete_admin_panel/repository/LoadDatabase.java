@@ -2,6 +2,8 @@ package ee.taltech.arete_admin_panel.repository;
 
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.taltech.arete_admin_panel.domain.CourseStudent;
+import ee.taltech.arete_admin_panel.domain.SlugStudent;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +34,21 @@ class LoadDatabase {
 //                areteService.parseAreteResponse(objectMapper.readValue(answer, AreteResponse.class));
 //
 //            }
+//        };
+//    }
+//
+//    @Bean
+//    CommandLineRunner initSubmissionAndJobDatabase(CourseStudentRepository courseStudentRepository, StudentRepository studentRepository, SlugStudentRepository slugStudentRepository) {
+//        return args -> {
+//
+//            for (SlugStudent slugStudent : slugStudentRepository.findAll()) {
+//
+//                slugStudent.setUniid(slugStudent.getStudent().getUniid());
+//                slugStudent.getStudent().getTimestamps().addAll(slugStudent.getTimestamps());
+//                slugStudentRepository.saveAndFlush(slugStudent);
+//
+//            }
+//
 //        };
 //    }
 

@@ -206,6 +206,7 @@ public class AreteService {
 
         slugStudent.getTimestamps().add(response.getTimestamp());
         courseStudent.getTimestamps().add(response.getTimestamp());
+        student.getTimestamps().add(response.getTimestamp());
         student.setLastTested(response.getTimestamp());
 
         try {
@@ -286,6 +287,7 @@ public class AreteService {
         student = optionalStudent.orElseGet(() -> Student.builder()
                 .uniid(response.getUniid())
                 .firstTested(response.getTimestamp())
+                .lastTested(response.getTimestamp())
                 .build());
 
         if (student.getGitRepo() == null && response.getGitStudentRepo() != null) {
@@ -306,6 +308,7 @@ public class AreteService {
         slugStudent = optionalSlugStudent.orElseGet(() -> SlugStudent.builder()
                 .slug(slug)
                 .student(student)
+                .uniid(student.getUniid())
                 .build());
 
         return slugStudent;
@@ -320,6 +323,7 @@ public class AreteService {
         courseStudent = optionalCourseStudent.orElseGet(() -> CourseStudent.builder()
                 .course(course)
                 .student(student)
+                .uniid(student.getUniid())
                 .build());
 
         return courseStudent;

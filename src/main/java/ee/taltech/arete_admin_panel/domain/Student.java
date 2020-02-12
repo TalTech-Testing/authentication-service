@@ -36,6 +36,11 @@ public class Student {
 
     @NotNull
     @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Long> timestamps = new HashSet<>();
+
+    @NotNull
+    @Builder.Default
     @ElementCollection
     private Set<String> courses = new HashSet<>();
 

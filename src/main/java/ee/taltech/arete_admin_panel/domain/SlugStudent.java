@@ -5,7 +5,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,9 +22,14 @@ public class SlugStudent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne(cascade = {CascadeType.ALL})
     private Student student;
+
+    @NotNull
+    @Builder.Default
+    private String uniid = "NaN";
 
     @JsonIgnore
     @NotNull

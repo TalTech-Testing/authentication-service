@@ -21,9 +21,14 @@ public class CourseStudent {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @NotNull
     @ManyToOne(cascade = {CascadeType.ALL})
     private Student student;
+
+    @NotNull
+    @Builder.Default
+    private String uniid = "NaN";
 
     @JsonIgnore
     @NotNull
