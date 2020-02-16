@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_USER: arete
       POSTGRES_DB: arete
-      POSTGRES_PASSWORD: 4Rqdfqaf3g1SgIyLejpcT2OARISpx90h7q30b4JiWKRElLuzPhby9ZYVDY3nDpOu
+      POSTGRES_PASSWORD: ca0asfx0IRWczZiqB9Z7eo5KE45iDTxNBxp64Maktcjln7v0pbqVGxAvRTDqyHuQ
     ports:
       - "5433:5432"
 
