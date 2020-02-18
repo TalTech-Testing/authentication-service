@@ -267,12 +267,12 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @GetMapping("/debug")
-    public String GetDebug() {
+    @GetMapping("/debug/{boolean}")
+    public String getDebug(@PathVariable("boolean") Boolean bool) {
 
         try {
-            return Files.readString(Paths.get("logs/spring.log"));
-        } catch (IOException e) {
+            return areteService.setDebug(bool) ? "Successful" : "Unsuccessful";
+        } catch (Exception e) {
             return e.getMessage();
         }
 
@@ -280,7 +280,7 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/logs")
-    public String GetLogs() {
+    public String getLogs() {
 
         try {
             return Files.readString(Paths.get("logs/spring.log"));
@@ -292,7 +292,7 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/logs/tester")
-    public String GetTesterLogs() {
+    public String getTesterLogs() {
 
         try {
             return areteService.getTesterLogs();
