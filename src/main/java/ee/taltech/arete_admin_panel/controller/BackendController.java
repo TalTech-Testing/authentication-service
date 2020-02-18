@@ -1,5 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
+import arete.java.request.AreteRequest;
+import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
@@ -18,6 +20,7 @@ import ee.taltech.arete_admin_panel.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -204,6 +207,78 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/submissions/active")
+    public AreteRequest getActiveSubmissions() {
+
+        try {
+            return areteService.getActiveSubmissions();
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:testSync")
+    public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) {
+
+        try {
+            return areteService.makeRequestSync(areteRequest);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:testAsync")
+    public void makeRequestAsync(@RequestBody AreteRequest areteRequest) {
+
+        try {
+            areteService.makeRequestAsync(areteRequest);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/test:update")
+    public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) {
+
+        try {
+            areteService.updateTests(areteTestUpdate);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/image:update/{image}")
+    public void makeRequestAsync(@PathVariable("image") String image) {
+
+        try {
+            areteService.updateImage(image);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/debug")
+    public String GetDebug() {
+
+        try {
+            return Files.readString(Paths.get("logs/spring.log"));
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/logs")
     public String GetLogs() {
 
@@ -214,4 +289,17 @@ public class BackendController {
         }
 
     }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/logs/tester")
+    public String GetTesterLogs() {
+
+        try {
+            return areteService.getTesterLogs();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+
+    }
+
 }

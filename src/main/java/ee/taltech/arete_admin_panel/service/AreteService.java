@@ -1,6 +1,8 @@
 package ee.taltech.arete_admin_panel.service;
 
 import arete.java.AreteClient;
+import arete.java.request.AreteRequest;
+import arete.java.request.AreteTestUpdate;
 import arete.java.response.Error;
 import arete.java.response.*;
 import ee.taltech.arete_admin_panel.domain.*;
@@ -52,7 +54,6 @@ public class AreteService {
     public void enqueueAreteResponse(AreteResponse response) {
         jobQueue.add(response);
     }
-
 
     @Async
     @Scheduled(fixedRate = 100)
@@ -365,5 +366,33 @@ public class AreteService {
                 .build();
 
         submissionRepository.saveAndFlush(submission);
+    }
+
+    public AreteResponse makeRequestSync(AreteRequest areteRequest) {
+        return areteClient.requestSync(areteRequest);
+    }
+
+    public void makeRequestAsync(AreteRequest areteRequest) {
+        areteClient.requestAsync(areteRequest);
+    }
+
+    public void updateImage(String image) {
+        areteClient.updateImage(image);
+    }
+
+    public void updateTests(AreteTestUpdate areteTestUpdate) {
+        areteClient.updateTests(areteTestUpdate);
+    }
+
+    public Boolean setDebug(Boolean debug) {
+        return areteClient.requestDebug(debug);
+    }
+
+    public String getTesterLogs() {
+        return areteClient.requestLogs();
+    }
+
+    public AreteRequest[] getActiveSubmissions() {
+        return areteClient.requestActiveSubmissions();
     }
 }
