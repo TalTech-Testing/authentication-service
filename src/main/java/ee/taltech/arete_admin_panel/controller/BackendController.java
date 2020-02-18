@@ -208,7 +208,7 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/submissions/active")
-    public AreteRequest getActiveSubmissions() {
+    public AreteRequest[] getActiveSubmissions() {
 
         try {
             return areteService.getActiveSubmissions();
