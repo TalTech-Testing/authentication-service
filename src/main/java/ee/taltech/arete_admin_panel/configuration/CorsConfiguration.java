@@ -15,6 +15,7 @@ public class CorsConfiguration {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
+                                "*", // allow all
                                 "http://localhost:8080", // dev
                                 "http://localhost:8001", // back
                                 "http://localhost:8099", // front
