@@ -1,5 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
+import arete.java.request.AreteRequest;
+import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
@@ -18,14 +20,18 @@ import ee.taltech.arete_admin_panel.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @RestController()
 @RequestMapping("/admin")
@@ -204,14 +210,152 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @GetMapping("/logs")
-    public String GetLogs() {
+    @GetMapping("/submissions/active")
+    public AreteRequest[] getActiveSubmissions() {
 
         try {
-            return Files.readString(Paths.get("logs/spring.log"));
+            return areteService.getActiveSubmissions();
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:testSync")
+    public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) {
+
+        try {
+            return areteService.makeRequestSync(areteRequest);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:testAsync")
+    public void makeRequestAsync(@RequestBody AreteRequest areteRequest) {
+
+        try {
+            areteService.makeRequestAsync(areteRequest);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/test:update")
+    public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) {
+
+        try {
+            areteService.updateTests(areteTestUpdate);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/image:update/{image}")
+    public void makeRequestAsync(@PathVariable("image") String image) {
+
+        try {
+            areteService.updateImage(image);
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/debug/{boolean}")
+    public String getDebug(@PathVariable("boolean") Boolean bool) {
+
+        try {
+            return areteService.setDebug(bool) ? "Successful" : "Unsuccessful";
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/logs")
+    public String getLogs() {
+
+        try {
+            return String.join("", tailFile(Paths.get("logs/spring.log"), 2000));
         } catch (IOException e) {
             return e.getMessage();
         }
 
     }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/logs/tester")
+    public String getTesterLogs() {
+
+        try {
+            return areteService.getTesterLogs();
+        } catch (Exception e) {
+            return e.getMessage();
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/state")
+    public SystemState getState() {
+
+        try {
+            return new SystemState();
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/state/tester")
+    public arete.java.response.SystemState getTesterState() {
+
+        try {
+            return areteService.getTesterState();
+        } catch (Exception e) {
+            throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    public static List<String> tailFile(final Path source, final int noOfLines) throws IOException {
+        try (Stream<String> stream = Files.lines(source)) {
+            FileBuffer fileBuffer = new FileBuffer(noOfLines);
+            stream.forEach(fileBuffer::collect);
+            return fileBuffer.getLines();
+        }
+    }
+
+    private static final class FileBuffer {
+        private final int noOfLines;
+        private final String[] lines;
+        private int offset = 0;
+
+        public FileBuffer(int noOfLines) {
+            this.noOfLines = noOfLines;
+            this.lines = new String[noOfLines];
+        }
+
+        public void collect(String line) {
+            lines[offset++ % noOfLines] = line;
+        }
+
+        public List<String> getLines() {
+            return IntStream.range(offset < noOfLines ? 0 : offset - noOfLines, offset)
+                    .mapToObj(idx -> lines[idx % noOfLines]).collect(Collectors.toList());
+        }
+    }
+
 }

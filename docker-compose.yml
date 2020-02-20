@@ -24,6 +24,7 @@ services:
     container_name: arete_ui_back
     image: arete_ui_back:latest
     restart: unless-stopped
+    network_mode: "host" # communication to arete testing service
     build:
       context: .
     depends_on:
