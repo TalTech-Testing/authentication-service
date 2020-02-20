@@ -5,6 +5,7 @@ import arete.java.request.AreteRequest;
 import arete.java.request.AreteTestUpdate;
 import arete.java.response.Error;
 import arete.java.response.*;
+import arete.java.response.SystemState;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
 import org.springframework.scheduling.annotation.Async;
@@ -390,6 +391,10 @@ public class AreteService {
 
     public String getTesterLogs() {
         return areteClient.requestLogs();
+    }
+
+    public SystemState getTesterState() {
+        return areteClient.requestState();
     }
 
     public AreteRequest[] getActiveSubmissions() {
