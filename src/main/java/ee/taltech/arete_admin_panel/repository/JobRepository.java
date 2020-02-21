@@ -6,10 +6,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
 
-    ArrayList<Job> findByHash(@Param("hash") String hash);
+    List<Job> findByHash(@Param("hash") String hash);
+
+    List<Job> findAllTop500ByHash(@Param("hash") String hash);
 
 }
