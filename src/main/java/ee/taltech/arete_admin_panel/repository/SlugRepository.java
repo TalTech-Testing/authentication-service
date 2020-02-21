@@ -14,6 +14,6 @@ public interface SlugRepository extends JpaRepository<Slug, Long> {
 
     Optional<Slug> findByCourseUrlAndName(@Param("courseUrl") String courseUrl, @Param("name") String name);
 
-    List<Slug> findAllTop500ByIdExists();
+    List<Slug> findAllTop500();
 
 }

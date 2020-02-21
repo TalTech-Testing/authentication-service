@@ -13,6 +13,6 @@ public interface CourseStudentRepository extends JpaRepository<CourseStudent, Lo
 
     Optional<CourseStudent> findByStudentAndCourse(@Param("student") Student student, @Param("course") Course course);
 
-    List<CourseStudent> findAllTop500ByIdExists();
+    List<CourseStudent> findAllTop500();
 
 }

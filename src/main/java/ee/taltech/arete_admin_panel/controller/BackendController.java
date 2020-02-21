@@ -107,7 +107,7 @@ public class BackendController {
     public List<Submission> getSubmissions() {
 
         LOG.info("Reading all submissions");
-        return submissionRepository.findAllTop500ByIdExists();
+        return submissionRepository.findAllTop500();
 
     }
 
@@ -116,7 +116,7 @@ public class BackendController {
     public List<Job> getSubmission(@PathVariable("hash") String hash) {
 
         LOG.info("Reading submission by hash {}", hash);
-        return jobRepository.findAllTop500ByHash(hash);
+        return jobRepository.findAllTop10ByHash(hash);
 
     }
 
@@ -125,7 +125,7 @@ public class BackendController {
     public List<StudentTableDto> getStudents() {
 
         LOG.info("Reading all students");
-        return studentRepository.findAllTop500ByIdExists().stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class)).collect(Collectors.toList());
+        return studentRepository.findAllTop500().stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class)).collect(Collectors.toList());
 
     }
 
@@ -164,7 +164,7 @@ public class BackendController {
     public List<CourseTableDto> getCourses() {
 
         LOG.info("Reading all courses");
-        return courseRepository.findAllTop500ByIdExists().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList());
+        return courseRepository.findAllTop500().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList());
 
     }
 
@@ -184,7 +184,7 @@ public class BackendController {
     public List<SlugTableDto> getSlugs() {
 
         LOG.info("Reading all slugs");
-        return slugRepository.findAllTop500ByIdExists().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList());
+        return slugRepository.findAllTop500().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList());
 
     }
 

@@ -13,6 +13,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     List<Job> findByHash(@Param("hash") String hash);
 
-    List<Job> findAllTop500ByHash(@Param("hash") String hash);
+    List<Job> findAllTop10ByHash(@Param("hash") String hash);
 
 }

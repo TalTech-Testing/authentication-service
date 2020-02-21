@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
-    List<Submission> findAllTop500ByIdExists();
+    List<Submission> findAllTop500();
 
 }

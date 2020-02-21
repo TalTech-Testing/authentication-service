@@ -11,6 +11,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     Optional<Student> findByUniid(@Param("uniid") String uniid);
 
-    List<Student> findAllTop500ByIdExists();
+    List<Student> findAllTop500();
 
 }
