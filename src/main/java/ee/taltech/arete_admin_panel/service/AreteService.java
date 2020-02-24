@@ -358,6 +358,7 @@ public class AreteService {
     private void saveSubmission(AreteResponse response) {
         Submission submission = Submission.builder()
                 .uniid(response.getUniid())
+                .slug(response.getSlug())
                 .hash(response.getHash())
                 .testingPlatform(response.getTestingPlatform())
                 .root(response.getRoot())

@@ -24,6 +24,8 @@ public class Submission {
     @NotNull
     private String hash; // references to job.
 
+    private String slug;
+
     @Builder.Default
     @NotNull
     private String uniid = "NaN"; // gitlab namespace: envomp
