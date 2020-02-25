@@ -140,6 +140,26 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/course/student/{course_student_id}")
+    public CourseStudent getCourseStudent(@PathVariable("course_student_id") Long course_student_id) {
+        LOG.info("Reading course student by id {}", course_student_id);
+        Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findById(course_student_id);
+        assert courseStudentOptional.isPresent();
+        return courseStudentOptional.get();
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/slug/student/{slug_student_id}")
+    public SlugStudent getSlugStudent(@PathVariable("slug_student_id") Long slug_student_id) {
+        LOG.info("Reading slug student by id {}", slug_student_id);
+        Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findById(slug_student_id);
+        assert slugStudentOptional.isPresent();
+        return slugStudentOptional.get();
+
+    }
+
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{course_id}/student/{student_id}")
     public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) {
         LOG.info("Reading course {} student by id {}", course_id, student_id);
