@@ -65,9 +65,17 @@ public class SlugStudent {
     @Builder.Default
     private Integer totalDiagnosticErrors = 0;
 
+    @Builder.Default
+    @ElementCollection
+    private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
+
     @NotNull
     @Builder.Default
     private Integer totalTestErrors = 0;
+
+    @Builder.Default
+    @ElementCollection
+    private Set<CodeError> testCodeErrors = new HashSet<>();
 
     @NotNull
     @Builder.Default

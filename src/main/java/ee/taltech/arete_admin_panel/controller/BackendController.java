@@ -140,22 +140,30 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/course/student/{id}")
-    public Student getCourseStudent(@PathVariable("id") Long id) {
-        LOG.info("Reading student by id {}", id);
-        Optional<CourseStudent> studentOptional = courseStudentRepository.findById(id);
+    @GetMapping(path = "/course/{course_id}/student/{student_id}")
+    public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) {
+        LOG.info("Reading course {} student by id {}", course_id, student_id);
+        Optional<Student> studentOptional = studentRepository.findById(student_id);
         assert studentOptional.isPresent();
-        return studentOptional.get().getStudent();
+        Optional<Course> courseOptional = courseRepository.findById(course_id);
+        assert courseOptional.isPresent();
+        Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findByStudentAndCourse(studentOptional.get(), courseOptional.get());
+        assert courseStudentOptional.isPresent();
+        return courseStudentOptional.get();
 
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(path = "/slug/student/{id}")
-    public Student getSlugStudent(@PathVariable("id") Long id) {
-        LOG.info("Reading student by id {}", id);
-        Optional<SlugStudent> studentOptional = slugStudentRepository.findById(id);
+    @GetMapping(path = "/slug/{slug_id}/student/{student_id}")
+    public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) {
+        LOG.info("Reading slug {} student by id {}", slug_id, student_id);
+        Optional<Student> studentOptional = studentRepository.findById(student_id);
         assert studentOptional.isPresent();
-        return studentOptional.get().getStudent();
+        Optional<Slug> slugOptional = slugRepository.findById(slug_id);
+        assert slugOptional.isPresent();
+        Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findByStudentAndSlug(studentOptional.get(), slugOptional.get());
+        assert slugStudentOptional.isPresent();
+        return slugStudentOptional.get();
 
     }
 

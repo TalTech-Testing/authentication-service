@@ -144,6 +144,8 @@ public class AreteService {
             updateDiagnosticCodeErrors(diagnosticErrors, key, slug.getDiagnosticCodeErrors());
             updateDiagnosticCodeErrors(diagnosticErrors, key, course.getDiagnosticCodeErrors());
             updateDiagnosticCodeErrors(diagnosticErrors, key, student.getDiagnosticCodeErrors());
+            updateDiagnosticCodeErrors(diagnosticErrors, key, courseStudent.getDiagnosticCodeErrors());
+            updateDiagnosticCodeErrors(diagnosticErrors, key, slugStudent.getDiagnosticCodeErrors());
         }
 
         int newTestErrors = 0;
@@ -174,6 +176,8 @@ public class AreteService {
             updateCodeErrors(testErrors, key, slug.getTestCodeErrors());
             updateCodeErrors(testErrors, key, course.getTestCodeErrors());
             updateCodeErrors(testErrors, key, student.getTestCodeErrors());
+            updateCodeErrors(testErrors, key, courseStudent.getTestCodeErrors());
+            updateCodeErrors(testErrors, key, slugStudent.getTestCodeErrors());
         }
 
         slug.setTotalCommits(slug.getTotalCommits() + 1);
