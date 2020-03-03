@@ -3,8 +3,11 @@ package ee.taltech.arete_admin_panel.service;
 import arete.java.AreteClient;
 import arete.java.request.AreteRequest;
 import arete.java.request.AreteTestUpdate;
+import arete.java.response.ConsoleOutput;
 import arete.java.response.Error;
 import arete.java.response.SystemState;
+import arete.java.response.TestContext;
+import arete.java.response.UnitTest;
 import arete.java.response.*;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
@@ -339,6 +342,33 @@ public class AreteService {
         Job job = Job.builder()
                 .output(response.getOutput().replace("\n", "<br>"))
                 .consoleOutput(response.getConsoleOutputs().stream().map(ConsoleOutput::getContent).collect(Collectors.joining()).replace("\n", "<br>"))
+                .testSuites(response.getTestSuites().stream()
+                        .map(x -> ee.taltech.arete_admin_panel.domain.TestContext.builder()
+                                .endDate(x.getEndDate())
+                                .file(x.getFile())
+                                .grade(x.getGrade())
+                                .name(x.getName())
+                                .passedCount(x.getPassedCount())
+                                .startDate(x.getStartDate())
+                                .weight(x.getWeight())
+                                .unitTests(
+                                        x.getUnitTests().stream()
+                                                .map(y -> ee.taltech.arete_admin_panel.domain.UnitTest.builder()
+                                                        .exceptionClass(y.getExceptionClass())
+                                                        .exceptionMessage(y.getExceptionMessage())
+                                                        .groupsDependedUpon(y.getGroupsDependedUpon())
+                                                        .methodsDependedUpon(y.getMethodsDependedUpon())
+                                                        .printExceptionMessage(y.getPrintExceptionMessage())
+                                                        .printStackTrace(y.getPrintStackTrace())
+                                                        .stackTrace(y.getStackTrace())
+                                                        .name(y.getName())
+                                                        .status(y.getStatus().toString())
+                                                        .timeElapsed(y.getTimeElapsed())
+                                                        .weight(y.getWeight())
+                                                        .build())
+                                                .collect(Collectors.toList()))
+                                .build())
+                        .collect(Collectors.toList()))
                 .timestamp(response.getTimestamp())
                 .uniid(response.getUniid())
                 .slug(response.getSlug())
@@ -348,7 +378,6 @@ public class AreteService {
                 .hash(response.getHash())
                 .commitMessage(response.getCommitMessage())
                 .failed(response.getFailed())
-                .source(response.getFiles().stream().map(x -> x.getPath() + "<br><br>" + x.getContents().replace("\n", "<br>")).collect(Collectors.joining()))
                 .gitStudentRepo(response.getGitStudentRepo())
                 .gitTestRepo(response.getGitTestRepo())
                 .dockerTimeout(response.getDockerTimeout())

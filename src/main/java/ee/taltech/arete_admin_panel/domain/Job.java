@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -23,9 +24,6 @@ public class Job {
     private String testingPlatform;
 
     private String gitStudentRepo;
-    //  or
-    @Column(columnDefinition = "TEXT")
-    private String source;
 
     @NotNull
     private String gitTestRepo;
@@ -44,6 +42,9 @@ public class Job {
     private String slug;
 
     private String commitMessage;
+
+    @OneToMany(cascade = {CascadeType.ALL})
+    private List<TestContext> testSuites;
 
     @ElementCollection
     @CollectionTable(name = "docker_extra", joinColumns = @JoinColumn(name = "id"))
