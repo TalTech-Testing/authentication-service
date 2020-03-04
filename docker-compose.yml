@@ -9,7 +9,7 @@ services:
     environment:
       POSTGRES_USER: arete
       POSTGRES_DB: arete
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
     ports:
       - "5433:5432"
 
@@ -31,6 +31,7 @@ services:
       - ..env #Change to .env to run locally
     environment:
       SHARED_SECRET: ${SHARED_SECRET}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       - arete_ui_back_db
     ports:
