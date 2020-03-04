@@ -24,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.AuthenticationException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -236,7 +237,11 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/job")
-    public void parseJob(@RequestBody AreteResponse areteResponse) {
+    public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
+
+        if (!areteResponse.getReturnExtra().get("shared_secret").toString().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
+            throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
+        }
 
         LOG.info("Saving job {} into DB", areteResponse.getHash());
         areteService.enqueueAreteResponse(areteResponse);
