@@ -34,10 +34,11 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .cors()
                 .and()
-                    .authorizeRequests()
-                    .antMatchers(HttpMethod.POST, "/admin/auth").permitAll() // login
-                    .antMatchers(HttpMethod.POST, "/admin/job").permitAll() // tester feedback. Protected by shared secret
-                .anyRequest().authenticated()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/admin/auth").permitAll() // login
+                .antMatchers(HttpMethod.POST, "/admin/job").permitAll() // tester feedback. Protected by shared secret
+                .anyRequest()
+                .authenticated()
                 .and()
                 .apply(new JwtSecurityConfigurer(jwtTokenProvider));
 

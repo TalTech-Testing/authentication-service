@@ -17,6 +17,7 @@ import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.*;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.UserService;
+import javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -70,303 +71,411 @@ public class BackendController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/auth")
-    public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) {
+    public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) throws AuthenticationException {
+        try {
+            LOG.info("Authenticating user {}", userDto.getUsername());
+            User user = userService.getUser(userDto.getUsername());
 
-        LOG.info("Authenticating user {}", userDto.getUsername());
-        User user = userService.getUser(userDto.getUsername());
+            SHA512 sha512 = new SHA512();
+            String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
 
-        SHA512 sha512 = new SHA512();
-        String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
+            if (!user.getPasswordHash().equals(passwordHash)) {
+                throw new UserWrongCredentials("Wrong login.");
+            }
 
-        if (!user.getPasswordHash().equals(passwordHash)) {
-            throw new UserWrongCredentials("Wrong login.");
+            return UserResponseIdToken.builder()
+                    .username(user.getUsername())
+                    .color(user.getColor())
+                    .id(user.getId())
+                    .roles(user.getRoles())
+                    .token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
+                    .build();
+
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
-        return UserResponseIdToken.builder()
-                .username(user.getUsername())
-                .color(user.getColor())
-                .id(user.getId())
-                .roles(user.getRoles())
-                .token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
-                .build();
     }
 
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/user")
-    public void setUserProperties(@RequestBody UserDto userDto) {
+    public void setUserProperties(@RequestBody UserDto userDto) throws AuthenticationException {
+        try {
+            User user = userService.getUser(userDto.getUsername());
 
-        User user = userService.getUser(userDto.getUsername());
+            if (userDto.getColor() != null) {
+                user.setColor(userDto.getColor());
+            }
 
-        if (userDto.getColor() != null) {
-            user.setColor(userDto.getColor());
+            userService.saveUser(user);
+
+            LOG.info("Successfully updated {}", user.getUsername());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
-        userService.saveUser(user);
-
-        LOG.info("Successfully updated {}", user.getUsername());
-
     }
 
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submissions")
-    public List<Submission> getSubmissions() {
-
-        LOG.info("Reading all submissions");
-        return submissionRepository.findTop500ByOrderByIdDesc();
-
+    public List<Submission> getSubmissions() throws AuthenticationException {
+        try {
+            LOG.info("Reading all submissions");
+            return submissionRepository.findTop500ByOrderByIdDesc();
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submission/{hash}")
-    public List<Job> getSubmission(@PathVariable("hash") String hash) {
-
-        LOG.info("Reading submission by hash {}", hash);
-        return jobRepository.findTop10ByHashOrderByIdDesc(hash);
-
+    public List<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
+        try {
+            LOG.info("Reading submission by hash {}", hash);
+            return jobRepository.findTop10ByHashOrderByIdDesc(hash);
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/students")
-    public List<StudentTableDto> getStudents() {
-
-        LOG.info("Reading all students");
-        return studentRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class)).collect(Collectors.toList());
-
+    public List<StudentTableDto> getStudents() throws AuthenticationException {
+        try {
+            LOG.info("Reading all students");
+            return studentRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class)).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/student/{id}")
-    public Student getStudent(@PathVariable("id") Long id) {
-        LOG.info("Reading student by id {}", id);
-        Optional<Student> studentOptional = studentRepository.findById(id);
-        assert studentOptional.isPresent();
-        return studentOptional.get();
-
+    public Student getStudent(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
+        try {
+            LOG.info("Reading student by id {}", id);
+            Optional<Student> studentOptional = studentRepository.findById(id);
+            assert studentOptional.isPresent();
+            return studentOptional.get();
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/student/{course_student_id}")
-    public CourseStudent getCourseStudent(@PathVariable("course_student_id") Long course_student_id) {
-        LOG.info("Reading course student by id {}", course_student_id);
-        Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findById(course_student_id);
-        assert courseStudentOptional.isPresent();
-        return courseStudentOptional.get();
-
+    public CourseStudent getCourseStudent(@PathVariable("course_student_id") Long course_student_id) throws AuthenticationException, NotFoundException {
+        try {
+            LOG.info("Reading course student by id {}", course_student_id);
+            Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findById(course_student_id);
+            assert courseStudentOptional.isPresent();
+            return courseStudentOptional.get();
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/student/{slug_student_id}")
-    public SlugStudent getSlugStudent(@PathVariable("slug_student_id") Long slug_student_id) {
-        LOG.info("Reading slug student by id {}", slug_student_id);
-        Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findById(slug_student_id);
-        assert slugStudentOptional.isPresent();
-        return slugStudentOptional.get();
+    public SlugStudent getSlugStudent(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
+        try {
 
+            LOG.info("Reading slug student by id {}", slug_student_id);
+            Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findById(slug_student_id);
+            assert slugStudentOptional.isPresent();
+            return slugStudentOptional.get();
+
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{course_id}/student/{student_id}")
-    public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) {
-        LOG.info("Reading course {} student by id {}", course_id, student_id);
-        Optional<Student> studentOptional = studentRepository.findById(student_id);
-        assert studentOptional.isPresent();
-        Optional<Course> courseOptional = courseRepository.findById(course_id);
-        assert courseOptional.isPresent();
-        Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findByStudentAndCourse(studentOptional.get(), courseOptional.get());
-        assert courseStudentOptional.isPresent();
-        return courseStudentOptional.get();
+    public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) throws AuthenticationException, NotFoundException {
+        try {
 
+            LOG.info("Reading course {} student by id {}", course_id, student_id);
+            Optional<Student> studentOptional = studentRepository.findById(student_id);
+            assert studentOptional.isPresent();
+            Optional<Course> courseOptional = courseRepository.findById(course_id);
+            assert courseOptional.isPresent();
+            Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findByStudentAndCourse(studentOptional.get(), courseOptional.get());
+            assert courseStudentOptional.isPresent();
+            return courseStudentOptional.get();
+
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{slug_id}/student/{student_id}")
-    public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) {
-        LOG.info("Reading slug {} student by id {}", slug_id, student_id);
-        Optional<Student> studentOptional = studentRepository.findById(student_id);
-        assert studentOptional.isPresent();
-        Optional<Slug> slugOptional = slugRepository.findById(slug_id);
-        assert slugOptional.isPresent();
-        Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findByStudentAndSlug(studentOptional.get(), slugOptional.get());
-        assert slugStudentOptional.isPresent();
-        return slugStudentOptional.get();
-
+    public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) throws NotFoundException, AuthenticationException {
+        try {
+            LOG.info("Reading slug {} student by id {}", slug_id, student_id);
+            Optional<Student> studentOptional = studentRepository.findById(student_id);
+            assert studentOptional.isPresent();
+            Optional<Slug> slugOptional = slugRepository.findById(slug_id);
+            assert slugOptional.isPresent();
+            Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findByStudentAndSlug(studentOptional.get(), slugOptional.get());
+            assert slugStudentOptional.isPresent();
+            return slugStudentOptional.get();
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/courses")
-    public List<CourseTableDto> getCourses() {
-
-        LOG.info("Reading all courses");
-        return courseRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList());
-
+    public List<CourseTableDto> getCourses() throws AuthenticationException {
+        try {
+            LOG.info("Reading all courses");
+            return courseRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{id}")
-    public Course getCourses(@PathVariable("id") Long id) {
-
-        LOG.info("Reading course by id {}", id);
-        Optional<Course> courseOptional = courseRepository.findById(id);
-        assert courseOptional.isPresent();
-        return courseOptional.get();
-
+    public Course getCourses(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
+        try {
+            LOG.info("Reading course by id {}", id);
+            Optional<Course> courseOptional = courseRepository.findById(id);
+            assert courseOptional.isPresent();
+            return courseOptional.get();
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slugs")
-    public List<SlugTableDto> getSlugs() {
-
-        LOG.info("Reading all slugs");
-        return slugRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList());
-
+    public List<SlugTableDto> getSlugs() throws AuthenticationException {
+        try {
+            LOG.info("Reading all slugs");
+            return slugRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList());
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{id}")
-    public Slug getSlugs(@PathVariable("id") Long id) {
-
-        LOG.info("Reading slug by id {}", id);
-        Optional<Slug> slugOptional = slugRepository.findById(id);
-        assert slugOptional.isPresent();
-        return slugOptional.get();
-
+    public Slug getSlugs(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
+        try {
+            LOG.info("Reading slug by id {}", id);
+            Optional<Slug> slugOptional = slugRepository.findById(id);
+            assert slugOptional.isPresent();
+            return slugOptional.get();
+        } catch (AssertionError e) {
+            LOG.error(e.getMessage());
+            throw new NotFoundException("Selected item was not found.");
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
+        }
     }
 
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/job")
     public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
+        try {
+            LOG.error(String.valueOf(areteResponse));
+            if (!areteResponse.getReturnExtra().get("shared_secret").toString().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
+                throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
+            }
 
-        if (!areteResponse.getReturnExtra().get("shared_secret").toString().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
-            throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
+            LOG.info("Saving job {} into DB", areteResponse.getHash());
+            areteService.enqueueAreteResponse(areteResponse);
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
-        LOG.info("Saving job {} into DB", areteResponse.getHash());
-        areteService.enqueueAreteResponse(areteResponse);
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/submissions/active")
-    public AreteRequest[] getActiveSubmissions() {
-
+    public AreteRequest[] getActiveSubmissions() throws AuthenticationException {
         try {
-            return areteService.getActiveSubmissions();
+            try {
+                return areteService.getActiveSubmissions();
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/:testSync")
-    public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) {
-
+    public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) throws AuthenticationException {
         try {
-            return areteService.makeRequestSync(areteRequest);
+            try {
+                return areteService.makeRequestSync(areteRequest);
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/:testAsync")
-    public void makeRequestAsync(@RequestBody AreteRequest areteRequest) {
-
+    public void makeRequestAsync(@RequestBody AreteRequest areteRequest) throws AuthenticationException {
         try {
-            areteService.makeRequestAsync(areteRequest);
+            try {
+                areteService.makeRequestAsync(areteRequest);
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping("/test:update")
-    public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) {
-
+    public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) throws AuthenticationException {
         try {
-            areteService.updateTests(areteTestUpdate);
+            try {
+                areteService.updateTests(areteTestUpdate);
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PutMapping("/image:update/{image}")
-    public void makeRequestAsync(@PathVariable("image") String image) {
-
+    public void makeRequestAsync(@PathVariable("image") String image) throws AuthenticationException {
         try {
-            areteService.updateImage(image);
+            try {
+                areteService.updateImage(image);
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/debug/{boolean}")
-    public String getDebug(@PathVariable("boolean") Boolean bool) {
-
+    public String getDebug(@PathVariable("boolean") Boolean bool) throws AuthenticationException {
         try {
-            return areteService.setDebug(bool) ? "Successful" : "Unsuccessful";
+            try {
+                return areteService.setDebug(bool) ? "Successful" : "Unsuccessful";
+            } catch (Exception e) {
+                return e.getMessage();
+            }
         } catch (Exception e) {
-            return e.getMessage();
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/state")
-    public SystemState getState() {
-
+    public SystemState getState() throws AuthenticationException {
         try {
-            return new SystemState();
+            try {
+                return new SystemState();
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/state/tester")
-    public arete.java.response.SystemState getTesterState() {
-
+    public arete.java.response.SystemState getTesterState() throws AuthenticationException {
         try {
-            return areteService.getTesterState();
+            try {
+                return areteService.getTesterState();
+            } catch (Exception e) {
+                throw new RequestRejectedException(e.getMessage());
+            }
         } catch (Exception e) {
-            throw new RequestRejectedException(e.getMessage());
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/logs")
-    public String getLogs() {
-
+    public String getLogs() throws AuthenticationException {
         try {
-            return String.join("", tailFile(Paths.get("logs/spring.log"), 2000));
-        } catch (IOException e) {
-            return e.getMessage();
+            try {
+                return String.join("", tailFile(Paths.get("logs/spring.log"), 2000));
+            } catch (IOException e) {
+                return e.getMessage();
+            }
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/logs/tester")
-    public String getTesterLogs() {
-
+    public String getTesterLogs() throws AuthenticationException {
         try {
-            return areteService.getTesterLogs();
+            try {
+                return areteService.getTesterLogs();
+            } catch (Exception e) {
+                return e.getMessage();
+            }
         } catch (Exception e) {
-            return e.getMessage();
+            LOG.error(e.getMessage());
+            throw new AuthenticationException("Not authorized.");
         }
-
     }
 
     public static List<String> tailFile(final Path source, final int noOfLines) throws IOException {
