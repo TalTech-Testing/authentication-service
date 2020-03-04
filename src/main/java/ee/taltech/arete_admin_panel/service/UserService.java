@@ -8,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +30,7 @@ public class UserService {
                         .username(username)
                         .passwordHash(passwordHash)
                         .salt(salt)
-                        .role(User.Role.ADMIN)
+                        .roles(new ArrayList<>(Collections.singletonList(User.Role.ADMIN)))
                         .build());
 
         LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");

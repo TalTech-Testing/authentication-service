@@ -5,6 +5,7 @@ import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
+import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
@@ -15,7 +16,6 @@ import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserPostDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.*;
 import ee.taltech.arete_admin_panel.service.AreteService;
-import ee.taltech.arete_admin_panel.service.TokenService;
 import ee.taltech.arete_admin_panel.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,6 @@ public class BackendController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final UserService userService;
-    private final TokenService tokenService;
     private final SubmissionRepository submissionRepository;
     private final JobRepository jobRepository;
     private final StudentRepository studentRepository;
@@ -50,10 +49,11 @@ public class BackendController {
     private final SlugRepository slugRepository;
     private final SlugStudentRepository slugStudentRepository;
     private final AreteService areteService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public BackendController(UserService userService, TokenService tokenService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
+    public BackendController(JwtTokenProvider jwtTokenProvider, UserService userService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
+        this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
-        this.tokenService = tokenService;
         this.submissionRepository = submissionRepository;
         this.jobRepository = jobRepository;
         this.studentRepository = studentRepository;
@@ -67,6 +67,7 @@ public class BackendController {
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/auth")
     public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) {
+
         LOG.info("Authenticating user {}", userDto.getUsername());
         User user = userService.getUser(userDto.getUsername());
 
@@ -77,7 +78,13 @@ public class BackendController {
             throw new UserWrongCredentials("Wrong login.");
         }
 
-        return tokenService.createResponse(userService.getHome(user.getUsername()));
+        return UserResponseIdToken.builder()
+                .username(user.getUsername())
+                .color(user.getColor())
+                .id(user.getId())
+                .roles(user.getRoles())
+                .token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
+                .build();
     }
 
 
@@ -86,10 +93,6 @@ public class BackendController {
     public void setUserProperties(@RequestBody UserDto userDto) {
 
         User user = userService.getUser(userDto.getUsername());
-
-        if (!tokenService.verifyTokenIsCertainId(userDto.getToken(), user.getId())) {
-            throw new UserWrongCredentials("Bad token.");
-        }
 
         if (userDto.getColor() != null) {
             user.setColor(userDto.getColor());
@@ -310,30 +313,6 @@ public class BackendController {
     }
 
     @ResponseStatus(HttpStatus.ACCEPTED)
-    @GetMapping("/logs")
-    public String getLogs() {
-
-        try {
-            return String.join("", tailFile(Paths.get("logs/spring.log"), 2000));
-        } catch (IOException e) {
-            return e.getMessage();
-        }
-
-    }
-
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    @GetMapping("/logs/tester")
-    public String getTesterLogs() {
-
-        try {
-            return areteService.getTesterLogs();
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-
-    }
-
-    @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/state")
     public SystemState getState() {
 
@@ -354,6 +333,30 @@ public class BackendController {
             return areteService.getTesterState();
         } catch (Exception e) {
             throw new RequestRejectedException(e.getMessage());
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/logs")
+    public String getLogs() {
+
+        try {
+            return String.join("", tailFile(Paths.get("logs/spring.log"), 2000));
+        } catch (IOException e) {
+            return e.getMessage();
+        }
+
+    }
+
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/logs/tester")
+    public String getTesterLogs() {
+
+        try {
+            return areteService.getTesterLogs();
+        } catch (Exception e) {
+            return e.getMessage();
         }
 
     }

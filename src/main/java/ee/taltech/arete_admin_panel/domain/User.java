@@ -1,11 +1,19 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
 
 @Entity
 @Getter
@@ -14,7 +22,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,7 +42,45 @@ public class User {
     private String salt;
 
     @NotNull
-    private Role role;
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    private List<Role> roles = new ArrayList<>();
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream().map(Enum::toString).map(SimpleGrantedAuthority::new).collect(toList());
+    }
+
+    @Deprecated
+    @Override
+    public String getPassword() {
+        return null;
+    }
+
+    @Deprecated
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Deprecated
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Deprecated
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Deprecated
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
 
     public User(String username, String password) {
         SHA512 sha512 = new SHA512();
@@ -43,7 +89,7 @@ public class User {
         this.username = username;
         this.passwordHash = passwordHash;
         this.salt = salt;
-        this.role = Role.USER;
+        this.roles.add(Role.USER);
     }
 
     public enum Role {
