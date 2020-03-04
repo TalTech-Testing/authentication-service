@@ -4,6 +4,7 @@ import arete.java.request.AreteRequest;
 import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.*;
@@ -315,7 +316,7 @@ public class BackendController {
     public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
         try {
             LOG.error(String.valueOf(areteResponse));
-            if (!areteResponse.getReturnExtra().get("shared_secret").toString().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
+            if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
                 throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
             }
 
