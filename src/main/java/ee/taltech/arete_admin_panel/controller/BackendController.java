@@ -20,6 +20,7 @@ import ee.taltech.arete_admin_panel.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,9 +50,11 @@ public class BackendController {
     private final SlugRepository slugRepository;
     private final SlugStudentRepository slugStudentRepository;
     private final AreteService areteService;
+    private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
     private final JwtTokenProvider jwtTokenProvider;
 
-    public BackendController(JwtTokenProvider jwtTokenProvider, UserService userService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
+    public BackendController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, UserService userService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
+        this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
         this.submissionRepository = submissionRepository;
