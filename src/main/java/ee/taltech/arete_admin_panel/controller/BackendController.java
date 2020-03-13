@@ -315,7 +315,6 @@ public class BackendController {
     @PostMapping(path = "/job")
     public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
         try {
-            LOG.error(String.valueOf(areteResponse));
             if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
                 throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
             }
