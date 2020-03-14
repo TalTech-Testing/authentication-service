@@ -18,9 +18,7 @@ public class CorsConfiguration {
                                 "*", // allow all
                                 "http://localhost:8080", // dev
                                 "http://localhost:8001", // back
-                                "http://localhost:1080", // front
-                                "http://localhost:80", // front http
-                                "http://localhost:443", // front https
+                                "https://cs.ttu.ee/", // front
                                 "http://localhost:8098") // tester
                         .allowedMethods("PUT", "DELETE", "GET", "POST")
                         .allowCredentials(true);
