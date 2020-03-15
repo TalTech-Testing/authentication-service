@@ -16,7 +16,8 @@ public class CorsConfiguration {
                 registry.addMapping("/**")
                         .allowedOrigins(
                                 "*", // allow all
-                                "http://localhost:8080", // dev
+                                "http://localhost:8080", // dev front
+                                "http://localhost:8002", // dev back
                                 "http://localhost:8001", // back
                                 "https://cs.ttu.ee/", // front
                                 "http://localhost:8098") // tester
