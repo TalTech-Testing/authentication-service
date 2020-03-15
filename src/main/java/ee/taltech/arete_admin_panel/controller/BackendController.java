@@ -38,7 +38,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @RestController()
-@RequestMapping("/admin")
+@RequestMapping("services/arete/api/admin")
 public class BackendController {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
