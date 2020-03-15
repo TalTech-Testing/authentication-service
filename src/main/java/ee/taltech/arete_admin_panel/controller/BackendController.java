@@ -54,11 +54,9 @@ public class BackendController {
     private final SlugStudentRepository slugStudentRepository;
     private final AreteService areteService;
     private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public BackendController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, UserService userService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
+    public BackendController(AuthenticationManager authenticationManager, UserService userService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
         this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
         this.submissionRepository = submissionRepository;
         this.jobRepository = jobRepository;
@@ -69,35 +67,6 @@ public class BackendController {
         this.slugStudentRepository = slugStudentRepository;
         this.areteService = areteService;
     }
-
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping(path = "/auth")
-    public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) throws AuthenticationException {
-        try {
-            LOG.info("Authenticating user {}", userDto.getUsername());
-            User user = userService.getUser(userDto.getUsername());
-
-            SHA512 sha512 = new SHA512();
-            String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
-
-            if (!user.getPasswordHash().equals(passwordHash)) {
-                throw new UserWrongCredentials("Wrong login.");
-            }
-
-            return UserResponseIdToken.builder()
-                    .username(user.getUsername())
-                    .color(user.getColor())
-                    .id(user.getId())
-                    .roles(user.getRoles())
-                    .token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
-                    .build();
-
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-            throw new AuthenticationException("Not authorized.");
-        }
-    }
-
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/user")
@@ -304,23 +273,6 @@ public class BackendController {
         } catch (AssertionError e) {
             LOG.error(e.getMessage());
             throw new NotFoundException("Selected item was not found.");
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-            throw new AuthenticationException("Not authorized.");
-        }
-    }
-
-
-    @ResponseStatus(HttpStatus.OK)
-    @PostMapping(path = "/job")
-    public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
-        try {
-            if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
-                throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
-            }
-
-            LOG.info("Saving job {} into DB", areteResponse.getHash());
-            areteService.enqueueAreteResponse(areteResponse);
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");

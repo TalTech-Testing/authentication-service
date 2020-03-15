@@ -38,8 +38,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                     .antMatchers(HttpMethod.GET, "/services/arete/api/v1/**").permitAll() // docs
                     .antMatchers(HttpMethod.POST, "/services/arete/api/v1/**").permitAll() // docs
                     .antMatchers("/services/arete/api/admin/**").authenticated() // admin
-                    .antMatchers(HttpMethod.POST, "/services/arete/api/admin/auth").permitAll() // login
-                    .antMatchers(HttpMethod.POST, "/services/arete/api/admin/job").permitAll() // tester feedback. Protected by shared secret
                 .and()
                 .apply(new JwtSecurityConfigurer(jwtTokenProvider));
 
