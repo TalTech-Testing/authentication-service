@@ -148,7 +148,11 @@ public class BackendController {
     public List<StudentTableDto> getStudents() throws AuthenticationException {
         try {
             LOG.info("Reading all students");
-            return studentRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class)).collect(Collectors.toList());
+            return studentRepository
+                    .findTop500ByOrderByIdDesc()
+                    .stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class))
+                    .map(areteService::calculateFields)
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");

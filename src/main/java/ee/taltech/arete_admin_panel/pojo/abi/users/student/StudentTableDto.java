@@ -31,4 +31,8 @@ public class StudentTableDto {
 
     int commitsStyleOK;
 
+    Double averageGrade;
+
+    Double medianGrade;
+
 }

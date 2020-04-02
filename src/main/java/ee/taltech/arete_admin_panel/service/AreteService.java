@@ -10,6 +10,7 @@ import arete.java.response.TestContext;
 import arete.java.response.UnitTest;
 import arete.java.response.*;
 import ee.taltech.arete_admin_panel.domain.*;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
 import ee.taltech.arete_admin_panel.repository.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 @Service
 @Transactional()
@@ -401,6 +403,25 @@ public class AreteService {
                 .build();
 
         submissionRepository.saveAndFlush(submission);
+    }
+
+    public StudentTableDto calculateFields(StudentTableDto dto) {
+        List<Double> grades = new ArrayList<>();
+
+        Student student = studentRepository.findByUniid(dto.getUniid()).orElseThrow();
+
+        for (String slug_name : student.getSlugs()) {
+            for (Slug slug : slugRepository.findAllByName(slug_name)) {
+                if (slug.getStudents().stream().anyMatch(x -> x.getStudent().equals(student))) {
+                    Optional<SlugStudent> slugStudent = slugStudentRepository.findByStudentAndSlug(student, slug);
+                    slugStudent.ifPresent(value -> grades.add(value.getHighestPercent()));
+                }
+            }
+        }
+
+        dto.setAverageGrade(grades.stream().flatMapToDouble(DoubleStream::of).average().orElse(0));
+        dto.setMedianGrade(grades.size() > 0 ? grades.get(grades.size() / 2) : 0);
+        return dto;
     }
 
     public AreteResponse makeRequestSync(AreteRequest areteRequest) {
