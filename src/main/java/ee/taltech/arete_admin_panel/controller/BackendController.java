@@ -4,7 +4,6 @@ import arete.java.request.AreteRequest;
 import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.*;
@@ -148,11 +147,7 @@ public class BackendController {
     public List<StudentTableDto> getStudents() throws AuthenticationException {
         try {
             LOG.info("Reading all students");
-            return studentRepository
-                    .findTop500ByOrderByIdDesc()
-                    .stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class))
-                    .map(areteService::calculateFields)
-                    .collect(Collectors.toList());
+            return areteService.getStudents();
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");

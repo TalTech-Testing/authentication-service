@@ -9,6 +9,7 @@ import arete.java.response.SystemState;
 import arete.java.response.TestContext;
 import arete.java.response.UnitTest;
 import arete.java.response.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
 import ee.taltech.arete_admin_panel.repository.*;
@@ -26,6 +27,8 @@ import java.util.stream.DoubleStream;
 @Transactional()
 @EnableAsync
 public class AreteService {
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final StudentRepository studentRepository;
 
@@ -405,22 +408,27 @@ public class AreteService {
         submissionRepository.saveAndFlush(submission);
     }
 
-    public StudentTableDto calculateFields(StudentTableDto dto) {
+    public List<StudentTableDto> getStudents() {
+        List<SlugStudent> slugStudents = slugStudentRepository.findAll();
+
+        return studentRepository
+                .findTop500ByOrderByIdDesc()
+                .stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class))
+                .map(x -> calculateFields(x, slugStudents))
+                .collect(Collectors.toList());
+    }
+
+    private StudentTableDto calculateFields(StudentTableDto dto, List<SlugStudent> slugStudents) {
         List<Double> grades = new ArrayList<>();
 
-        Student student = studentRepository.findByUniid(dto.getUniid()).orElseThrow();
-
-        for (String slug_name : student.getSlugs()) {
-            for (Slug slug : slugRepository.findAllByName(slug_name)) {
-                if (slug.getStudents().stream().anyMatch(x -> x.getStudent().equals(student))) {
-                    Optional<SlugStudent> slugStudent = slugStudentRepository.findByStudentAndSlug(student, slug);
-                    slugStudent.ifPresent(value -> grades.add(value.getHighestPercent()));
-                }
+        for (SlugStudent slugStudent : slugStudents) {
+            if (slugStudent.getUniid().equals(dto.getUniid())) {
+                grades.add(slugStudent.getHighestPercent());
             }
         }
 
         dto.setAverageGrade(grades.stream().flatMapToDouble(DoubleStream::of).average().orElse(0));
-        dto.setMedianGrade(grades.size() > 0 ? grades.get(grades.size() / 2) : 0);
+        dto.setMedianGrade(grades.size() > 0 ? grades.get(grades.size() / 2) : 0.0);
         return dto;
     }
 
