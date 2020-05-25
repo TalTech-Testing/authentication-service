@@ -4,7 +4,10 @@ import arete.java.request.AreteRequest;
 import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import ee.taltech.arete_admin_panel.algorithms.SHA512;
+import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.*;
+import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
@@ -51,8 +54,9 @@ public class BackendController {
 	private final SlugRepository slugRepository;
 	private final SlugStudentRepository slugStudentRepository;
     private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
+	private final JwtTokenProvider jwtTokenProvider;
 
-    public BackendController(AuthenticationManager authenticationManager, UserService userService, AreteService areteService, JobRepository jobRepository, SubmissionRepository submissionRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository) {
+    public BackendController(AuthenticationManager authenticationManager, UserService userService, AreteService areteService, JobRepository jobRepository, SubmissionRepository submissionRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.areteService = areteService;
@@ -63,13 +67,46 @@ public class BackendController {
 		this.courseStudentRepository = courseStudentRepository;
 		this.slugRepository = slugRepository;
 		this.slugStudentRepository = slugStudentRepository;
+		this.jwtTokenProvider = jwtTokenProvider;
+	}
+
+	public UserResponseIdToken authenticateUser(@RequestBody UserPostDto userDto) {
+		LOG.info("Authenticating user {}", userDto.getUsername());
+		User user = userService.getUser(userDto.getUsername());
+
+		SHA512 sha512 = new SHA512();
+		String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
+
+		if (!user.getPasswordHash().equals(passwordHash)) {
+			throw new UserWrongCredentials("Wrong login.");
+		}
+
+		return UserResponseIdToken.builder()
+				.username(user.getUsername())
+				.color(user.getColor())
+				.id(user.getId())
+				.roles(user.getRoles())
+				.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
+				.build();
+	}
+
+	public void updateUserProperties(@RequestBody UserDto userDto) {
+		User user = userService.getUser(userDto.getUsername());
+
+		if (userDto.getColor() != null) {
+			user.setColor(userDto.getColor());
+		}
+
+		userService.saveUser(user);
+
+		LOG.info("Successfully updated {}", user.getUsername());
 	}
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/auth")
     public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) throws AuthenticationException {
         try {
-			return userService.authenticateUser(userDto);
+			return authenticateUser(userDto);
 
 		} catch (Exception e) {
             LOG.error(e.getMessage());
@@ -81,7 +118,7 @@ public class BackendController {
     @PutMapping(path = "/user")
     public void setUserProperties(@RequestBody UserDto userDto) throws AuthenticationException {
         try {
-			userService.updateUserProperties(userDto);
+			updateUserProperties(userDto);
 		} catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
