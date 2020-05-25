@@ -1,17 +1,24 @@
 package ee.taltech.arete_admin_panel.service;
 
+import ee.taltech.arete_admin_panel.algorithms.SHA512;
+import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.exception.UserNotFoundException;
+import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserPostDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -19,10 +26,12 @@ public class UserService {
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
     private final UserRepository userRepository;
+	private final JwtTokenProvider jwtTokenProvider;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
-    }
+		this.jwtTokenProvider = jwtTokenProvider;
+	}
 
     public void addSuperUser(String username, String passwordHash, String salt) {
         User savedUser = userRepository.save(
@@ -80,6 +89,38 @@ public class UserService {
         }
         return user.get().getId();
     }
+
+	public UserResponseIdToken authenticateUser(@RequestBody UserPostDto userDto) {
+		LOG.info("Authenticating user {}", userDto.getUsername());
+		User user = getUser(userDto.getUsername());
+
+		SHA512 sha512 = new SHA512();
+		String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
+
+		if (!user.getPasswordHash().equals(passwordHash)) {
+			throw new UserWrongCredentials("Wrong login.");
+		}
+
+		return UserResponseIdToken.builder()
+				.username(user.getUsername())
+				.color(user.getColor())
+				.id(user.getId())
+				.roles(user.getRoles())
+				.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
+				.build();
+	}
+
+	public void updateUserProperties(@RequestBody UserDto userDto) {
+		User user = getUser(userDto.getUsername());
+
+		if (userDto.getColor() != null) {
+			user.setColor(userDto.getColor());
+		}
+
+		saveUser(user);
+
+		LOG.info("Successfully updated {}", user.getUsername());
+	}
 
     public List<User> getAllUsers() {
         return userRepository.findAll();

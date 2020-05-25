@@ -4,10 +4,7 @@ import arete.java.request.AreteRequest;
 import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.taltech.arete_admin_panel.algorithms.SHA512;
-import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.*;
-import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
@@ -20,6 +17,7 @@ import ee.taltech.arete_admin_panel.service.UserService;
 import javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.firewall.RequestRejectedException;
@@ -44,81 +42,54 @@ public class BackendController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final UserService userService;
-    private final SubmissionRepository submissionRepository;
-    private final JobRepository jobRepository;
-    private final StudentRepository studentRepository;
-    private final CourseRepository courseRepository;
-    private final CourseStudentRepository courseStudentRepository;
-    private final SlugRepository slugRepository;
-    private final SlugStudentRepository slugStudentRepository;
     private final AreteService areteService;
+	private final JobRepository jobRepository;
+	private final SubmissionRepository submissionRepository;
+	private final StudentRepository studentRepository;
+	private final CourseRepository courseRepository;
+	private final CourseStudentRepository courseStudentRepository;
+	private final SlugRepository slugRepository;
+	private final SlugStudentRepository slugStudentRepository;
     private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
-    private final JwtTokenProvider jwtTokenProvider;
 
-    public BackendController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, UserService userService, SubmissionRepository submissionRepository, JobRepository jobRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, AreteService areteService) {
+    public BackendController(AuthenticationManager authenticationManager, UserService userService, AreteService areteService, JobRepository jobRepository, SubmissionRepository submissionRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository) {
         this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
-        this.submissionRepository = submissionRepository;
-        this.jobRepository = jobRepository;
-        this.studentRepository = studentRepository;
-        this.courseRepository = courseRepository;
-        this.courseStudentRepository = courseStudentRepository;
-        this.slugRepository = slugRepository;
-        this.slugStudentRepository = slugStudentRepository;
         this.areteService = areteService;
-    }
+		this.jobRepository = jobRepository;
+		this.submissionRepository = submissionRepository;
+		this.studentRepository = studentRepository;
+		this.courseRepository = courseRepository;
+		this.courseStudentRepository = courseStudentRepository;
+		this.slugRepository = slugRepository;
+		this.slugStudentRepository = slugStudentRepository;
+	}
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/auth")
     public UserResponseIdToken getHome(@RequestBody UserPostDto userDto) throws AuthenticationException {
         try {
-            LOG.info("Authenticating user {}", userDto.getUsername());
-            User user = userService.getUser(userDto.getUsername());
+			return userService.authenticateUser(userDto);
 
-            SHA512 sha512 = new SHA512();
-            String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
-
-            if (!user.getPasswordHash().equals(passwordHash)) {
-                throw new UserWrongCredentials("Wrong login.");
-            }
-
-            return UserResponseIdToken.builder()
-                    .username(user.getUsername())
-                    .color(user.getColor())
-                    .id(user.getId())
-                    .roles(user.getRoles())
-                    .token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
-                    .build();
-
-        } catch (Exception e) {
+		} catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
         }
     }
 
-
-    @ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.OK)
     @PutMapping(path = "/user")
     public void setUserProperties(@RequestBody UserDto userDto) throws AuthenticationException {
         try {
-            User user = userService.getUser(userDto.getUsername());
-
-            if (userDto.getColor() != null) {
-                user.setColor(userDto.getColor());
-            }
-
-            userService.saveUser(user);
-
-            LOG.info("Successfully updated {}", user.getUsername());
-        } catch (Exception e) {
+			userService.updateUserProperties(userDto);
+		} catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
         }
     }
 
-
-    @ResponseStatus(HttpStatus.OK)
+	@Cacheable("submission")
+	@ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submissions")
     public List<Submission> getSubmissions() throws AuthenticationException {
         try {
@@ -130,6 +101,7 @@ public class BackendController {
         }
     }
 
+	@Cacheable("submission")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submission/{hash}")
     public List<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
@@ -142,6 +114,7 @@ public class BackendController {
         }
     }
 
+    @Cacheable("student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/students")
     public List<StudentTableDto> getStudents() throws AuthenticationException {
@@ -154,6 +127,7 @@ public class BackendController {
         }
     }
 
+	@Cacheable("student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/student/{id}")
     public Student getStudent(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
@@ -171,9 +145,10 @@ public class BackendController {
         }
     }
 
+	@Cacheable("course-student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/student/{course_student_id}")
-    public CourseStudent getCourseStudent(@PathVariable("course_student_id") Long course_student_id) throws AuthenticationException, NotFoundException {
+    public CourseStudent getCourseStudentById(@PathVariable("course_student_id") Long course_student_id) throws AuthenticationException, NotFoundException {
         try {
             LOG.info("Reading course student by id {}", course_student_id);
             Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findById(course_student_id);
@@ -188,9 +163,10 @@ public class BackendController {
         }
     }
 
+	@Cacheable("slug-student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/student/{slug_student_id}")
-    public SlugStudent getSlugStudent(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
+    public SlugStudent getSlugStudentById(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
         try {
 
             LOG.info("Reading slug student by id {}", slug_student_id);
@@ -207,6 +183,7 @@ public class BackendController {
         }
     }
 
+	@Cacheable("course-student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{course_id}/student/{student_id}")
     public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) throws AuthenticationException, NotFoundException {
@@ -230,6 +207,7 @@ public class BackendController {
         }
     }
 
+	@Cacheable("slug-student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{slug_id}/student/{student_id}")
     public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) throws NotFoundException, AuthenticationException {
@@ -251,6 +229,7 @@ public class BackendController {
         }
     }
 
+	@Cacheable("course")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/courses")
     public List<CourseTableDto> getCourses() throws AuthenticationException {
@@ -263,9 +242,10 @@ public class BackendController {
         }
     }
 
+	@Cacheable("course")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{id}")
-    public Course getCourses(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
+    public Course getCoursesById(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
         try {
             LOG.info("Reading course by id {}", id);
             Optional<Course> courseOptional = courseRepository.findById(id);
@@ -280,6 +260,7 @@ public class BackendController {
         }
     }
 
+	@Cacheable("slug")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slugs")
     public List<SlugTableDto> getSlugs() throws AuthenticationException {
@@ -292,9 +273,10 @@ public class BackendController {
         }
     }
 
+	@Cacheable("slug")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{id}")
-    public Slug getSlugs(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
+    public Slug getSlugsById(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
         try {
             LOG.info("Reading slug by id {}", id);
             Optional<Slug> slugOptional = slugRepository.findById(id);
