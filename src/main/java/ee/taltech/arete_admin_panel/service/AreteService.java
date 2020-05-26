@@ -437,41 +437,35 @@ public class AreteService {
 
 	/////// CACHING
 
-	@CachePut(value = "{course-student, #course_student_id}")
 	public CourseStudent updateCourseStudent(CourseStudent courseStudent, Long course_student_id) {
 		courseStudentRepository.saveAndFlush(courseStudent);
 		return courseStudent;
 	}
 
-	@CachePut(value = "{slug-student, #slug_student_id}")
 	public SlugStudent updateSlugStudent(SlugStudent slugStudent, Long slug_student_id) {
 		slugStudentRepository.saveAndFlush(slugStudent);
 		cacheService.updateSlugStudentList(slugStudent);
 		return slugStudent;
 	}
 
-	@CachePut(value = "{course, #id}")
 	public Course updateCourse(Course course, Long id) {
 		courseRepository.saveAndFlush(course);
 		cacheService.updateCourseList(course);
 		return course;
 	}
 
-	@CachePut(value = "{slug, #id}")
 	public Slug updateSlug(Slug slug, Long id) {
 		slugRepository.saveAndFlush(slug);
 		cacheService.updateSlugList(slug);
 		return slug;
 	}
 
-	@CachePut(value = "{student, #id}")
 	public Student updateStudent(Student student, Long id) {
 		studentRepository.saveAndFlush(student);
 		cacheService.updateStudentList(student);
 		return student;
 	}
 
-	@CachePut(value = "{submission, #hash}")
 	public void updateSubmissions(Submission submission, String hash) {
 		submissionRepository.saveAndFlush(submission);
 		cacheService.updateSubmissionList(submission);

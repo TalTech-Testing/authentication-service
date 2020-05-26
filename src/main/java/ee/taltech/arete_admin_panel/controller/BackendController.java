@@ -140,7 +140,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("{submission, #hash}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submission/{hash}")
     public Collection<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
@@ -165,7 +164,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("{student, #id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/student/{id}")
     public Student getStudent(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
@@ -183,7 +181,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("{course-student, #course_student_id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/student/{course_student_id}")
     public CourseStudent getCourseStudentById(@PathVariable("course_student_id") Long course_student_id) throws AuthenticationException, NotFoundException {
@@ -201,7 +198,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("{slug-student, #slug_student_id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/student/{slug_student_id}")
     public SlugStudent getSlugStudentById(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
@@ -277,7 +273,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("{course, #id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{id}")
     public Course getCoursesById(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
@@ -307,7 +302,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("{slug, #id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{id}")
     public Slug getSlugsById(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
