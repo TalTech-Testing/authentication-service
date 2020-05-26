@@ -30,8 +30,8 @@ services:
     env_file:
       - ..env #Change to .env to run locally
     environment:
-      SHARED_SECRET: ${SHARED_SECRET}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SHARED_SECRET: ${SHARED_SECRET:-0fpvg4Bv1CfIjn4DyHhzd70ftjwOcTZ0SqpE9wprzLjMbbA8H5pvVirtJvE4rBvVj0z8UW0n}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
     depends_on:
       - arete_ui_back_db
     ports:

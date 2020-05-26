@@ -5,7 +5,7 @@ stages:
   - build_and_deploy
 
 
-build_and_deploy:
+build:
   tags:
     - dev
     - master
@@ -13,8 +13,41 @@ build_and_deploy:
   stage: build_and_deploy
   services:
     - name: docker:dind
+  before_script:
+    - docker container ls
+    - docker images
   script:
-    - docker-compose up --build --force-recreate --no-deps --remove-orphans -d
+    - docker-compose -f docker-compose-build.yml up --no-start --build --force-recreate --no-deps
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - docker tag arete $DOCKER_USER/arete_ui_back:latest
+    - docker push $DOCKER_USER/arete_ui_back:latest
+  after_script:
+    - docker-compose -f docker-compose-build.yml down --remove-orphans -v -f
+    - docker container ls
+    - docker images
+  only:
+    - dev
+    - master
+
+deploy:
+  tags:
+    - dev
+    - master
+  image: docker:latest
+  stage: build_and_deploy
+  services:
+    - name: docker:dind
+  before_script:
+    - docker images
+    - docker container ls
+    - docker-compose -f docker-compose-deploy.yml down --remove-orphans -v -f || true
+  script:
+    - docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+    - docker pull automatedtestingservice/arete_ui_back:latest
+    - docker-compose -f docker-compose-deploy.yml up -d --force-recreate --no-deps
+  after_script:
+    - docker container ls
+    - docker images
   only:
     - dev
     - master
