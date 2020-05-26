@@ -11,7 +11,6 @@ import arete.java.response.UnitTest;
 import arete.java.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.domain.*;
-import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
 import ee.taltech.arete_admin_panel.repository.*;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.scheduling.annotation.Async;
@@ -22,36 +21,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 
 @Service
 @Transactional()
 @EnableAsync
 public class AreteService {
 
+	private final CacheService cacheService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final StudentRepository studentRepository;
-
 	private final CourseRepository courseRepository;
-
 	private final SlugRepository slugRepository;
-
-	private final JobRepository jobRepository;
-
 	private final SubmissionRepository submissionRepository;
-
+	private final JobRepository jobRepository;
 	private final SlugStudentRepository slugStudentRepository;
-
 	private final CourseStudentRepository courseStudentRepository;
 
 	private AreteClient areteClient = new AreteClient("http://localhost:8098");
-
 	private Queue<AreteResponse> jobQueue = new LinkedList<>();
-
 	private Boolean halted = false;
 
-	public AreteService(StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository, SlugStudentRepository slugStudentRepository, CourseStudentRepository courseStudentRepository) {
+	public AreteService(CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository, SlugStudentRepository slugStudentRepository, CourseStudentRepository courseStudentRepository) {
+		this.cacheService = cacheService;
 		this.studentRepository = studentRepository;
 		this.courseRepository = courseRepository;
 		this.slugRepository = slugRepository;
@@ -251,42 +243,12 @@ public class AreteService {
 		student.setDifferentCourses(student.getCourses().size());
 		student.setDifferentSlugs(student.getSlugs().size());
 
-		updateCourseStudent(courseStudent);
-		updateSlugStudent(slugStudent);
-		updateCourse(course);
-		updateSlug(slug);
-		updateStudent(student);
+		updateCourseStudent(courseStudent, courseStudent.getId());
+		updateSlugStudent(slugStudent, slugStudent.getId());
+		updateCourse(course, course.getId());
+		updateSlug(slug, slug.getId());
+		updateStudent(student, student.getId());
 
-	}
-
-	@CachePut(value = "course-student")
-	public CourseStudent updateCourseStudent(CourseStudent courseStudent) {
-		courseStudentRepository.saveAndFlush(courseStudent);
-		return courseStudent;
-	}
-
-	@CachePut(value = "slug-student")
-	public SlugStudent updateSlugStudent(SlugStudent slugStudent) {
-		slugStudentRepository.saveAndFlush(slugStudent);
-		return slugStudent;
-	}
-
-	@CachePut(value = "course")
-	public Course updateCourse(Course course) {
-		courseRepository.saveAndFlush(course);
-		return course;
-	}
-
-	@CachePut(value = "slug")
-	public Slug updateSlug(Slug slug) {
-		slugRepository.saveAndFlush(slug);
-		return slug;
-	}
-
-	@CachePut(value = "student")
-	public Student updateStudent(Student student) {
-		studentRepository.saveAndFlush(student);
-		return student;
 	}
 
 	private void updateCodeErrors(Map<String, Integer> testErrors, String key, Set<CodeError> testCodeErrors) {
@@ -425,7 +387,6 @@ public class AreteService {
 		jobRepository.saveAndFlush(job);
 	}
 
-	@CachePut(value = "submission")
 	public Submission saveSubmission(AreteResponse response) {
 		Submission submission = Submission.builder()
 				.uniid(response.getUniid())
@@ -438,32 +399,8 @@ public class AreteService {
 				.gitTestSource(response.getGitTestRepo())
 				.build();
 
-		submissionRepository.saveAndFlush(submission);
+		updateSubmissions(submission, submission.getHash());
 		return submission;
-	}
-
-	public List<StudentTableDto> getStudents() {
-		List<SlugStudent> slugStudents = slugStudentRepository.findAll();
-
-		return studentRepository
-				.findTop500ByOrderByIdDesc()
-				.stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class))
-				.map(x -> calculateFields(x, slugStudents))
-				.collect(Collectors.toList());
-	}
-
-	private StudentTableDto calculateFields(StudentTableDto dto, List<SlugStudent> slugStudents) {
-		List<Double> grades = new ArrayList<>();
-
-		for (SlugStudent slugStudent : slugStudents) {
-			if (slugStudent.getUniid().equals(dto.getUniid())) {
-				grades.add(slugStudent.getHighestPercent());
-			}
-		}
-
-		dto.setAverageGrade(grades.stream().flatMapToDouble(DoubleStream::of).average().orElse(0));
-		dto.setMedianGrade(grades.size() > 0 ? grades.get(grades.size() / 2) : 0.0);
-		return dto;
 	}
 
 	public AreteResponse makeRequestSync(AreteRequest areteRequest) {
@@ -497,4 +434,47 @@ public class AreteService {
 	public AreteRequest[] getActiveSubmissions() {
 		return areteClient.requestActiveSubmissions();
 	}
+
+	/////// CACHING
+
+	@CachePut(value = "{course-student, #course_student_id}")
+	public CourseStudent updateCourseStudent(CourseStudent courseStudent, Long course_student_id) {
+		courseStudentRepository.saveAndFlush(courseStudent);
+		return courseStudent;
+	}
+
+	@CachePut(value = "{slug-student, #slug_student_id}")
+	public SlugStudent updateSlugStudent(SlugStudent slugStudent, Long slug_student_id) {
+		slugStudentRepository.saveAndFlush(slugStudent);
+		cacheService.updateSlugStudentList(slugStudent);
+		return slugStudent;
+	}
+
+	@CachePut(value = "{course, #id}")
+	public Course updateCourse(Course course, Long id) {
+		courseRepository.saveAndFlush(course);
+		cacheService.updateCourseList(course);
+		return course;
+	}
+
+	@CachePut(value = "{slug, #id}")
+	public Slug updateSlug(Slug slug, Long id) {
+		slugRepository.saveAndFlush(slug);
+		cacheService.updateSlugList(slug);
+		return slug;
+	}
+
+	@CachePut(value = "{student, #id}")
+	public Student updateStudent(Student student, Long id) {
+		studentRepository.saveAndFlush(student);
+		cacheService.updateStudentList(student);
+		return student;
+	}
+
+	@CachePut(value = "{submission, #hash}")
+	public void updateSubmissions(Submission submission, String hash) {
+		submissionRepository.saveAndFlush(submission);
+		cacheService.updateSubmissionList(submission);
+	}
+
 }

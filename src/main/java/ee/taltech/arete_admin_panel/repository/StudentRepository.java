@@ -11,8 +11,10 @@ import java.util.Optional;
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
-    Optional<Student> findByUniid(@Param("uniid") String uniid);
+	Optional<Student> findByUniid(@Param("uniid") String uniid);
 
-    List<Student> findTop500ByOrderByIdDesc();
+	List<Student> findTop500ByOrderByIdDesc();
+
+	List<Student> findTop10000ByOrderByIdDesc();
 
 }

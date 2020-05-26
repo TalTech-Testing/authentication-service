@@ -15,6 +15,6 @@ public interface SlugStudentRepository extends JpaRepository<SlugStudent, Long> 
 
     Optional<SlugStudent> findByStudentAndSlug(@Param("student") Student student, @Param("slug") Slug slug);
 
-    List<SlugStudent> findTop500ByOrderByIdDesc();
+    List<SlugStudent> findTop10000ByOrderByIdDesc();
 
 }

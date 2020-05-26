@@ -16,6 +16,7 @@ import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserPostDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.*;
 import ee.taltech.arete_admin_panel.service.AreteService;
+import ee.taltech.arete_admin_panel.service.CacheService;
 import ee.taltech.arete_admin_panel.service.UserService;
 import javassist.NotFoundException;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,7 +45,7 @@ public class BackendController {
 
     private final Logger LOG = LoggerFactory.getLogger(this.getClass());
     private final ObjectMapper objectMapper = new ObjectMapper();
-
+	private final CacheService cacheService;
     private final UserService userService;
     private final AreteService areteService;
 	private final JobRepository jobRepository;
@@ -56,8 +58,9 @@ public class BackendController {
     private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 	private final JwtTokenProvider jwtTokenProvider;
 
-    public BackendController(AuthenticationManager authenticationManager, UserService userService, AreteService areteService, JobRepository jobRepository, SubmissionRepository submissionRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, JwtTokenProvider jwtTokenProvider) {
-        this.authenticationManager = authenticationManager;
+    public BackendController(CacheService cacheService, AuthenticationManager authenticationManager, UserService userService, AreteService areteService, JobRepository jobRepository, SubmissionRepository submissionRepository, StudentRepository studentRepository, CourseRepository courseRepository, CourseStudentRepository courseStudentRepository, SlugRepository slugRepository, SlugStudentRepository slugStudentRepository, JwtTokenProvider jwtTokenProvider) {
+		this.cacheService = cacheService;
+		this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.areteService = areteService;
 		this.jobRepository = jobRepository;
@@ -125,23 +128,22 @@ public class BackendController {
         }
     }
 
-	@Cacheable("submission")
 	@ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submissions")
-    public List<Submission> getSubmissions() throws AuthenticationException {
+    public Collection<Submission> getSubmissions() throws AuthenticationException {
         try {
             LOG.info("Reading all submissions");
-            return submissionRepository.findTop500ByOrderByIdDesc();
+            return cacheService.getSubmissionList();
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
         }
     }
 
-	@Cacheable("submission")
+	@Cacheable("{submission, #hash}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/submission/{hash}")
-    public List<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
+    public Collection<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
         try {
             LOG.info("Reading submission by hash {}", hash);
             return jobRepository.findTop10ByHashOrderByIdDesc(hash);
@@ -151,20 +153,19 @@ public class BackendController {
         }
     }
 
-    @Cacheable("student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/students")
-    public List<StudentTableDto> getStudents() throws AuthenticationException {
+    public Collection<StudentTableDto> getStudents() throws AuthenticationException {
         try {
             LOG.info("Reading all students");
-            return areteService.getStudents();
+            return cacheService.getStudentList();
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
         }
     }
 
-	@Cacheable("student")
+	@Cacheable("{student, #id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/student/{id}")
     public Student getStudent(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
@@ -182,7 +183,7 @@ public class BackendController {
         }
     }
 
-	@Cacheable("course-student")
+	@Cacheable("{course-student, #course_student_id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/student/{course_student_id}")
     public CourseStudent getCourseStudentById(@PathVariable("course_student_id") Long course_student_id) throws AuthenticationException, NotFoundException {
@@ -200,7 +201,7 @@ public class BackendController {
         }
     }
 
-	@Cacheable("slug-student")
+	@Cacheable("{slug-student, #slug_student_id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/student/{slug_student_id}")
     public SlugStudent getSlugStudentById(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
@@ -220,7 +221,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("course-student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{course_id}/student/{student_id}")
     public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) throws AuthenticationException, NotFoundException {
@@ -244,7 +244,6 @@ public class BackendController {
         }
     }
 
-	@Cacheable("slug-student")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{slug_id}/student/{student_id}")
     public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) throws NotFoundException, AuthenticationException {
@@ -266,20 +265,19 @@ public class BackendController {
         }
     }
 
-	@Cacheable("course")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/courses")
-    public List<CourseTableDto> getCourses() throws AuthenticationException {
+    public Collection<CourseTableDto> getCourses() throws AuthenticationException {
         try {
             LOG.info("Reading all courses");
-            return courseRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList());
+            return cacheService.getCourseList();
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
         }
     }
 
-	@Cacheable("course")
+	@Cacheable("{course, #id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/course/{id}")
     public Course getCoursesById(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
@@ -297,20 +295,19 @@ public class BackendController {
         }
     }
 
-	@Cacheable("slug")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slugs")
-    public List<SlugTableDto> getSlugs() throws AuthenticationException {
+    public Collection<SlugTableDto> getSlugs() throws AuthenticationException {
         try {
             LOG.info("Reading all slugs");
-            return slugRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList());
+            return cacheService.getSlugList();
         } catch (Exception e) {
             LOG.error(e.getMessage());
             throw new AuthenticationException("Not authorized.");
         }
     }
 
-	@Cacheable("slug")
+	@Cacheable("{slug, #id}")
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(path = "/slug/{id}")
     public Slug getSlugsById(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
@@ -327,7 +324,6 @@ public class BackendController {
             throw new AuthenticationException("Not authorized.");
         }
     }
-
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "/job")
