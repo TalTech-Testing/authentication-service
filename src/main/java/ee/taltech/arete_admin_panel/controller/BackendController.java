@@ -112,7 +112,7 @@ public class BackendController {
 			return authenticateUser(userDto);
 
 		} catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -123,7 +123,7 @@ public class BackendController {
         try {
 			updateUserProperties(userDto);
 		} catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -135,7 +135,7 @@ public class BackendController {
             LOG.info("Reading all submissions");
             return cacheService.getSubmissionList();
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -147,7 +147,7 @@ public class BackendController {
             LOG.info("Reading submission by hash {}", hash);
             return jobRepository.findTop10ByHashOrderByIdDesc(hash);
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -159,7 +159,7 @@ public class BackendController {
             LOG.info("Reading all students");
             return cacheService.getStudentList();
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -173,10 +173,10 @@ public class BackendController {
             assert studentOptional.isPresent();
             return studentOptional.get();
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -190,10 +190,10 @@ public class BackendController {
             assert courseStudentOptional.isPresent();
             return courseStudentOptional.get();
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -209,10 +209,10 @@ public class BackendController {
             return slugStudentOptional.get();
 
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -232,10 +232,10 @@ public class BackendController {
             return courseStudentOptional.get();
 
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -253,10 +253,10 @@ public class BackendController {
             assert slugStudentOptional.isPresent();
             return slugStudentOptional.get();
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -268,7 +268,7 @@ public class BackendController {
             LOG.info("Reading all courses");
             return cacheService.getCourseList();
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -282,10 +282,10 @@ public class BackendController {
             assert courseOptional.isPresent();
             return courseOptional.get();
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -297,7 +297,7 @@ public class BackendController {
             LOG.info("Reading all slugs");
             return cacheService.getSlugList();
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -311,10 +311,10 @@ public class BackendController {
             assert slugOptional.isPresent();
             return slugOptional.get();
         } catch (AssertionError e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new NotFoundException("Selected item was not found.");
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -330,7 +330,7 @@ public class BackendController {
             LOG.info("Saving job {} into DB", areteResponse.getHash());
             areteService.enqueueAreteResponse(areteResponse);
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -345,7 +345,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -360,7 +360,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -375,7 +375,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -390,7 +390,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -405,7 +405,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -420,7 +420,7 @@ public class BackendController {
                 return e.getMessage();
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -435,7 +435,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+			e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -451,7 +451,7 @@ public class BackendController {
                 throw new RequestRejectedException(e.getMessage());
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -466,7 +466,7 @@ public class BackendController {
                 return e.getMessage();
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
@@ -481,7 +481,7 @@ public class BackendController {
                 return e.getMessage();
             }
         } catch (Exception e) {
-            LOG.error(e.getMessage());
+            e.printStackTrace();
             throw new AuthenticationException("Not authorized.");
         }
     }
