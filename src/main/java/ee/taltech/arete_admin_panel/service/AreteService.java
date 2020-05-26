@@ -38,7 +38,7 @@ public class AreteService {
 	private final SlugStudentRepository slugStudentRepository;
 	private final CourseStudentRepository courseStudentRepository;
 
-	private AreteClient areteClient = new AreteClient("http://localhost:8098");
+	private AreteClient areteClient = new AreteClient(System.getProperty("TESTER_URL", "http://localhost:8098"));
 	private Queue<AreteResponse> jobQueue = new LinkedList<>();
 	private Boolean halted = false;
 
