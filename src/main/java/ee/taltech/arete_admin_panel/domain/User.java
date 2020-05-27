@@ -99,6 +99,7 @@ public class User implements UserDetails {
 		this.username = username;
 		this.passwordHash = passwordHash;
 		this.salt = salt;
+		this.roles = new ArrayList<>();
 		this.roles.add(role);
 	}
 
