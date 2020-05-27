@@ -92,6 +92,16 @@ public class User implements UserDetails {
         this.roles.add(Role.USER);
     }
 
+	public User(String username, String password, Role role) {
+		SHA512 sha512 = new SHA512();
+		String salt = sha512.generateHash();
+		String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);
+		this.username = username;
+		this.passwordHash = passwordHash;
+		this.salt = salt;
+		this.roles.add(role);
+	}
+
     public enum Role {
         USER,
         ADMIN

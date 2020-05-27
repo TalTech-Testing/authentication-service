@@ -24,6 +24,12 @@ public class UserService {
 		this.userRepository = userRepository;
 	}
 
+	public void addSuperUser(String username, String password) {
+		User savedUser = userRepository.save(new User(username, password, User.Role.ADMIN));
+
+		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
+	}
+
 	public void addSuperUser(String username, String passwordHash, String salt) {
 		User savedUser = userRepository.save(
 				User.builder()
