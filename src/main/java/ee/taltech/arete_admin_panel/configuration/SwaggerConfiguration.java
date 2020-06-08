@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -20,6 +21,11 @@ public class SwaggerConfiguration {
 	@Bean
 	public OpenAPI customOpenAPI() {
 		LOG.info("Loaded Swagger");
+
+		List<Server> servers = new ArrayList<>();
+		servers.add(new Server().url("https://cs.ttu.ee/").description("TalTech"));
+		servers.add(new Server().url("https://arete-back.herokuapp.com/").description("Dev"));
+
 		return new OpenAPI()
 				.info(new Info()
 						.title("Arete API")
@@ -28,8 +34,7 @@ public class SwaggerConfiguration {
 						.license(new License().name("GitHub").url("https://github.com/envomp?tab=repositories&q=arete&type=&language="))
 						.contact(new Contact().email("enrico.vompa@gmail.com").name("Enrico Vompa"))
 				)
-				.servers(List.of(new Server().url("https://cs.ttu.ee/").description("TalTech")));
+				.servers(servers);
 	}
-
 
 }
