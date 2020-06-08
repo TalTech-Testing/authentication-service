@@ -24,7 +24,7 @@ import java.util.Optional;
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "student", description = "student CRUD operations")
 @RestController()
-@RequestMapping("services/arete/api/admin")
+@RequestMapping("services/arete/api/v2/student")
 public class StudentController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -50,7 +50,7 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all cached students", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/students")
+	@GetMapping(path = "/all")
 	public Collection<StudentTableDto> getStudents() throws AuthenticationException {
 		try {
 			LOG.info("Reading all students");
@@ -63,7 +63,7 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns student with id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/student/{id}")
+	@GetMapping(path = "/{id}")
 	public Student getStudent(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
 		try {
 			LOG.info("Reading student by id {}", id);
@@ -81,7 +81,7 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding a course by its id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/course/student/{course_student_id}")
+	@GetMapping(path = "/course/{course_student_id}")
 	public CourseStudent getCourseStudentById(@PathVariable("course_student_id") Long course_student_id) throws AuthenticationException, NotFoundException {
 		try {
 			LOG.info("Reading course student by id {}", course_student_id);
@@ -99,7 +99,7 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding an exercise by its id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/slug/student/{slug_student_id}")
+	@GetMapping(path = "/slug/{slug_student_id}")
 	public SlugStudent getSlugStudentById(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
 		try {
 
@@ -119,7 +119,7 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding a course by course id and student id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/course/{course_id}/student/{student_id}")
+	@GetMapping(path = "/{student_id}/course/{course_id}")
 	public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) throws AuthenticationException, NotFoundException {
 		try {
 
@@ -143,7 +143,7 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding an exercise by exercise id and student id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/slug/{slug_id}/student/{student_id}")
+	@GetMapping(path = "/{student_id}/slug/{slug_id}/")
 	public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) throws NotFoundException, AuthenticationException {
 		try {
 			LOG.info("Reading slug {} student by id {}", slug_id, student_id);

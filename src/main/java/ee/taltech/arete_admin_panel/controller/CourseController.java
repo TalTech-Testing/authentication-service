@@ -30,7 +30,7 @@ import java.util.Optional;
 				"You will get the bearer from the account/login or account/register endpoint.")
 @Tag(name = "course", description = "course CRUD operations")
 @RestController()
-@RequestMapping("services/arete/api/admin")
+@RequestMapping("services/arete/api/v2/course")
 public class CourseController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -49,7 +49,7 @@ public class CourseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/courses")
+	@GetMapping(path = "/all")
 	public Collection<CourseTableDto> getCourses() throws AuthenticationException {
 		try {
 			LOG.info("Reading all courses");
@@ -62,7 +62,7 @@ public class CourseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/course/{id}")
+	@GetMapping(path = "/{id}")
 	public Course getCoursesById(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
 		try {
 			LOG.info("Reading course by id {}", id);
@@ -80,7 +80,7 @@ public class CourseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PutMapping("/image:update/{image}")
+	@PutMapping("/{image}")
 	public void makeRequestAsync(@PathVariable("image") String image) throws AuthenticationException {
 		try {
 			try {

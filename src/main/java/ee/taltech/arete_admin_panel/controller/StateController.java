@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "state", description = "server status")
 @RestController()
-@RequestMapping("services/arete/api/admin")
+@RequestMapping("services/arete/api/v2/state")
 public class StateController {
 
 	private final AreteService areteService;
@@ -43,7 +43,7 @@ public class StateController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Return backends' state", tags = {"state"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/state")
+	@GetMapping("/")
 	public SystemState getState() throws AuthenticationException {
 		try {
 			try {
@@ -60,7 +60,7 @@ public class StateController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Return testers' state", tags = {"state"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/state/tester")
+	@GetMapping("/tester")
 	public arete.java.response.SystemState getTesterState() throws AuthenticationException {
 		try {
 			try {

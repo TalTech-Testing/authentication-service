@@ -27,7 +27,7 @@ import java.util.Optional;
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "exercise", description = "exercise CRUD operations")
 @RestController()
-@RequestMapping("services/arete/api/admin")
+@RequestMapping("services/arete/api/v2/exercise")
 public class ExerciseController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +47,7 @@ public class ExerciseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all exercises", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/slugs")
+	@GetMapping(path = "/all")
 	public Collection<SlugTableDto> getSlugs() throws AuthenticationException {
 		try {
 			LOG.info("Reading all slugs");
@@ -60,7 +60,7 @@ public class ExerciseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns exercise by id", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/slug/{id}")
+	@GetMapping(path = "/{id}")
 	public Slug getSlugsById(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
 		try {
 			LOG.info("Reading slug by id {}", id);
@@ -78,7 +78,7 @@ public class ExerciseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Update an exercise", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PutMapping("/test:update")
+	@PutMapping("/")
 	public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) throws AuthenticationException {
 		try {
 			try {

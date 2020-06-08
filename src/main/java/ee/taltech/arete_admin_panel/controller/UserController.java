@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "user", description = "User authentication")
 @RestController()
-@RequestMapping("services/arete/api/admin")
+@RequestMapping("services/arete/api/v2/user")
 public class UserController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -57,7 +57,7 @@ public class UserController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Updates users' settings", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
-	@PutMapping(path = "/user")
+	@PutMapping(path = "/")
 	public void setUserProperties(@RequestBody UserDto userDto) throws AuthenticationException {
 		try {
 			updateUserProperties(userDto);

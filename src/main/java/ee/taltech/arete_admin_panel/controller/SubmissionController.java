@@ -27,7 +27,7 @@ import java.util.Collection;
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "submission", description = "submission service API", externalDocs=@ExternalDocumentation(description = "More detailed explanations and examples", url = "https://github.com/envomp/arete"))
 @RestController()
-@RequestMapping("services/arete/api/admin")
+@RequestMapping("services/arete/api/v2/submission")
 public class SubmissionController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -47,7 +47,7 @@ public class SubmissionController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all cached submissions", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/submissions")
+	@GetMapping(path = "/all")
 	public Collection<Submission> getSubmissions() throws AuthenticationException {
 		try {
 			LOG.info("Reading all submissions");
@@ -60,7 +60,7 @@ public class SubmissionController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns a submission by hash", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/submission/{hash}")
+	@GetMapping(path = "/{hash}")
 	public Collection<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
 		try {
 			LOG.info("Reading submission by hash {}", hash);
@@ -73,7 +73,7 @@ public class SubmissionController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Add a new submission to database", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = "/job")
+	@PostMapping(path = "/")
 	public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
 		try {
 			if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
@@ -90,7 +90,7 @@ public class SubmissionController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all currently running submissions", tags = {"submission"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/submissions/active")
+	@GetMapping("/active")
 	public AreteRequest[] getActiveSubmissions() throws AuthenticationException {
 		try {
 			try {
