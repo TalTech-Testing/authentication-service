@@ -30,7 +30,7 @@ public class SwaggerConfiguration {
 				.info(new Info()
 						.title("Arete API")
 						.version("2.0")
-						.description("This is an API reference for Aretes that talks with automated testing service. use /auth endpoint to get a token which can be used to authorise one's self")
+						.description("This is an API reference for Aretes that talks with automated testing service. use /auth endpoint to get a token which can be used to authorise one's self. You can use username: `admin`, password: `admin` to log into dev environment to test endpoints")
 						.license(new License().name("GitHub").url("https://github.com/envomp?tab=repositories&q=arete&type=&language="))
 						.contact(new Contact().email("enrico.vompa@gmail.com").name("Enrico Vompa"))
 				)
