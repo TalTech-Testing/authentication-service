@@ -4,10 +4,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController()
-@RequestMapping("services/arete/ui")
+@RequestMapping("services/arete/api/v2")
 public class WebController {
 
-	// services/arete/ui/swagger-ui.html is reserved by swagger
+	// services/arete/api/v2/swagger-ui.html is reserved by swagger
 
 }
 

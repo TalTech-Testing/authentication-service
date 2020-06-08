@@ -4,7 +4,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController()
-@RequestMapping("services/arete/api/v1")
+@RequestMapping("services/arete/api/v2")
 public class ApiController {
 	// services/arete/api/v1/docs is reserved by swagger
 }
