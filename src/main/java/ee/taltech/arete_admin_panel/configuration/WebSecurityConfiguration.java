@@ -33,15 +33,17 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .cors()
-                .and()
-                .authorizeRequests()
-                    .antMatchers(HttpMethod.GET, "/services/arete/api/v1/**").permitAll() // docs
-                    .antMatchers(HttpMethod.POST, "/services/arete/api/v1/**").permitAll() // docs
-                    .antMatchers(HttpMethod.POST, "/services/arete/api/admin/auth").permitAll() // login
-                    .antMatchers(HttpMethod.POST, "/services/arete/api/admin/job").permitAll() // tester feedback. Protected by shared secret
-                .anyRequest().authenticated()
-                .and()
-                .apply(new JwtSecurityConfigurer(jwtTokenProvider));
+//                .and()
+//                .authorizeRequests()
+//					.antMatchers(HttpMethod.GET, "/services/arete/ui/**").permitAll() // swagger ui
+//					.antMatchers(HttpMethod.GET, "/services/arete/api/v1/**").permitAll() // docs
+//                    .antMatchers(HttpMethod.POST, "/services/arete/api/v1/**").permitAll() // docs
+//                    .antMatchers(HttpMethod.POST, "/services/arete/api/admin/auth").permitAll() // login
+//                    .antMatchers(HttpMethod.POST, "/services/arete/api/admin/job").permitAll() // tester feedback. Protected by shared secret
+//                .anyRequest().authenticated()
+//                .and()
+//                .apply(new JwtSecurityConfigurer(jwtTokenProvider))
+		;
 
     }
 }

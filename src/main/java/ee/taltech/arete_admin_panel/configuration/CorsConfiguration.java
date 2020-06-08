@@ -15,12 +15,13 @@ public class CorsConfiguration {
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
                         .allowedOrigins(
-                                "*", // allow all
-                                "http://localhost:8080", // dev front
-                                "http://localhost:8002", // dev back
-                                "http://localhost:8001", // back
-                                "https://cs.ttu.ee/", // front
-                                "http://localhost:8098") // tester
+                                "*" // allow all
+//                                "http://localhost:8080", // dev front
+//                                "http://localhost:8002", // dev back
+//                                "http://localhost:8001", // back
+//                                "https://cs.ttu.ee/", // front
+//                                "http://localhost:8098" // tester
+						)
                         .allowedMethods("PUT", "DELETE", "GET", "POST")
                         .allowCredentials(true);
             }

@@ -1,0 +1,96 @@
+package ee.taltech.arete_admin_panel.controller;
+
+import ee.taltech.arete_admin_panel.domain.Course;
+import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
+import ee.taltech.arete_admin_panel.repository.CourseRepository;
+import ee.taltech.arete_admin_panel.service.AreteService;
+import ee.taltech.arete_admin_panel.service.CacheService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import javassist.NotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.web.firewall.RequestRejectedException;
+import org.springframework.web.bind.annotation.*;
+
+import javax.naming.AuthenticationException;
+import java.util.Collection;
+import java.util.Optional;
+
+@SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER,
+		description = "JWT Authorization header using the Bearer scheme.\n" +
+				"Enter 'Bearer'[space] and then your token in the text box below.\n" +
+				"Example: Bearer eyJhbGciOiJIUzUxMiIsIn...\n" +
+				"You will get the bearer from the account/login or account/register endpoint.")
+@Tag(name = "course", description = "course CRUD operations")
+@RestController()
+@RequestMapping("services/arete/api/admin")
+public class CourseController {
+
+	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+
+	private final AreteService areteService;
+	private final CacheService cacheService;
+	private final CourseRepository courseRepository;
+	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
+
+	public CourseController(AreteService areteService, CacheService cacheService, CourseRepository courseRepository, AuthenticationManager authenticationManager) {
+		this.areteService = areteService;
+		this.cacheService = cacheService;
+		this.courseRepository = courseRepository;
+		this.authenticationManager = authenticationManager;
+	}
+
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(path = "/courses")
+	public Collection<CourseTableDto> getCourses() throws AuthenticationException {
+		try {
+			LOG.info("Reading all courses");
+			return cacheService.getCourseList();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new AuthenticationException("Not authorized.");
+		}
+	}
+
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
+	@ResponseStatus(HttpStatus.OK)
+	@GetMapping(path = "/course/{id}")
+	public Course getCoursesById(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
+		try {
+			LOG.info("Reading course by id {}", id);
+			Optional<Course> courseOptional = courseRepository.findById(id);
+			assert courseOptional.isPresent();
+			return courseOptional.get();
+		} catch (AssertionError e) {
+			e.printStackTrace();
+			throw new NotFoundException("Selected item was not found.");
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new AuthenticationException("Not authorized.");
+		}
+	}
+
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PutMapping("/image:update/{image}")
+	public void makeRequestAsync(@PathVariable("image") String image) throws AuthenticationException {
+		try {
+			try {
+				areteService.updateImage(image);
+			} catch (Exception e) {
+				throw new RequestRejectedException(e.getMessage());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new AuthenticationException("Not authorized.");
+		}
+	}
+}
