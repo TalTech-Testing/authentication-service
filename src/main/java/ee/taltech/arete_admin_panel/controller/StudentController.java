@@ -99,12 +99,12 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding an exercise by its id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/slug/{slug_student_id}")
-	public SlugStudent getSlugStudentById(@PathVariable("slug_student_id") Long slug_student_id) throws AuthenticationException, NotFoundException {
+	@GetMapping(path = "/exercise/{exercise_student_id}")
+	public SlugStudent getSlugStudentById(@PathVariable("exercise_student_id") Long exercise_student_id) throws AuthenticationException, NotFoundException {
 		try {
 
-			LOG.info("Reading slug student by id {}", slug_student_id);
-			Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findById(slug_student_id);
+			LOG.info("Reading slug student by id {}", exercise_student_id);
+			Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findById(exercise_student_id);
 			assert slugStudentOptional.isPresent();
 			return slugStudentOptional.get();
 
@@ -143,13 +143,13 @@ public class StudentController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding an exercise by exercise id and student id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{student_id}/slug/{slug_id}/")
-	public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("slug_id") Long slug_id) throws NotFoundException, AuthenticationException {
+	@GetMapping(path = "/{student_id}/exercise/{exercise_id}/")
+	public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("exercise_id") Long exercise_id) throws NotFoundException, AuthenticationException {
 		try {
-			LOG.info("Reading slug {} student by id {}", slug_id, student_id);
+			LOG.info("Reading slug {} student by id {}", exercise_id, student_id);
 			Optional<Student> studentOptional = studentRepository.findById(student_id);
 			assert studentOptional.isPresent();
-			Optional<Slug> slugOptional = slugRepository.findById(slug_id);
+			Optional<Slug> slugOptional = slugRepository.findById(exercise_id);
 			assert slugOptional.isPresent();
 			Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findByStudentAndSlug(studentOptional.get(), slugOptional.get());
 			assert slugStudentOptional.isPresent();
