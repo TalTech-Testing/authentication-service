@@ -28,7 +28,7 @@ public class SwaggerConfiguration {
 						.license(new License().name("GitHub").url("https://github.com/envomp?tab=repositories&q=arete&type=&language="))
 						.contact(new Contact().email("enrico.vompa@gmail.com").name("Enrico Vompa"))
 				)
-				.servers(List.of(new Server().url("https://cs.ttu.ee/services/arete/").description("TalTech")));
+				.servers(List.of(new Server().url("https://cs.ttu.ee/").description("TalTech")));
 	}
 
 
