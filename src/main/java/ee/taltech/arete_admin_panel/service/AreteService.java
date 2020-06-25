@@ -12,7 +12,6 @@ import arete.java.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
