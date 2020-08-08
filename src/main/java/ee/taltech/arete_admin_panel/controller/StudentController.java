@@ -56,8 +56,7 @@ public class StudentController {
 			LOG.info("Reading all students");
 			return cacheService.getStudentList();
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -71,11 +70,9 @@ public class StudentController {
 			assert studentOptional.isPresent();
 			return studentOptional.get();
 		} catch (AssertionError e) {
-			e.printStackTrace();
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -89,11 +86,9 @@ public class StudentController {
 			assert courseStudentOptional.isPresent();
 			return courseStudentOptional.get();
 		} catch (AssertionError e) {
-			e.printStackTrace();
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -109,11 +104,9 @@ public class StudentController {
 			return slugStudentOptional.get();
 
 		} catch (AssertionError e) {
-			e.printStackTrace();
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -133,17 +126,15 @@ public class StudentController {
 			return courseStudentOptional.get();
 
 		} catch (AssertionError e) {
-			e.printStackTrace();
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns students' activity regarding an exercise by exercise id and student id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{student_id}/exercise/{exercise_id}/")
+	@GetMapping(path = "/{student_id}/exercise/{exercise_id}")
 	public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("exercise_id") Long exercise_id) throws NotFoundException, AuthenticationException {
 		try {
 			LOG.info("Reading slug {} student by id {}", exercise_id, student_id);
@@ -155,11 +146,9 @@ public class StudentController {
 			assert slugStudentOptional.isPresent();
 			return slugStudentOptional.get();
 		} catch (AssertionError e) {
-			e.printStackTrace();
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 

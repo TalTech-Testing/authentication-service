@@ -53,8 +53,7 @@ public class SubmissionController {
 			LOG.info("Reading all submissions");
 			return cacheService.getSubmissionList();
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -66,14 +65,13 @@ public class SubmissionController {
 			LOG.info("Reading submission by hash {}", hash);
 			return jobRepository.findTop10ByHashOrderByIdDesc(hash);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Add a new submission to database", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = "/")
+	@PostMapping(path = "")
 	public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
 		try {
 			if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
@@ -83,8 +81,7 @@ public class SubmissionController {
 			LOG.info("Saving job {} into DB", areteResponse.getHash());
 			areteService.enqueueAreteResponse(areteResponse);
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -99,8 +96,7 @@ public class SubmissionController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -115,8 +111,7 @@ public class SubmissionController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -131,8 +126,7 @@ public class SubmissionController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 

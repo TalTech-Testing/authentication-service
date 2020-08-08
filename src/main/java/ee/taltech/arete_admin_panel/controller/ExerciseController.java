@@ -53,8 +53,8 @@ public class ExerciseController {
 			LOG.info("Reading all slugs");
 			return cacheService.getSlugList();
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -68,17 +68,18 @@ public class ExerciseController {
 			assert slugOptional.isPresent();
 			return slugOptional.get();
 		} catch (AssertionError e) {
-			e.printStackTrace();
+			
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Update an exercise", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PutMapping("/")
+	@PutMapping("")
+	@PostMapping("")
 	public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) throws AuthenticationException {
 		try {
 			try {
@@ -87,8 +88,7 @@ public class ExerciseController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 

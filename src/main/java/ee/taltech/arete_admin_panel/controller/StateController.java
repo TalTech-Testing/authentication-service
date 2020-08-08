@@ -43,7 +43,7 @@ public class StateController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Return backends' state", tags = {"state"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/")
+	@GetMapping("")
 	public SystemState getState() throws AuthenticationException {
 		try {
 			try {
@@ -52,8 +52,7 @@ public class StateController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -69,8 +68,7 @@ public class StateController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -85,8 +83,7 @@ public class StateController {
 				return e.getMessage();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -101,8 +98,7 @@ public class StateController {
 				return e.getMessage();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 

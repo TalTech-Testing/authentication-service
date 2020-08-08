@@ -30,7 +30,7 @@ import java.util.Optional;
 				"You will get the bearer from the account/login or account/register endpoint.")
 @Tag(name = "course", description = "course CRUD operations")
 @RestController()
-@RequestMapping("services/arete/api/v2/course")
+@RequestMapping({"test", "services/arete/api/v2/course"})
 public class CourseController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
@@ -55,8 +55,7 @@ public class CourseController {
 			LOG.info("Reading all courses");
 			return cacheService.getCourseList();
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -70,11 +69,9 @@ public class CourseController {
 			assert courseOptional.isPresent();
 			return courseOptional.get();
 		} catch (AssertionError e) {
-			e.printStackTrace();
 			throw new NotFoundException("Selected item was not found.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
@@ -89,8 +86,7 @@ public class CourseController {
 				throw new RequestRejectedException(e.getMessage());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new AuthenticationException("Not authorized.");
+			throw new AuthenticationException(e.getMessage());
 		}
 	}
 }
