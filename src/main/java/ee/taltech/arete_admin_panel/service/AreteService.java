@@ -20,7 +20,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -432,8 +431,7 @@ public class AreteService {
 				.slugs(slugs)
 				.build();
 
-		LOG.info("Forwarding a async submission: {}", request);
-		areteClient.requestAsync(request);
+		makeRequestAsync(request);
 	}
 
 	public void updateImage(String image) {
