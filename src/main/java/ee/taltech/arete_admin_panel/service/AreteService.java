@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.MessageFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -415,6 +416,9 @@ public class AreteService {
 	}
 
 	public void updateTests(AreteTestUpdate areteTestUpdate) {
+		if (areteTestUpdate.getUser_email() == null && areteTestUpdate.getUser_username() != null) { // gitlab sometimes doesn't add the field
+			areteTestUpdate.setUser_email(MessageFormat.format("{0}@ttu.ee", areteTestUpdate.getUser_username()));
+		}
 		areteClient.updateTests(areteTestUpdate);
 	}
 

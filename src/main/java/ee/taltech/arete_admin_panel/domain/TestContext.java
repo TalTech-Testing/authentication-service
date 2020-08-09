@@ -18,7 +18,6 @@ import java.util.List;
 @JsonClassDescription("Test results from test file")
 public class TestContext {
 
-
     @OneToMany(cascade = {CascadeType.ALL})
     @JsonPropertyDescription("List of unittests tested")
     List<UnitTest> unitTests;

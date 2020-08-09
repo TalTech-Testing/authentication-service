@@ -62,9 +62,12 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 	}
 
 	private void filterGitlabHooks(HttpServletRequest request) {
-		if (ImmutableList.copyOf(request.getHeaderNames().asIterator()).contains("X-Gitlab-Token")) {
-			LOG.info(MessageFormat.format("Trying to authenticate X-Gitlab-Token: {0}", request.getHeader("X-Gitlab-Token")));
-			String[] parts = request.getHeader("X-Gitlab-Token").split(" ");
+
+		String token = request.getHeader("X-Gitlab-Token");
+
+		if (token != null) {
+			LOG.info(MessageFormat.format("Trying to authenticate X-Gitlab-Token: {0}", token));
+			String[] parts = token.split(" ");
 			String gitlabToken = parts[1];
 			String username = parts[0];
 			UserResponseIdToken user = userService.authenticateUser(new AuthenticationDto("", username, gitlabToken));
