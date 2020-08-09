@@ -1,6 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import arete.java.request.AreteRequest;
+import arete.java.request.AreteTestUpdate;
 import arete.java.response.AreteResponse;
 import ee.taltech.arete_admin_panel.domain.Job;
 import ee.taltech.arete_admin_panel.domain.Submission;
@@ -92,4 +93,10 @@ public class SubmissionController {
 		areteService.makeRequestAsync(areteRequest);
 	}
 
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Run tests from webhook", tags = {"submission"})
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("/:webhook/withTests")
+	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdate areteTestUpdate, @RequestParam(name="testRepository") String testRepository) {
+		areteService.makeRequestWebhook(areteTestUpdate, testRepository);
+	}
 }

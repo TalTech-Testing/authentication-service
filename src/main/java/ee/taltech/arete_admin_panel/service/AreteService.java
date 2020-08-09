@@ -417,6 +417,25 @@ public class AreteService {
 		areteClient.requestAsync(areteRequest);
 	}
 
+	public void makeRequestWebhook(AreteTestUpdate update, String testRepository) {
+		AreteTestUpdate.Commit latest = update.getCommits().get(0);
+
+		Set<String> slugs = new HashSet<>();
+		slugs.addAll(latest.getAdded());
+		slugs.addAll(latest.getModified());
+
+		AreteRequest request = AreteRequest.builder()
+				.eMail(latest.getAuthor().getEmail())
+				.uniid(latest.getAuthor().getName())
+				.gitStudentRepo(update.getProject().getUrl())
+				.gitTestSource(testRepository)
+				.slugs(slugs)
+				.build();
+
+		LOG.info("Forwarding a async submission: {}", request);
+		areteClient.requestAsync(request);
+	}
+
 	public void updateImage(String image) {
 		LOG.info("Updating image: {}", image);
 		areteClient.updateImage(image);
