@@ -12,6 +12,8 @@ import arete.java.response.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @EnableAsync
 public class AreteService {
 
+	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 	private final CacheService cacheService;
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -54,6 +57,7 @@ public class AreteService {
 	}
 
 	public void enqueueAreteResponse(AreteResponse response) {
+		LOG.info("Saving job into DB: {}", response);
 		jobQueue.add(response);
 	}
 
@@ -67,7 +71,7 @@ public class AreteService {
 			try {
 				halted = true;
 				parseAreteResponse(response);
-			} catch (Exception e) {
+			} catch (Exception ignored) {
 			} finally {
 				halted = false;
 			}
@@ -404,37 +408,40 @@ public class AreteService {
 	}
 
 	public AreteResponse makeRequestSync(AreteRequest areteRequest) {
+		LOG.info("Forwarding a sync submission: {}", areteRequest);
 		return areteClient.requestSync(areteRequest);
 	}
 
 	public void makeRequestAsync(AreteRequest areteRequest) {
+		LOG.info("Forwarding a async submission: {}", areteRequest);
 		areteClient.requestAsync(areteRequest);
 	}
 
 	public void updateImage(String image) {
+		LOG.info("Updating image: {}", image);
 		areteClient.updateImage(image);
 	}
 
 	public void updateTests(AreteTestUpdate areteTestUpdate) {
+		LOG.info("Updating tests: {}", areteTestUpdate);
 		if (areteTestUpdate.getUser_email() == null && areteTestUpdate.getUser_username() != null) { // gitlab sometimes doesn't add the field
 			areteTestUpdate.setUser_email(MessageFormat.format("{0}@ttu.ee", areteTestUpdate.getUser_username()));
 		}
 		areteClient.updateTests(areteTestUpdate);
 	}
 
-	public Boolean setDebug(Boolean debug) {
-		return areteClient.requestDebug(debug);
-	}
-
 	public String getTesterLogs() {
+		LOG.info("Reading tester logs");
 		return areteClient.requestLogs();
 	}
 
 	public SystemState getTesterState() {
+		LOG.info("Reading tester state");
 		return areteClient.requestState();
 	}
 
 	public AreteRequest[] getActiveSubmissions() {
+		LOG.info("Reading all active submissions");
 		return areteClient.requestActiveSubmissions();
 	}
 

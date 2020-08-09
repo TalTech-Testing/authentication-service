@@ -6,6 +6,8 @@ import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
 import ee.taltech.arete_admin_panel.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,7 +19,9 @@ import java.util.stream.DoubleStream;
 
 @Service
 public class CacheService {
+
 	private final ObjectMapper objectMapper = new ObjectMapper();
+	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
 	private final StudentRepository studentRepository;
 	private final SlugStudentRepository slugStudentRepository;
@@ -71,18 +75,22 @@ public class CacheService {
 	}
 
 	public Collection<Submission> getSubmissionList() {
+		LOG.info("Reading all submissions from cache");
 		return submissionCache.values();
 	}
 
 	public Collection<StudentTableDto> getStudentList() {
+		LOG.info("Reading all students from cache");
 		return studentCache.values();
 	}
 
 	public Collection<CourseTableDto> getCourseList() {
+		LOG.info("Reading all courses from cache");
 		return courseCache.values();
 	}
 
 	public Collection<SlugTableDto> getSlugList() {
+		LOG.info("Reading all slugs from cache");
 		return slugCache.values();
 	}
 

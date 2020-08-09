@@ -13,11 +13,11 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javassist.NotFoundException;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
@@ -45,51 +45,40 @@ public class ExerciseController {
 	}
 
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all exercises", tags = {"exercise"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all exercises", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<SlugTableDto> getSlugs() throws AuthenticationException {
-		try {
-			LOG.info("Reading all slugs");
-			return cacheService.getSlugList();
-		} catch (Exception e) {
-			
-			throw new AuthenticationException(e.getMessage());
-		}
+	public Collection<SlugTableDto> getSlugs() {
+		return cacheService.getSlugList();
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns exercise by id", tags = {"exercise"})
+	@SneakyThrows
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns exercise by id", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public Slug getSlugsById(@PathVariable("id") Long id) throws NotFoundException, AuthenticationException {
+	public Slug getSlugsById(@PathVariable("id") Long id) {
 		try {
 			LOG.info("Reading slug by id {}", id);
 			Optional<Slug> slugOptional = slugRepository.findById(id);
 			assert slugOptional.isPresent();
 			return slugOptional.get();
 		} catch (AssertionError e) {
-			
 			throw new NotFoundException("Selected item was not found.");
-		} catch (Exception e) {
-			
-			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Update an exercise", tags = {"exercise"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an exercise", tags = {"exercise"})
+	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("")
+	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdate areteTestUpdate) {
+		areteService.updateTests(areteTestUpdate);
+	}
+
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an exercise", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PutMapping("")
-	@PostMapping("")
-	public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) throws AuthenticationException {
-		try {
-			try {
-				areteService.updateTests(areteTestUpdate);
-			} catch (Exception e) {
-				throw new RequestRejectedException(e.getMessage());
-			}
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) {
+		areteService.updateTests(areteTestUpdate);
 	}
 
 }

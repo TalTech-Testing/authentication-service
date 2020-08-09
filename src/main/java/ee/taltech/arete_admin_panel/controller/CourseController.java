@@ -12,14 +12,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javassist.NotFoundException;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.AuthenticationException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -50,19 +49,15 @@ public class CourseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<CourseTableDto> getCourses() throws AuthenticationException {
-		try {
-			LOG.info("Reading all courses");
-			return cacheService.getCourseList();
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public Collection<CourseTableDto> getCourses() {
+		return cacheService.getCourseList();
 	}
 
+	@SneakyThrows
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public Course getCoursesById(@PathVariable("id") Long id) throws AuthenticationException, NotFoundException {
+	public Course getCoursesById(@PathVariable("id") Long id) {
 		try {
 			LOG.info("Reading course by id {}", id);
 			Optional<Course> courseOptional = courseRepository.findById(id);
@@ -70,23 +65,13 @@ public class CourseController {
 			return courseOptional.get();
 		} catch (AssertionError e) {
 			throw new NotFoundException("Selected item was not found.");
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
 		}
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PutMapping("/{image}")
-	public void makeRequestAsync(@PathVariable("image") String image) throws AuthenticationException {
-		try {
-			try {
-				areteService.updateImage(image);
-			} catch (Exception e) {
-				throw new RequestRejectedException(e.getMessage());
-			}
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public void makeRequestAsync(@PathVariable("image") String image) {
+		areteService.updateImage(image);
 	}
 }

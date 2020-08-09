@@ -13,12 +13,14 @@ import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.naming.AuthenticationException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -103,6 +105,7 @@ public class UserService {
 	}
 
 	public List<UserResponseIdToken> getAllUsers() {
+		LOG.info("getting all users");
 		return userRepository.findAll().stream().map(user -> UserResponseIdToken.builder()
 				.username(user.getUsername())
 				.color(user.getColor())
@@ -141,6 +144,7 @@ public class UserService {
 	}
 
 	public void updateUserProperties(@RequestBody UserDto userDto) {
+		LOG.info("Update user: {}", userDto);
 		User user = getUser(userDto.getUsername());
 
 		if (userDto.getColor() != null) {
@@ -148,24 +152,22 @@ public class UserService {
 		}
 
 		saveUser(user);
-
-		LOG.info("Successfully updated {}", user.getUsername());
 	}
 
-	public AuthenticationDto deleteNonAdminUser(@RequestBody AuthenticationDto userDto) throws AuthenticationException {
-		LOG.info("Delete user {}", userDto.getUsername());
+	public AuthenticationDto deleteNonAdminUser(@RequestBody AuthenticationDto userDto) {
+		LOG.info("Delete user: {}", userDto);
 
 		if (!getUser(userDto.getUsername()).getRoles().contains(User.Role.ADMIN)) {
 			removeUser(userDto.getUsername());
 		} else {
-			throw new AuthenticationException("Can't delete a super user");
+			throw new InvalidParameterException("Can't delete a super user");
 		}
 
 		return userDto;
 	}
 
-	public UserResponseIdToken addNonAdminUser(@RequestBody AuthenticationDto userDto) throws Exception {
-		LOG.info("Add user {}", userDto.getUsername());
+	public UserResponseIdToken addNonAdminUser(@RequestBody AuthenticationDto userDto) {
+		LOG.info("Add user: {}", userDto.getUsername());
 
 		try {
 			getUser(userDto.getUsername());
@@ -182,7 +184,7 @@ public class UserService {
 					.build();
 		}
 
-		throw new Exception("User with that username already present");
+		throw new DuplicateKeyException("User with that username already present");
 	}
 
 	public String getUsername(String token) {

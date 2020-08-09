@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.AuthenticationException;
 import java.util.List;
 
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
@@ -37,65 +37,40 @@ public class UserController {
 		this.authenticationManager = authenticationManager;
 	}
 
-
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Gets all users", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public List<UserResponseIdToken> getAllUsers() throws AuthenticationException {
-		try {
-			return userService.getAllUsers();
-
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public List<UserResponseIdToken> getAllUsers() {
+		return userService.getAllUsers();
 	}
 
 	@Operation(summary = "Generates a JWT upon authenticating user input", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = "/auth")
-	public UserResponseIdToken authenticate(@RequestBody AuthenticationDto userDto) throws AuthenticationException {
-		try {
-			return userService.authenticateUser(userDto);
-
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public UserResponseIdToken authenticate(@RequestBody AuthenticationDto userDto) {
+		return userService.authenticateUser(userDto);
 	}
 
+	@SneakyThrows
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Adds a new non admin user to database", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = "")
-	public UserResponseIdToken addUser(@RequestBody AuthenticationDto userDto) throws AuthenticationException {
-		try {
-			return userService.addNonAdminUser(userDto);
-
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public UserResponseIdToken addUser(@RequestBody AuthenticationDto userDto) {
+		return userService.addNonAdminUser(userDto);
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Deletes a non admin user from database", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@DeleteMapping(path = "")
-	public AuthenticationDto deleteUser(@RequestBody AuthenticationDto userDto) throws AuthenticationException {
-		try {
-
-			return userService.deleteNonAdminUser(userDto);
-
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public AuthenticationDto deleteUser(@RequestBody AuthenticationDto userDto) {
+		return userService.deleteNonAdminUser(userDto);
 	}
 
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Updates users' settings", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@PutMapping(path = "")
-	public void setUserProperties(@RequestBody UserDto userDto) throws AuthenticationException {
-		try {
-			userService.updateUserProperties(userDto);
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public void setUserProperties(@RequestBody UserDto userDto) {
+		userService.updateUserProperties(userDto);
 	}
 }

@@ -20,6 +20,7 @@ public class LoggingComponent extends HandlerInterceptorAdapter {
 
 		long startTime = Instant.now().toEpochMilli();
 		request.setAttribute("startTime", startTime);
+		request.setAttribute("originalURL", request.getRequestURL().toString());
 		return true;
 	}
 
@@ -27,9 +28,10 @@ public class LoggingComponent extends HandlerInterceptorAdapter {
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
 		long startTime = (Long) request.getAttribute("startTime");
+		String originalURL = (String) request.getAttribute("originalURL");
 		LOG.info(MessageFormat.format("Request URL::{0} {1}:: Status Code={2}:: Time Taken={3} ms",
 				request.getMethod(),
-				request.getRequestURL().toString(),
+				originalURL, // otherwise /error would be displayed
 				response.getStatus(),
 				Instant.now().toEpochMilli() - startTime)
 		);

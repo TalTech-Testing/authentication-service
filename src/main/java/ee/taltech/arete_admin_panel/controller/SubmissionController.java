@@ -14,18 +14,18 @@ import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
 import java.util.Collection;
 
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
-@Tag(name = "submission", description = "submission service API", externalDocs=@ExternalDocumentation(description = "More detailed explanations and examples", url = "https://github.com/envomp/arete"))
+@Tag(name = "submission", description = "submission service API", externalDocs = @ExternalDocumentation(description = "More detailed explanations and examples", url = "https://github.com/envomp/arete"))
 @RestController()
 @RequestMapping("services/arete/api/v2/submission")
 public class SubmissionController {
@@ -45,89 +45,51 @@ public class SubmissionController {
 		this.authenticationManager = authenticationManager;
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all cached submissions", tags = {"submission"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached submissions", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<Submission> getSubmissions() throws AuthenticationException {
-		try {
-			LOG.info("Reading all submissions");
-			return cacheService.getSubmissionList();
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public Collection<Submission> getSubmissions() {
+		return cacheService.getSubmissionList();
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns a submission by hash", tags = {"submission"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{hash}")
-	public Collection<Job> getSubmission(@PathVariable("hash") String hash) throws AuthenticationException {
-		try {
-			LOG.info("Reading submission by hash {}", hash);
-			return jobRepository.findTop10ByHashOrderByIdDesc(hash);
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public Collection<Job> getSubmission(@PathVariable("hash") String hash) {
+		LOG.info("Reading submission by hash {}", hash);
+		return jobRepository.findTop10ByHashOrderByIdDesc(hash);
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Add a new submission to database", tags = {"submission"})
+	@SneakyThrows
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Add a new submission to database", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = "")
-	public void parseJob(@RequestBody AreteResponse areteResponse) throws AuthenticationException {
-		try {
-			if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
-				throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
-			}
-
-			LOG.info("Saving job {} into DB", areteResponse.getHash());
-			areteService.enqueueAreteResponse(areteResponse);
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
+	public void parseJob(@RequestBody AreteResponse areteResponse) {
+		if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
+			throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
 		}
+		areteService.enqueueAreteResponse(areteResponse);
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Returns all currently running submissions", tags = {"submission"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all currently running submissions", tags = {"submission"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@GetMapping("/active")
-	public AreteRequest[] getActiveSubmissions() throws AuthenticationException {
-		try {
-			try {
-				return areteService.getActiveSubmissions();
-			} catch (Exception e) {
-				throw new RequestRejectedException(e.getMessage());
-			}
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public AreteRequest[] getActiveSubmissions() {
+		return areteService.getActiveSubmissions();
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Create a new submission which will be tested synchronously", tags = {"submission"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Create a new submission which will be tested synchronously", tags = {"submission"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("/:testSync")
-	public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) throws AuthenticationException {
-		try {
-			try {
-				return areteService.makeRequestSync(areteRequest);
-			} catch (Exception e) {
-				throw new RequestRejectedException(e.getMessage());
-			}
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) {
+		return areteService.makeRequestSync(areteRequest);
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")},summary = "Create a new submission which will be tested asynchronously", tags = {"submission"})
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Create a new submission which will be tested asynchronously", tags = {"submission"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("/:testAsync")
-	public void makeRequestAsync(@RequestBody AreteRequest areteRequest) throws AuthenticationException {
-		try {
-			try {
-				areteService.makeRequestAsync(areteRequest);
-			} catch (Exception e) {
-				throw new RequestRejectedException(e.getMessage());
-			}
-		} catch (Exception e) {
-			throw new AuthenticationException(e.getMessage());
-		}
+	public void makeRequestAsync(@RequestBody AreteRequest areteRequest) {
+		areteService.makeRequestAsync(areteRequest);
 	}
 
 }
