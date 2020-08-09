@@ -424,9 +424,6 @@ public class AreteService {
 
 	public void updateTests(AreteTestUpdate areteTestUpdate) {
 		LOG.info("Updating tests: {}", areteTestUpdate);
-		if (areteTestUpdate.getUser_email() == null && areteTestUpdate.getUser_username() != null) { // gitlab sometimes doesn't add the field
-			areteTestUpdate.setUser_email(MessageFormat.format("{0}@ttu.ee", areteTestUpdate.getUser_username()));
-		}
 		areteClient.updateTests(areteTestUpdate);
 	}
 
