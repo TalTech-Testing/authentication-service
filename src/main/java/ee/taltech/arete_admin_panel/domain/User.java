@@ -44,11 +44,12 @@ public class User implements UserDetails {
     @NotNull
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
+	@Enumerated(EnumType.STRING)
     private List<Role> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream().map(Enum::toString).map(SimpleGrantedAuthority::new).collect(toList());
+        return this.roles.stream().map(Role::toValue).map(SimpleGrantedAuthority::new).collect(toList());
     }
 
     @Deprecated
@@ -103,10 +104,5 @@ public class User implements UserDetails {
 		this.roles = new ArrayList<>();
 		this.roles.add(role);
 	}
-
-    public enum Role {
-        USER,
-        ADMIN
-    }
 
 }

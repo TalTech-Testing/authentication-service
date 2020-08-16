@@ -47,7 +47,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 					Authentication auth = userService.getAuthentication(token);
 
 					if (auth != null) {
-						LOG.info(MessageFormat.format("Authenticated user: {0}", userService.getUsername(token)));
+						LOG.info(MessageFormat.format("Authenticated user: {0} with authorities: {1}", userService.getUsername(token), auth.getAuthorities()));
 						SecurityContextHolder.getContext().setAuthentication(auth);
 					}
 				}

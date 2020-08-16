@@ -2,6 +2,7 @@ package ee.taltech.arete_admin_panel.service;
 
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
+import ee.taltech.arete_admin_panel.domain.Role;
 import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.exception.UserNotFoundException;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
@@ -42,7 +43,7 @@ public class UserService {
 	}
 
 	public void addSuperUser(String username, String password) {
-		User savedUser = userRepository.save(new User(username, password, User.Role.ADMIN));
+		User savedUser = userRepository.save(new User(username, password, Role.ADMIN));
 
 		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
 	}
@@ -53,7 +54,7 @@ public class UserService {
 						.username(username)
 						.passwordHash(passwordHash)
 						.salt(salt)
-						.roles(new ArrayList<>(Collections.singletonList(User.Role.ADMIN)))
+						.roles(new ArrayList<>(Collections.singletonList(Role.ADMIN)))
 						.build());
 
 		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
@@ -157,7 +158,7 @@ public class UserService {
 	public AuthenticationDto deleteNonAdminUser(@RequestBody AuthenticationDto userDto) {
 		LOG.info("Delete user: {}", userDto);
 
-		if (!getUser(userDto.getUsername()).getRoles().contains(User.Role.ADMIN)) {
+		if (!getUser(userDto.getUsername()).getRoles().contains(Role.ADMIN)) {
 			removeUser(userDto.getUsername());
 		} else {
 			throw new InvalidParameterException("Can't delete a super user");
