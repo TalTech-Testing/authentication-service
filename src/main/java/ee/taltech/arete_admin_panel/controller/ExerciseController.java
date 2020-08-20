@@ -7,9 +7,12 @@ import ee.taltech.arete_admin_panel.repository.SlugRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javassist.NotFoundException;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 import java.util.Optional;
 
+@SecurityScheme(name = "X-Gitlab-Token", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "exercise", description = "exercise CRUD operations")
 @RestController()
@@ -66,7 +70,12 @@ public class ExerciseController {
 		}
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an exercise", tags = {"exercise"})
+	@Operation(
+			parameters = {@Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
+					description = "gitlab token with structure: s\"{name} {password}\"")},
+			security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Gitlab-Token")},
+			summary = "Update an exercise",
+			tags = {"exercise"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("")
 	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdate areteTestUpdate) {

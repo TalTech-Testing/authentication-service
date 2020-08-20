@@ -6,6 +6,8 @@ import ee.taltech.arete_admin_panel.repository.CourseRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collection;
 import java.util.Optional;
 
+@SecurityScheme(name = "X-Docker-Token", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER,
 		description = "JWT Authorization header using the Bearer scheme.\n" +
 				"Enter 'Bearer'[space] and then your token in the text box below.\n" +
@@ -68,7 +71,11 @@ public class CourseController {
 		}
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
+	@Operation(
+			parameters = {@Parameter(in = ParameterIn.HEADER, required = true, name = "X-Docker-Token", description = "docker token with structure: s\"{name} {password}\"")},
+			security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Docker-Token")},
+			summary = "Update an image on which testing takes place",
+			tags = {"course"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("/{image}")
 	public void updateImageWithHook(@PathVariable("image") String image) {
