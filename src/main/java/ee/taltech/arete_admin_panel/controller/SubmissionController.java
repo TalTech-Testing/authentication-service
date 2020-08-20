@@ -10,6 +10,8 @@ import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -93,7 +95,12 @@ public class SubmissionController {
 		areteService.makeRequestAsync(areteRequest);
 	}
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Run tests from webhook", tags = {"submission"})
+	@Operation(
+			parameters = {@Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
+					description = "gitlab token with structure: s\"{name} {password}\"")},
+			security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Gitlab-Token")},
+			summary = "Run tests from webhook",
+			tags = {"submission"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("/:webhook/withTests")
 	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdate areteTestUpdate, @RequestParam(name="testRepository") String testRepository) {
