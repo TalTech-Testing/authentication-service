@@ -53,6 +53,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 				}
 			} else {
 				filterGitlabHooks(request);
+				filterDockerHooks(request);
 			}
 		} catch (Exception e) {
 			LOG.error("JWT authentication failed with message: {}", e.getMessage());
@@ -61,10 +62,21 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 		}
 	}
 
+	private void filterDockerHooks(HttpServletRequest request) {
+
+		String token = request.getHeader("X-Docker-Token");
+		filterHooks(token);
+
+	}
+
 	private void filterGitlabHooks(HttpServletRequest request) {
 
 		String token = request.getHeader("X-Gitlab-Token");
+		filterHooks(token);
 
+	}
+
+	private void filterHooks(String token) {
 		if (token != null) {
 			LOG.info(MessageFormat.format("Trying to authenticate X-Gitlab-Token: {0}", token));
 			String[] parts = token.split(" ");

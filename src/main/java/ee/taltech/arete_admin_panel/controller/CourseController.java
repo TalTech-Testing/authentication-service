@@ -70,8 +70,15 @@ public class CourseController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
+	@PostMapping("/{image}")
+	public void updateImageWithHook(@PathVariable("image") String image) {
+		areteService.updateImage(image);
+	}
+
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
+	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PutMapping("/{image}")
-	public void makeRequestAsync(@PathVariable("image") String image) {
+	public void updateImage(@PathVariable("image") String image) {
 		areteService.updateImage(image);
 	}
 }
