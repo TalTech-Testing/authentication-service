@@ -56,7 +56,7 @@ public class AreteService {
 	}
 
 	public void enqueueAreteResponse(AreteResponse response) {
-		LOG.info("Saving job into DB: {}", response);
+		LOG.info("Saving job into DB for user: {} with hash: {} in: {}", response.getUniid(), response.getHash(), response.getRoot());
 		jobQueue.add(response);
 	}
 
