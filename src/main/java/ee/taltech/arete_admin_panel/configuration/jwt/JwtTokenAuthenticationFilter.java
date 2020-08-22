@@ -36,10 +36,10 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
 			throws IOException, ServletException, InvalidJwtAuthenticationException {
 
-		HttpServletRequest request = (HttpServletRequest) req;
-		String token = jwtTokenProvider.resolveToken(request);
-
 		try {
+			HttpServletRequest request = (HttpServletRequest) req;
+			String token = jwtTokenProvider.resolveToken(request);
+
 			if (token != null) {
 				LOG.info(MessageFormat.format("Trying to authenticate Authentication: {0}", token));
 
@@ -52,6 +52,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 					}
 				}
 			} else {
+				filterTestingTokens(request);
 				filterGitlabHooks(request);
 				filterDockerHooks(request);
 			}
@@ -60,6 +61,13 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 		} finally {
 			filterChain.doFilter(req, res);
 		}
+	}
+
+	private void filterTestingTokens(HttpServletRequest request) {
+
+		String token = request.getHeader("X-Testing-Token");
+		filterHooks(token);
+
 	}
 
 	private void filterDockerHooks(HttpServletRequest request) {

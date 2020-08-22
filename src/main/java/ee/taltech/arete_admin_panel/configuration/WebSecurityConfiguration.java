@@ -52,7 +52,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/user/all").hasAuthority("ADMIN") // admin can see users
 
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
-				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "HOOK") // TODO: people can run tests
+				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "HOOK", "TESTER") // TODO: people can run tests
 
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/student/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
 
