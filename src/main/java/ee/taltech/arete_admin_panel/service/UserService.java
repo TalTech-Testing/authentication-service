@@ -7,6 +7,7 @@ import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.exception.UserNotFoundException;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.FullUserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.repository.UserRepository;
@@ -58,6 +59,12 @@ public class UserService {
 						.build());
 
 		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
+	}
+
+	public long saveAnyUser(FullUserDto user) {
+		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getRole()));
+		LOG.info(savedUser.getUsername() + " successfully saved into DB");
+		return savedUser.getId();
 	}
 
 	public long saveNonAdminUser(AuthenticationDto user) {
@@ -165,6 +172,27 @@ public class UserService {
 		}
 
 		return userDto;
+	}
+
+	public UserResponseIdToken addUser(@RequestBody FullUserDto userDto) {
+		LOG.info("Add user: {}", userDto.getUsername());
+
+		try {
+			getUser(userDto.getUsername());
+		} catch (UserNotFoundException e) {
+			long userId = saveAnyUser(userDto);
+			User user = getUser(userId);
+
+			return UserResponseIdToken.builder()
+					.username(user.getUsername())
+					.color(user.getColor())
+					.id(user.getId())
+					.roles(user.getRoles())
+					.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
+					.build();
+		}
+
+		throw new DuplicateKeyException("User with that username already present");
 	}
 
 	public UserResponseIdToken addNonAdminUser(@RequestBody AuthenticationDto userDto) {

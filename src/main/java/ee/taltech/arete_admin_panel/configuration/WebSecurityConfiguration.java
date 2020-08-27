@@ -47,6 +47,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/user/auth").permitAll() // login
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/user").hasAuthority("ADMIN") // people cant register
+				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/user/any").hasAuthority("ADMIN") // admin can register all roles
 				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/user").hasAnyAuthority("ADMIN") // TODO: people can change their data
 				.antMatchers(HttpMethod.DELETE, "/services/arete/api/v2/user").hasAnyAuthority("ADMIN") // TODO: people can delete their accounts and admin can delete every ones (except admin)
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/user/all").hasAuthority("ADMIN") // admin can see users

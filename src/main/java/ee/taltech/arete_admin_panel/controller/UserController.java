@@ -1,6 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.FullUserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.service.UserService;
@@ -57,6 +58,14 @@ public class UserController {
 	@PostMapping(path = "")
 	public UserResponseIdToken addUser(@RequestBody AuthenticationDto userDto) {
 		return userService.addNonAdminUser(userDto);
+	}
+
+	@SneakyThrows
+	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Adds a new user to database", tags = {"user"})
+	@ResponseStatus(HttpStatus.OK)
+	@PostMapping(path = "/any")
+	public UserResponseIdToken addAnyUser(@RequestBody FullUserDto userDto) {
+		return userService.addUser(userDto);
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Deletes a non admin user from database", tags = {"user"})
