@@ -50,7 +50,7 @@ public class UserControllerTests {
 
 		userService.addSuperUser("username", "password");
 
-		AuthenticationDto auth = new AuthenticationDto("", "username", "password");
+		AuthenticationDto auth = new AuthenticationDto("username", "password");
 
 		UserResponseIdToken token = getUserToken(auth);
 
@@ -61,7 +61,7 @@ public class UserControllerTests {
 	@Test
 	public void userCanLogIn() {
 
-		AuthenticationDto auth = new AuthenticationDto("", "username", "password");
+		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addNonAdminUser(auth);
 
 		UserResponseIdToken token = getUserToken(auth);
@@ -73,9 +73,9 @@ public class UserControllerTests {
 	@Test
 	public void userCantAddNewUsers() {
 
-		AuthenticationDto auth = new AuthenticationDto("", "username", "password");
+		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addNonAdminUser(auth);
-		AuthenticationDto newUser = new AuthenticationDto("", "user", "password");
+		AuthenticationDto newUser = new AuthenticationDto("user", "password");
 
 		UserResponseIdToken token = getUserToken(auth);
 
@@ -92,9 +92,9 @@ public class UserControllerTests {
 	@Test
 	public void adminCanAddNewUsers() {
 
-		AuthenticationDto auth = new AuthenticationDto("", "username", "password");
+		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addSuperUser("username", "password");
-		AuthenticationDto newUser = new AuthenticationDto("", "user", "password");
+		AuthenticationDto newUser = new AuthenticationDto("user", "password");
 
 		UserResponseIdToken token = getUserToken(auth);
 
