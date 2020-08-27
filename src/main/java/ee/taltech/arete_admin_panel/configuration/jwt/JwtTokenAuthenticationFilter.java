@@ -90,7 +90,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 			String[] parts = token.split(" ");
 			String gitlabToken = parts[1];
 			String username = parts[0];
-			UserResponseIdToken user = userService.authenticateUser(new AuthenticationDto("", username, gitlabToken));
+			UserResponseIdToken user = userService.authenticateUser(new AuthenticationDto(username, gitlabToken));
 
 			User userDetails = userService.getUser(user.getId());
 			Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
