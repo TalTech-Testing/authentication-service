@@ -16,6 +16,6 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
 	List<Course> findTop500ByOrderByIdDesc();
 
-    List<Course> findTop10000ByOrderByIdDesc();
+    List<Course> findTop1000ByOrderByIdDesc();
 
 }

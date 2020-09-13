@@ -15,6 +15,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
 	List<Student> findTop500ByOrderByIdDesc();
 
-	List<Student> findTop10000ByOrderByIdDesc();
+	List<Student> findTop1000ByOrderByIdDesc();
 
 }
