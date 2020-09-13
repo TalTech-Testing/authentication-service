@@ -25,7 +25,7 @@ public class Slug {
 
     @NotNull
     @Builder.Default
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Set<SlugStudent> students = new HashSet<>();
 
     @NotNull

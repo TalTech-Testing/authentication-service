@@ -28,7 +28,7 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    @OneToMany(cascade = {CascadeType.ALL})
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Set<CourseStudent> students = new HashSet<>();
 
     @NotNull

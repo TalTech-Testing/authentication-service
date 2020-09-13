@@ -460,35 +460,41 @@ public class AreteService {
 	/////// CACHING
 
 	public CourseStudent updateCourseStudent(CourseStudent courseStudent, Long course_student_id) {
+		LOG.info("Updating course student cache: {}", course_student_id);
 		courseStudentRepository.saveAndFlush(courseStudent);
 		return courseStudent;
 	}
 
 	public SlugStudent updateSlugStudent(SlugStudent slugStudent, Long slug_student_id) {
+		LOG.info("Updating slug student cache: {}", slug_student_id);
 		slugStudentRepository.saveAndFlush(slugStudent);
 		cacheService.updateSlugStudentList(slugStudent);
 		return slugStudent;
 	}
 
 	public Course updateCourse(Course course, Long id) {
+		LOG.info("Updating course cache: {}", id);
 		courseRepository.saveAndFlush(course);
 		cacheService.updateCourseList(course);
 		return course;
 	}
 
 	public Slug updateSlug(Slug slug, Long id) {
+		LOG.info("Updating slug cache: {}", id);
 		slugRepository.saveAndFlush(slug);
 		cacheService.updateSlugList(slug);
 		return slug;
 	}
 
 	public Student updateStudent(Student student, Long id) {
+		LOG.info("Updating student cache: {}", id);
 		studentRepository.saveAndFlush(student);
 		cacheService.updateStudentList(student);
 		return student;
 	}
 
 	public void updateSubmissions(Submission submission, String hash) {
+		LOG.info("Updating submission cache: {}", hash);
 		submissionRepository.saveAndFlush(submission);
 		cacheService.updateSubmissionList(submission);
 	}

@@ -23,7 +23,7 @@ public class CourseStudent {
 
     @JsonIgnore
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Student student;
 
     @NotNull
@@ -32,7 +32,7 @@ public class CourseStudent {
 
     @JsonIgnore
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Course course;
 
     @NotNull

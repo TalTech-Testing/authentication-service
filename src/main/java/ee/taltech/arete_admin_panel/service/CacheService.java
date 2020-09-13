@@ -24,9 +24,12 @@ public class CacheService {
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
 	private final StudentRepository studentRepository;
+	private final StudentTableDtoRepository studentTableDtoRepository;
 	private final SlugStudentRepository slugStudentRepository;
 	private final CourseRepository courseRepository;
+	private final CourseTableDtoRepository courseTableDtoRepository;
 	private final SlugRepository slugRepository;
+	private final SlugTableDtoRepository slugTableDtoRepository;
 	private final SubmissionRepository submissionRepository;
 
 	HashMap<Long, Submission> submissionCache = new HashMap<>();
@@ -37,34 +40,42 @@ public class CacheService {
 
 
 	public void updateSubmissionList(Submission submission) {
+		LOG.info("Update submission cache");
 		submissionCache.put(submission.getId(), submission);
 
 	}
 
 	public void updateStudentList(Student student) {
+		LOG.info("Update student cache");
 		StudentTableDto studentTableDto = objectMapper.convertValue(student, StudentTableDto.class);
 		studentCache.put(studentTableDto.getId(), studentTableDto);
 	}
 
 	public void updateCourseList(Course course) {
+		LOG.info("Update course cache");
 		CourseTableDto courseTableDto = objectMapper.convertValue(course, CourseTableDto.class);
 		courseCache.put(courseTableDto.getId(), courseTableDto);
 	}
 
 	public void updateSlugList(Slug slug) {
+		LOG.info("Update slug cache");
 		SlugTableDto slugTableDto = objectMapper.convertValue(slug, SlugTableDto.class);
 		slugCache.put(slugTableDto.getId(), slugTableDto);
 	}
 
 	public void updateSlugStudentList(SlugStudent slugStudent) {
+		LOG.info("Update slug student cache");
 		slugStudentCache.put(slugStudent.getId(), slugStudent);
 	}
 
-	public CacheService(StudentRepository studentRepository, SlugStudentRepository slugStudentRepository, CourseRepository courseRepository, SlugRepository slugRepository, SubmissionRepository submissionRepository) {
+	public CacheService(StudentRepository studentRepository, StudentTableDtoRepository studentTableDtoRepository, SlugStudentRepository slugStudentRepository, CourseRepository courseRepository, CourseTableDtoRepository courseTableDtoRepository, SlugRepository slugRepository, SlugTableDtoRepository slugTableDtoRepository, SubmissionRepository submissionRepository) {
 		this.studentRepository = studentRepository;
+		this.studentTableDtoRepository = studentTableDtoRepository;
 		this.slugStudentRepository = slugStudentRepository;
 		this.courseRepository = courseRepository;
+		this.courseTableDtoRepository = courseTableDtoRepository;
 		this.slugRepository = slugRepository;
+		this.slugTableDtoRepository = slugTableDtoRepository;
 		this.submissionRepository = submissionRepository;
 
 		submissionRepository.findTop100ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
@@ -73,10 +84,10 @@ public class CacheService {
 		LOG.info("Loaded slugStudents to cache");
 		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
 		LOG.info("Loaded students to cache");
-//		courseRepository.findTop100ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList()).forEach(x -> courseCache.put(x.getId(), x));
-//		LOG.info("Loaded courses to cache");
-//		slugRepository.findTop100ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList()).forEach(x -> slugCache.put(x.getId(), x));
-//		LOG.info("Loaded slugs to cache");
+		courseTableDtoRepository.findAll().forEach(x -> courseCache.put(x.getId(), x));
+		LOG.info("Loaded courses to cache");
+		slugTableDtoRepository.findAll().forEach(x -> slugCache.put(x.getId(), x));
+		LOG.info("Loaded slugs to cache");
 	}
 
 	public Collection<Submission> getSubmissionList() {
@@ -100,9 +111,8 @@ public class CacheService {
 	}
 
 	public List<StudentTableDto> getAllStudents() {
-		return studentRepository
-				.findTop100ByOrderByIdDesc()
-				.stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class))
+		LOG.info("Reading all students from cache");
+		return studentTableDtoRepository.findAll().stream()
 				.map(x -> calculateFields(x, slugStudentCache.values()))
 				.collect(Collectors.toList());
 	}

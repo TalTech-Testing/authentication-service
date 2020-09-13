@@ -24,7 +24,7 @@ public class SlugStudent {
 
     @JsonIgnore
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Student student;
 
     @NotNull
@@ -33,7 +33,7 @@ public class SlugStudent {
 
     @JsonIgnore
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
     private Slug slug;
 
     @NotNull
