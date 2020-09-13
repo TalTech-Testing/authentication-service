@@ -79,9 +79,7 @@ public class AreteService {
 
 	public void parseAreteResponse(AreteResponse response) {
 		setDefaultValuesIfNull(response);
-
 		saveSubmission(response);
-
 		saveJob(response);
 
 		if (!response.getFailed()) {
