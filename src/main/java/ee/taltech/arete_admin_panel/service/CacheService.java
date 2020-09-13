@@ -40,31 +40,31 @@ public class CacheService {
 
 
 	public void updateSubmissionList(Submission submission) {
-		LOG.info("Update submission cache");
+		LOG.debug("Update submission cache");
 		submissionCache.put(submission.getId(), submission);
 
 	}
 
 	public void updateStudentList(Student student) {
-		LOG.info("Update student cache");
+		LOG.debug("Update student cache");
 		StudentTableDto studentTableDto = objectMapper.convertValue(student, StudentTableDto.class);
 		studentCache.put(studentTableDto.getId(), studentTableDto);
 	}
 
 	public void updateCourseList(Course course) {
-		LOG.info("Update course cache");
+		LOG.debug("Update course cache");
 		CourseTableDto courseTableDto = objectMapper.convertValue(course, CourseTableDto.class);
 		courseCache.put(courseTableDto.getId(), courseTableDto);
 	}
 
 	public void updateSlugList(Slug slug) {
-		LOG.info("Update slug cache");
+		LOG.debug("Update slug cache");
 		SlugTableDto slugTableDto = objectMapper.convertValue(slug, SlugTableDto.class);
 		slugCache.put(slugTableDto.getId(), slugTableDto);
 	}
 
 	public void updateSlugStudentList(SlugStudent slugStudent) {
-		LOG.info("Update slug student cache");
+		LOG.debug("Update slug student cache");
 		slugStudentCache.put(slugStudent.getId(), slugStudent);
 	}
 

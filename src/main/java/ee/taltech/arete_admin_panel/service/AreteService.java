@@ -83,16 +83,22 @@ public class AreteService {
 		saveJob(response);
 
 		if (!response.getFailed()) {
+			LOG.debug("getting course");
 			Course course = getCourse(response);
 
+			LOG.debug("getting slug");
 			Slug slug = getSlug(response, course);
 
+			LOG.debug("getting student");
 			Student student = getStudent(response, course, slug);
 
+			LOG.debug("getting slug student");
 			SlugStudent slugStudent = getSlugStudent(slug, student);
 
+			LOG.debug("getting course student");
 			CourseStudent courseStudent = getCourseStudent(course, student);
 
+			LOG.debug("update all");
 			updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
 		}
 
@@ -309,8 +315,8 @@ public class AreteService {
 	}
 
 	private SlugStudent getSlugStudent(Slug slug, Student student) {
-		slugRepository.saveAndFlush(slug);
-		studentRepository.saveAndFlush(student);
+		slugRepository.save(slug);
+		studentRepository.save(student);
 
 		SlugStudent slugStudent;
 		Optional<SlugStudent> optionalSlugStudent = slugStudentRepository.findByStudentAndSlug(student, slug);
@@ -324,8 +330,8 @@ public class AreteService {
 	}
 
 	private CourseStudent getCourseStudent(Course course, Student student) {
-		courseRepository.saveAndFlush(course);
-		studentRepository.saveAndFlush(student);
+		courseRepository.save(course);
+		studentRepository.save(student);
 
 		CourseStudent courseStudent;
 		Optional<CourseStudent> optionalCourseStudent = courseStudentRepository.findByStudentAndCourse(student, course);
@@ -385,7 +391,8 @@ public class AreteService {
 				.systemExtra(response.getSystemExtra())
 				.build();
 
-		jobRepository.saveAndFlush(job);
+		LOG.info("Saving job");
+		jobRepository.save(job);
 	}
 
 	public Submission saveSubmission(AreteResponse response) {
@@ -461,41 +468,41 @@ public class AreteService {
 
 	public CourseStudent updateCourseStudent(CourseStudent courseStudent, Long course_student_id) {
 		LOG.info("Updating course student cache: {}", course_student_id);
-		courseStudentRepository.saveAndFlush(courseStudent);
+		courseStudentRepository.save(courseStudent);
 		return courseStudent;
 	}
 
 	public SlugStudent updateSlugStudent(SlugStudent slugStudent, Long slug_student_id) {
 		LOG.info("Updating slug student cache: {}", slug_student_id);
-		slugStudentRepository.saveAndFlush(slugStudent);
+		slugStudentRepository.save(slugStudent);
 		cacheService.updateSlugStudentList(slugStudent);
 		return slugStudent;
 	}
 
 	public Course updateCourse(Course course, Long id) {
 		LOG.info("Updating course cache: {}", id);
-		courseRepository.saveAndFlush(course);
+		courseRepository.save(course);
 		cacheService.updateCourseList(course);
 		return course;
 	}
 
 	public Slug updateSlug(Slug slug, Long id) {
 		LOG.info("Updating slug cache: {}", id);
-		slugRepository.saveAndFlush(slug);
+		slugRepository.save(slug);
 		cacheService.updateSlugList(slug);
 		return slug;
 	}
 
 	public Student updateStudent(Student student, Long id) {
 		LOG.info("Updating student cache: {}", id);
-		studentRepository.saveAndFlush(student);
+		studentRepository.save(student);
 		cacheService.updateStudentList(student);
 		return student;
 	}
 
 	public void updateSubmissions(Submission submission, String hash) {
 		LOG.info("Updating submission cache: {}", hash);
-		submissionRepository.saveAndFlush(submission);
+		submissionRepository.save(submission);
 		cacheService.updateSubmissionList(submission);
 	}
 
