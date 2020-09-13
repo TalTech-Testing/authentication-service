@@ -67,7 +67,7 @@ public class CacheService {
 		this.slugRepository = slugRepository;
 		this.submissionRepository = submissionRepository;
 
-		submissionRepository.findTop500ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
+		submissionRepository.findTop100ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
 		slugStudentRepository.findTop500ByOrderByIdDesc().forEach(x -> slugStudentCache.put(x.getId(), x));
 		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
 		courseRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList()).forEach(x -> courseCache.put(x.getId(), x));
