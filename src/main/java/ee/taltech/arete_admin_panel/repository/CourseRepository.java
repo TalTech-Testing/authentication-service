@@ -14,7 +14,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
 
     Optional<Course> findByGitUrl(@Param("gitUrl") String gitUrl);
 
-	List<Course> findTop500ByOrderByIdDesc();
+	List<Course> findTop100ByOrderByIdDesc();
 
     List<Course> findTop1000ByOrderByIdDesc();
 

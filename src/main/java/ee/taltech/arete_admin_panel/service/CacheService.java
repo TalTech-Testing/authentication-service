@@ -68,10 +68,15 @@ public class CacheService {
 		this.submissionRepository = submissionRepository;
 
 		submissionRepository.findTop100ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
-		slugStudentRepository.findTop500ByOrderByIdDesc().forEach(x -> slugStudentCache.put(x.getId(), x));
+		LOG.info("Loaded submissions to cache");
+		slugStudentRepository.findTop100ByOrderByIdDesc().forEach(x -> slugStudentCache.put(x.getId(), x));
+		LOG.info("Loaded slugStudents to cache");
 		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
-		courseRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList()).forEach(x -> courseCache.put(x.getId(), x));
-		slugRepository.findTop500ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList()).forEach(x -> slugCache.put(x.getId(), x));
+		LOG.info("Loaded students to cache");
+//		courseRepository.findTop100ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, CourseTableDto.class)).collect(Collectors.toList()).forEach(x -> courseCache.put(x.getId(), x));
+//		LOG.info("Loaded courses to cache");
+//		slugRepository.findTop100ByOrderByIdDesc().stream().map(x -> objectMapper.convertValue(x, SlugTableDto.class)).collect(Collectors.toList()).forEach(x -> slugCache.put(x.getId(), x));
+//		LOG.info("Loaded slugs to cache");
 	}
 
 	public Collection<Submission> getSubmissionList() {
@@ -96,7 +101,7 @@ public class CacheService {
 
 	public List<StudentTableDto> getAllStudents() {
 		return studentRepository
-				.findTop1000ByOrderByIdDesc()
+				.findTop100ByOrderByIdDesc()
 				.stream().map(x -> objectMapper.convertValue(x, StudentTableDto.class))
 				.map(x -> calculateFields(x, slugStudentCache.values()))
 				.collect(Collectors.toList());

@@ -18,6 +18,6 @@ public interface SlugRepository extends JpaRepository<Slug, Long> {
 
 	List<Slug> findTop1000ByOrderByIdDesc();
 
-    List<Slug> findTop500ByOrderByIdDesc();
+    List<Slug> findTop100ByOrderByIdDesc();
 
 }
