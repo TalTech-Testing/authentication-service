@@ -9,7 +9,6 @@ import arete.java.response.SystemState;
 import arete.java.response.TestContext;
 import arete.java.response.UnitTest;
 import arete.java.response.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
 import org.slf4j.Logger;
@@ -30,7 +29,6 @@ public class AreteService {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 	private final CacheService cacheService;
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	private final StudentRepository studentRepository;
 	private final CourseRepository courseRepository;
@@ -42,6 +40,7 @@ public class AreteService {
 
 	private AreteClient areteClient = new AreteClient(System.getProperty("TESTER_URL", "http://localhost:8098"));
 	private Queue<AreteResponse> jobQueue = new LinkedList<>();
+	private int antiStuckQueue = 10;
 	private Boolean halted = false;
 
 	public AreteService(CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository, SlugStudentRepository slugStudentRepository, CourseStudentRepository courseStudentRepository) {
@@ -56,7 +55,7 @@ public class AreteService {
 	}
 
 	public void enqueueAreteResponse(AreteResponse response) {
-		LOG.info("Saving job into DB for user: {} with hash: {} in: {}", response.getUniid(), response.getHash(), response.getRoot());
+		LOG.info("Saving job into DB for user: {} with hash: {} in: {} where queue has {} elements", response.getUniid(), response.getHash(), response.getRoot(), jobQueue.size());
 		jobQueue.add(response);
 	}
 
@@ -74,6 +73,15 @@ public class AreteService {
 			} finally {
 				halted = false;
 			}
+		}
+
+		if (halted) {
+			antiStuckQueue -= 1;
+		}
+
+		if (antiStuckQueue <= 0) {
+			antiStuckQueue = 10;
+			halted = false;
 		}
 	}
 
@@ -268,7 +276,11 @@ public class AreteService {
 
 	private void updateDiagnosticCodeErrors(Map<String, Long> diagnosticErrors, String key, Set<CodeError> diagnosticCodeErrors) {
 		if (diagnosticCodeErrors.stream().anyMatch(x -> x.getErrorType().equals(key))) {
-			diagnosticCodeErrors.stream().filter(error -> error.getErrorType().equals(key)).forEachOrdered(error -> error.setRepetitions(Math.toIntExact(error.getRepetitions() + diagnosticErrors.get(key))));
+			for (CodeError error : diagnosticCodeErrors) {
+				if (error.getErrorType().equals(key)) {
+					error.setRepetitions(Math.toIntExact(error.getRepetitions() + diagnosticErrors.get(key)));
+				}
+			}
 		} else {
 			diagnosticCodeErrors.add(new CodeError(key, Math.toIntExact(diagnosticErrors.get(key))));
 		}
