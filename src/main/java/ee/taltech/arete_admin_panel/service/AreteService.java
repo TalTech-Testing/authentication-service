@@ -40,7 +40,7 @@ public class AreteService {
 
 	private AreteClient areteClient = new AreteClient(System.getProperty("TESTER_URL", "http://localhost:8098"));
 	private Queue<AreteResponse> jobQueue = new LinkedList<>();
-	private int antiStuckQueue = 10;
+	private int antiStuckQueue = 20;
 	private Boolean halted = false;
 
 	public AreteService(CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository, SlugStudentRepository slugStudentRepository, CourseStudentRepository courseStudentRepository) {
@@ -65,22 +65,24 @@ public class AreteService {
 
 		AreteResponse response = jobQueue.poll();
 
-		if (response != null && !halted) {
-			try {
-				halted = true;
-				parseAreteResponse(response);
-			} catch (Exception ignored) {
-			} finally {
-				halted = false;
+		if (response != null) {
+			if (!halted) {
+				try {
+					halted = true;
+					parseAreteResponse(response);
+				} catch (Exception ignored) {
+				} finally {
+					halted = false;
+					antiStuckQueue = 20;
+				}
+			} else {
+				jobQueue.add(response);
+				antiStuckQueue -= 1;
 			}
 		}
 
-		if (halted) {
-			antiStuckQueue -= 1;
-		}
-
 		if (antiStuckQueue <= 0) {
-			antiStuckQueue = 10;
+			antiStuckQueue = 20;
 			halted = false;
 		}
 	}
