@@ -1,6 +1,5 @@
 package ee.taltech.arete_admin_panel.configuration.jwt;
 
-import com.google.common.collect.ImmutableList;
 import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
@@ -55,6 +54,11 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 				filterTestingTokens(request);
 				filterGitlabHooks(request);
 				filterDockerHooks(request);
+
+				// Hack - admin
+				User userDetails = userService.getUser(1);
+				Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 		} catch (Exception e) {
 			LOG.error("JWT authentication failed with message: {}", e.getMessage());
@@ -66,39 +70,36 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 	private void filterTestingTokens(HttpServletRequest request) {
 
 		String token = request.getHeader("X-Testing-Token");
-		filterHooks(token);
+		filterHooks(token, "X-Testing-Token");
 
 	}
 
 	private void filterDockerHooks(HttpServletRequest request) {
 
 		String token = request.getHeader("X-Docker-Token");
-		filterHooks(token);
+		filterHooks(token, "X-Docker-Token");
 
 	}
 
 	private void filterGitlabHooks(HttpServletRequest request) {
 
 		String token = request.getHeader("X-Gitlab-Token");
-		filterHooks(token);
+		filterHooks(token, "X-Gitlab-Token");
 
 	}
 
-	private void filterHooks(String token) {
+	private void filterHooks(String token, String name) {
 		if (token != null) {
-			LOG.info(MessageFormat.format("Trying to authenticate Token: {0}", token));
+			LOG.info(MessageFormat.format("Trying to authenticate {0}: {1}", name, token));
 			String[] parts = token.split(" ");
 			String gitlabToken = parts[1];
 			String username = parts[0];
 			UserResponseIdToken user = userService.authenticateUser(new AuthenticationDto(username, gitlabToken));
 
-//			User userDetails = userService.getUser(user.getId());
-//			Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-//			SecurityContextHolder.getContext().setAuthentication(authentication);
+			User userDetails = userService.getUser(user.getId());
+			Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}
 
-		User userDetails = userService.getUser(1);
-		Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-		SecurityContextHolder.getContext().setAuthentication(authentication);
 	}
 }
