@@ -92,25 +92,25 @@ public class AreteService {
 		saveSubmission(response);
 		saveJob(response);
 
-		if (!response.getFailed()) {
-			LOG.debug("getting course");
-			Course course = getCourse(response);
-
-			LOG.debug("getting slug");
-			Slug slug = getSlug(response, course);
-
-			LOG.debug("getting student");
-			Student student = getStudent(response, course, slug);
-
-			LOG.debug("getting slug student");
-			SlugStudent slugStudent = getSlugStudent(slug, student);
-
-			LOG.debug("getting course student");
-			CourseStudent courseStudent = getCourseStudent(course, student);
-
-			LOG.debug("update all");
-			updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
-		}
+//		if (!response.getFailed()) {
+//			LOG.debug("getting course");
+//			Course course = getCourse(response);
+//
+//			LOG.debug("getting slug");
+//			Slug slug = getSlug(response, course);
+//
+//			LOG.debug("getting student");
+//			Student student = getStudent(response, course, slug);
+//
+//			LOG.debug("getting slug student");
+//			SlugStudent slugStudent = getSlugStudent(slug, student);
+//
+//			LOG.debug("getting course student");
+//			CourseStudent courseStudent = getCourseStudent(course, student);
+//
+//			LOG.debug("update all");
+//			updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
+//		}
 
 	}
 
