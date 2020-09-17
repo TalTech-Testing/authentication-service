@@ -35,23 +35,19 @@ public class AreteService {
 	private final SlugRepository slugRepository;
 	private final SubmissionRepository submissionRepository;
 	private final JobRepository jobRepository;
-	private final SlugStudentRepository slugStudentRepository;
-	private final CourseStudentRepository courseStudentRepository;
 
 	private AreteClient areteClient = new AreteClient(System.getProperty("TESTER_URL", "http://localhost:8098"));
 	private Queue<AreteResponse> jobQueue = new LinkedList<>();
 	private int antiStuckQueue = 20;
 	private Boolean halted = false;
 
-	public AreteService(CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository, SlugStudentRepository slugStudentRepository, CourseStudentRepository courseStudentRepository) {
+	public AreteService(CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository) {
 		this.cacheService = cacheService;
 		this.studentRepository = studentRepository;
 		this.courseRepository = courseRepository;
 		this.slugRepository = slugRepository;
 		this.jobRepository = jobRepository;
 		this.submissionRepository = submissionRepository;
-		this.slugStudentRepository = slugStudentRepository;
-		this.courseStudentRepository = courseStudentRepository;
 	}
 
 	public void enqueueAreteResponse(AreteResponse response) {
@@ -92,25 +88,19 @@ public class AreteService {
 		saveSubmission(response);
 		saveJob(response);
 
-//		if (!response.getFailed()) {
-//			LOG.debug("getting course");
-//			Course course = getCourse(response);
-//
-//			LOG.debug("getting slug");
-//			Slug slug = getSlug(response, course);
-//
-//			LOG.debug("getting student");
-//			Student student = getStudent(response, course, slug);
-//
-//			LOG.debug("getting slug student");
-//			SlugStudent slugStudent = getSlugStudent(slug, student);
-//
-//			LOG.debug("getting course student");
-//			CourseStudent courseStudent = getCourseStudent(course, student);
-//
-//			LOG.debug("update all");
-//			updateStudentSlugCourse(response, student, slug, course, slugStudent, courseStudent);
-//		}
+		if (!response.getFailed()) {
+			LOG.debug("getting course");
+			Course course = getCourse(response);
+
+			LOG.debug("getting slug");
+			Slug slug = getSlug(response, course);
+
+			LOG.debug("getting student");
+			Student student = getStudent(response, course, slug);
+
+			LOG.debug("update all");
+			updateStudentSlugCourse(response, student, slug, course);
+		}
 
 	}
 
@@ -144,14 +134,12 @@ public class AreteService {
 		}
 	}
 
-	private void updateStudentSlugCourse(AreteResponse response, Student student, Slug slug, Course course, SlugStudent slugStudent, CourseStudent courseStudent) {
+	private void updateStudentSlugCourse(AreteResponse response, Student student, Slug slug, Course course) {
 
 		if (response.getStyle() == 100) {
 			slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
 			course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
 			student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
-			slugStudent.setCommitsStyleOK(slugStudent.getCommitsStyleOK() + 1);
-			courseStudent.setCommitsStyleOK(courseStudent.getCommitsStyleOK() + 1);
 		}
 
 		int newDiagnosticErrors = response.getErrors().size();
@@ -162,8 +150,6 @@ public class AreteService {
 			updateDiagnosticCodeErrors(diagnosticErrors, key, slug.getDiagnosticCodeErrors());
 			updateDiagnosticCodeErrors(diagnosticErrors, key, course.getDiagnosticCodeErrors());
 			updateDiagnosticCodeErrors(diagnosticErrors, key, student.getDiagnosticCodeErrors());
-			updateDiagnosticCodeErrors(diagnosticErrors, key, courseStudent.getDiagnosticCodeErrors());
-			updateDiagnosticCodeErrors(diagnosticErrors, key, slugStudent.getDiagnosticCodeErrors());
 		}
 
 		int newTestErrors = 0;
@@ -194,74 +180,35 @@ public class AreteService {
 			updateCodeErrors(testErrors, key, slug.getTestCodeErrors());
 			updateCodeErrors(testErrors, key, course.getTestCodeErrors());
 			updateCodeErrors(testErrors, key, student.getTestCodeErrors());
-			updateCodeErrors(testErrors, key, courseStudent.getTestCodeErrors());
-			updateCodeErrors(testErrors, key, slugStudent.getTestCodeErrors());
 		}
 
 		slug.setTotalCommits(slug.getTotalCommits() + 1);
 		course.setTotalCommits(course.getTotalCommits() + 1);
 		student.setTotalCommits(student.getTotalCommits() + 1);
-		slugStudent.setTotalCommits(slugStudent.getTotalCommits() + 1);
-		courseStudent.setTotalCommits(courseStudent.getTotalCommits() + 1);
 
 		slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
 		course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
 		student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
-		slugStudent.setTotalDiagnosticErrors(slugStudent.getTotalDiagnosticErrors() + newDiagnosticErrors);
-		courseStudent.setTotalDiagnosticErrors(courseStudent.getTotalDiagnosticErrors() + newDiagnosticErrors);
 
 		slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
 		course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
 		student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
-		slugStudent.setTotalTestErrors(slugStudent.getTotalTestErrors() + newTestErrors);
-		courseStudent.setTotalTestErrors(courseStudent.getTotalTestErrors() + newTestErrors);
 
 		slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
 		course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
 		student.setTotalTestsPassed(student.getTotalTestsPassed() + newTestPassed);
-		slugStudent.setTotalTestsPassed(slugStudent.getTotalTestsPassed() + newTestPassed);
-		courseStudent.setTotalTestsPassed(courseStudent.getTotalTestsPassed() + newTestPassed);
 
 		slug.setTotalTestsRan(slug.getTotalTestsRan() + newTestsRan);
 		course.setTotalTestsRan(course.getTotalTestsRan() + newTestsRan);
 		student.setTotalTestsRan(student.getTotalTestsRan() + newTestsRan);
-		slugStudent.setTotalTestsRan(slugStudent.getTotalTestsRan() + newTestsRan);
-		courseStudent.setTotalTestsRan(courseStudent.getTotalTestsRan() + newTestsRan);
 
-		slugStudent.getTimestamps().add(response.getTimestamp());
-		courseStudent.getTimestamps().add(response.getTimestamp());
 		student.getTimestamps().add(response.getTimestamp());
 		student.setLastTested(response.getTimestamp());
 
-		try {
-			Double percentage = Double.valueOf(response.getTotalGrade());
-			if (percentage > slugStudent.getHighestPercent()) {
-				slugStudent.setHighestPercent(percentage);
-			}
-		} catch (Exception ignored) {
-		}
-
-		if (response.getTimestamp() > slugStudent.getLatestSubmission()) {
-			slugStudent.setLatestSubmission(response.getTimestamp());
-		}
-		if (response.getTimestamp() > courseStudent.getLatestSubmission()) {
-			courseStudent.setLatestSubmission(response.getTimestamp());
-		}
-
-		course.getStudents().add(courseStudent);
-		course.setDifferentStudents(course.getStudents().size());
-
-		slug.getStudents().add(slugStudent);
-		slug.setDifferentStudents(slug.getStudents().size());
-
-		courseStudent.getSlugs().add(slug.getName());
-		courseStudent.setDifferentSlugs(courseStudent.getSlugs().size());
 
 		student.setDifferentCourses(student.getCourses().size());
 		student.setDifferentSlugs(student.getSlugs().size());
 
-		updateCourseStudent(courseStudent, courseStudent.getId());
-		updateSlugStudent(slugStudent, slugStudent.getId());
 		updateCourse(course, course.getId());
 		updateSlug(slug, slug.getId());
 		updateStudent(student, student.getId());
@@ -326,36 +273,6 @@ public class AreteService {
 		student.getCourses().add(course.getGitUrl());
 		student.getSlugs().add(slug.getName());
 		return student;
-	}
-
-	private SlugStudent getSlugStudent(Slug slug, Student student) {
-		slugRepository.save(slug);
-		studentRepository.save(student);
-
-		SlugStudent slugStudent;
-		Optional<SlugStudent> optionalSlugStudent = slugStudentRepository.findByStudentAndSlug(student, slug);
-		slugStudent = optionalSlugStudent.orElseGet(() -> SlugStudent.builder()
-				.slug(slug)
-				.student(student)
-				.uniid(student.getUniid())
-				.build());
-
-		return slugStudent;
-	}
-
-	private CourseStudent getCourseStudent(Course course, Student student) {
-		courseRepository.save(course);
-		studentRepository.save(student);
-
-		CourseStudent courseStudent;
-		Optional<CourseStudent> optionalCourseStudent = courseStudentRepository.findByStudentAndCourse(student, course);
-		courseStudent = optionalCourseStudent.orElseGet(() -> CourseStudent.builder()
-				.course(course)
-				.student(student)
-				.uniid(student.getUniid())
-				.build());
-
-		return courseStudent;
 	}
 
 	private void saveJob(AreteResponse response) {
@@ -479,19 +396,6 @@ public class AreteService {
 	}
 
 	/////// CACHING
-
-	public CourseStudent updateCourseStudent(CourseStudent courseStudent, Long course_student_id) {
-		LOG.info("Updating course student cache: {}", course_student_id);
-		courseStudentRepository.save(courseStudent);
-		return courseStudent;
-	}
-
-	public SlugStudent updateSlugStudent(SlugStudent slugStudent, Long slug_student_id) {
-		LOG.info("Updating slug student cache: {}", slug_student_id);
-		slugStudentRepository.save(slugStudent);
-		cacheService.updateSlugStudentList(slugStudent);
-		return slugStudent;
-	}
 
 	public Course updateCourse(Course course, Long id) {
 		LOG.info("Updating course cache: {}", id);

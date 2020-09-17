@@ -28,11 +28,6 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-    private Set<CourseStudent> students = new HashSet<>();
-
-    @NotNull
-    @Builder.Default
     private Integer totalCommits = 0;
 
     @NotNull

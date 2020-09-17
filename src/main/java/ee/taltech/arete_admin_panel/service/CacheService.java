@@ -25,7 +25,6 @@ public class CacheService {
 
 	private final StudentRepository studentRepository;
 	private final StudentTableDtoRepository studentTableDtoRepository;
-	private final SlugStudentRepository slugStudentRepository;
 	private final CourseRepository courseRepository;
 	private final CourseTableDtoRepository courseTableDtoRepository;
 	private final SlugRepository slugRepository;
@@ -36,7 +35,6 @@ public class CacheService {
 	HashMap<Long, StudentTableDto> studentCache = new HashMap<>();
 	HashMap<Long, CourseTableDto> courseCache = new HashMap<>();
 	HashMap<Long, SlugTableDto> slugCache = new HashMap<>();
-	HashMap<Long, SlugStudent> slugStudentCache = new HashMap<>();
 
 
 	public void updateSubmissionList(Submission submission) {
@@ -63,15 +61,9 @@ public class CacheService {
 		slugCache.put(slugTableDto.getId(), slugTableDto);
 	}
 
-	public void updateSlugStudentList(SlugStudent slugStudent) {
-		LOG.debug("Update slug student cache");
-		slugStudentCache.put(slugStudent.getId(), slugStudent);
-	}
-
-	public CacheService(StudentRepository studentRepository, StudentTableDtoRepository studentTableDtoRepository, SlugStudentRepository slugStudentRepository, CourseRepository courseRepository, CourseTableDtoRepository courseTableDtoRepository, SlugRepository slugRepository, SlugTableDtoRepository slugTableDtoRepository, SubmissionRepository submissionRepository) {
+	public CacheService(StudentRepository studentRepository, StudentTableDtoRepository studentTableDtoRepository, CourseRepository courseRepository, CourseTableDtoRepository courseTableDtoRepository, SlugRepository slugRepository, SlugTableDtoRepository slugTableDtoRepository, SubmissionRepository submissionRepository) {
 		this.studentRepository = studentRepository;
 		this.studentTableDtoRepository = studentTableDtoRepository;
-		this.slugStudentRepository = slugStudentRepository;
 		this.courseRepository = courseRepository;
 		this.courseTableDtoRepository = courseTableDtoRepository;
 		this.slugRepository = slugRepository;
@@ -80,8 +72,6 @@ public class CacheService {
 
 		submissionRepository.findTop100ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
 		LOG.info("Loaded submissions to cache");
-		slugStudentRepository.findTop100ByOrderByIdDesc().forEach(x -> slugStudentCache.put(x.getId(), x));
-		LOG.info("Loaded slugStudents to cache");
 		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
 		LOG.info("Loaded students to cache");
 		courseTableDtoRepository.findAll().forEach(x -> courseCache.put(x.getId(), x));
@@ -112,22 +102,6 @@ public class CacheService {
 
 	public List<StudentTableDto> getAllStudents() {
 		LOG.info("Reading all students from cache");
-		return studentTableDtoRepository.findAll().stream()
-				.map(x -> calculateFields(x, slugStudentCache.values()))
-				.collect(Collectors.toList());
-	}
-
-	private StudentTableDto calculateFields(StudentTableDto dto, Collection<SlugStudent> slugStudents) {
-		List<Double> grades = new ArrayList<>();
-
-		for (SlugStudent slugStudent : slugStudents) {
-			if (slugStudent.getUniid().equals(dto.getUniid())) {
-				grades.add(slugStudent.getHighestPercent());
-			}
-		}
-
-		dto.setAverageGrade(grades.stream().flatMapToDouble(DoubleStream::of).average().orElse(0));
-		dto.setMedianGrade(grades.size() > 0 ? grades.get(grades.size() / 2) : 0.0);
-		return dto;
+		return new ArrayList<>(studentTableDtoRepository.findAll());
 	}
 }

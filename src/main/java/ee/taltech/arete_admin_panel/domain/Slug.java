@@ -24,11 +24,6 @@ public class Slug {
     private String name;
 
     @NotNull
-    @Builder.Default
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
-    private Set<SlugStudent> students = new HashSet<>();
-
-    @NotNull
     private String courseUrl;
 
     @NotNull
