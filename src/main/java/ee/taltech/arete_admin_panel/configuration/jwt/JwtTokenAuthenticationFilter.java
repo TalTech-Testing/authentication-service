@@ -54,11 +54,6 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 				filterTestingTokens(request);
 				filterGitlabHooks(request);
 				filterDockerHooks(request);
-
-				// Hack - admin
-				User userDetails = userService.getUser(1);
-				Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-				SecurityContextHolder.getContext().setAuthentication(authentication);
 			}
 		} catch (Exception e) {
 			LOG.error("JWT authentication failed with message: {}", e.getMessage());
