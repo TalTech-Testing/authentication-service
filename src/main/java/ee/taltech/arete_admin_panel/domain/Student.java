@@ -67,17 +67,7 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    @ElementCollection
-    private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
-
-    @NotNull
-    @Builder.Default
     private Integer totalTestErrors = 0;
-
-    @NotNull
-    @Builder.Default
-    @ElementCollection
-    private Set<CodeError> testCodeErrors = new HashSet<>();
 
     @NotNull
     @Builder.Default

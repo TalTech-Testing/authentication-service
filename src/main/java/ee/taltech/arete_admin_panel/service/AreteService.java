@@ -143,14 +143,6 @@ public class AreteService {
 		}
 
 		int newDiagnosticErrors = response.getErrors().size();
-		Map<String, Long> diagnosticErrors = response.getErrors().stream().map(Error::getKind).collect(Collectors.groupingBy(e -> e, Collectors.counting()));
-
-		for (String key : diagnosticErrors.keySet()) {
-
-			updateDiagnosticCodeErrors(diagnosticErrors, key, slug.getDiagnosticCodeErrors());
-			updateDiagnosticCodeErrors(diagnosticErrors, key, course.getDiagnosticCodeErrors());
-			updateDiagnosticCodeErrors(diagnosticErrors, key, student.getDiagnosticCodeErrors());
-		}
 
 		int newTestErrors = 0;
 		int newTestPassed = 0;
@@ -173,13 +165,6 @@ public class AreteService {
 					newTestPassed += 1;
 				}
 			}
-		}
-
-		for (String key : testErrors.keySet()) {
-
-			updateCodeErrors(testErrors, key, slug.getTestCodeErrors());
-			updateCodeErrors(testErrors, key, course.getTestCodeErrors());
-			updateCodeErrors(testErrors, key, student.getTestCodeErrors());
 		}
 
 		slug.setTotalCommits(slug.getTotalCommits() + 1);
@@ -213,26 +198,6 @@ public class AreteService {
 		updateSlug(slug, slug.getId());
 		updateStudent(student, student.getId());
 
-	}
-
-	private void updateCodeErrors(Map<String, Integer> testErrors, String key, Set<CodeError> testCodeErrors) {
-		if (testCodeErrors.stream().anyMatch(x -> x.getErrorType().equals(key))) {
-			testCodeErrors.stream().filter(error -> error.getErrorType().equals(key)).forEachOrdered(error -> error.setRepetitions(Math.toIntExact(error.getRepetitions() + testErrors.get(key))));
-		} else {
-			testCodeErrors.add(new CodeError(key, Math.toIntExact(testErrors.get(key))));
-		}
-	}
-
-	private void updateDiagnosticCodeErrors(Map<String, Long> diagnosticErrors, String key, Set<CodeError> diagnosticCodeErrors) {
-		if (diagnosticCodeErrors.stream().anyMatch(x -> x.getErrorType().equals(key))) {
-			for (CodeError error : diagnosticCodeErrors) {
-				if (error.getErrorType().equals(key)) {
-					error.setRepetitions(Math.toIntExact(error.getRepetitions() + diagnosticErrors.get(key)));
-				}
-			}
-		} else {
-			diagnosticCodeErrors.add(new CodeError(key, Math.toIntExact(diagnosticErrors.get(key))));
-		}
 	}
 
 	private Slug getSlug(AreteResponse response, Course course) {
