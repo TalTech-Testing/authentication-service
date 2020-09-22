@@ -301,6 +301,7 @@ public class AreteService {
 				.timestamp(response.getTimestamp())
 				.gitStudentRepo(response.getGitStudentRepo())
 				.gitTestSource(response.getGitTestRepo())
+				.failed(response.getFailed())
 				.build();
 
 		updateSubmissions(submission, submission.getHash());
