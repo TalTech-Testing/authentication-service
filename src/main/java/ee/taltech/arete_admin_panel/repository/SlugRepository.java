@@ -16,8 +16,8 @@ public interface SlugRepository extends JpaRepository<Slug, Long> {
 
     List<Slug> findAllByName(@Param("name") String name);
 
-	List<Slug> findTop10000ByOrderByIdDesc();
+	List<Slug> findTop1000ByOrderByIdDesc();
 
-    List<Slug> findTop500ByOrderByIdDesc();
+    List<Slug> findTop100ByOrderByIdDesc();
 
 }

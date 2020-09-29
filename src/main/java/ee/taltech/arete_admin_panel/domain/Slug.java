@@ -24,11 +24,6 @@ public class Slug {
     private String name;
 
     @NotNull
-    @Builder.Default
-    @OneToMany(cascade = {CascadeType.ALL})
-    private Set<SlugStudent> students = new HashSet<>();
-
-    @NotNull
     private String courseUrl;
 
     @NotNull
@@ -49,17 +44,7 @@ public class Slug {
 
     @NotNull
     @Builder.Default
-    @ElementCollection
-    private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
-
-    @NotNull
-    @Builder.Default
     private Integer totalTestErrors = 0;
-
-    @NotNull
-    @Builder.Default
-    @ElementCollection
-    private Set<CodeError> testCodeErrors = new HashSet<>();
 
     @NotNull
     @Builder.Default

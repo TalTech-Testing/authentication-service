@@ -10,5 +10,5 @@ import java.util.List;
 public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
     List<Submission> findTop500ByOrderByIdDesc();
-	List<Submission> findTop10000ByOrderByIdDesc();
+	List<Submission> findTop100ByOrderByIdDesc();
 }

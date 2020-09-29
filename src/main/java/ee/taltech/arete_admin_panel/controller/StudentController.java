@@ -31,18 +31,14 @@ public class StudentController {
 
 	private final CacheService cacheService;
 	private final StudentRepository studentRepository;
-	private final CourseStudentRepository courseStudentRepository;
-	private final SlugStudentRepository slugStudentRepository;
 	private final CourseRepository courseRepository;
 	private final SlugRepository slugRepository;
 	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
-	public StudentController(AuthenticationManager authenticationManager, CacheService cacheService, StudentRepository studentRepository, CourseStudentRepository courseStudentRepository, SlugStudentRepository slugStudentRepository, CourseRepository courseRepository, SlugRepository slugRepository) {
+	public StudentController(AuthenticationManager authenticationManager, CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository) {
 		this.authenticationManager = authenticationManager;
 		this.cacheService = cacheService;
 		this.studentRepository = studentRepository;
-		this.courseStudentRepository = courseStudentRepository;
-		this.slugStudentRepository = slugStudentRepository;
 		this.courseRepository = courseRepository;
 		this.slugRepository = slugRepository;
 	}
@@ -66,74 +62,6 @@ public class StudentController {
 			Optional<Student> studentOptional = studentRepository.findById(id);
 			assert studentOptional.isPresent();
 			return studentOptional.get();
-		} catch (AssertionError e) {
-			throw new NotFoundException("Selected item was not found.");
-		}
-	}
-
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns students' activity regarding a course by its id", tags = {"student"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/course/{course_student_id}")
-	public CourseStudent getCourseStudentById(@PathVariable("course_student_id") Long course_student_id) {
-		try {
-			LOG.info("Reading course student by id {}", course_student_id);
-			Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findById(course_student_id);
-			assert courseStudentOptional.isPresent();
-			return courseStudentOptional.get();
-		} catch (AssertionError e) {
-			throw new NotFoundException("Selected item was not found.");
-		}
-	}
-
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns students' activity regarding an exercise by its id", tags = {"student"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/exercise/{exercise_student_id}")
-	public SlugStudent getSlugStudentById(@PathVariable("exercise_student_id") Long exercise_student_id) {
-		try {
-			LOG.info("Reading slug student by id {}", exercise_student_id);
-			Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findById(exercise_student_id);
-			assert slugStudentOptional.isPresent();
-			return slugStudentOptional.get();
-		} catch (AssertionError e) {
-			throw new NotFoundException("Selected item was not found.");
-		}
-	}
-
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns students' activity regarding a course by course id and student id", tags = {"student"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{student_id}/course/{course_id}")
-	public CourseStudent getCourseStudent(@PathVariable("student_id") Long student_id, @PathVariable("course_id") Long course_id) {
-		try {
-			LOG.info("Reading course {} student by id {}", course_id, student_id);
-			Optional<Student> studentOptional = studentRepository.findById(student_id);
-			assert studentOptional.isPresent();
-			Optional<Course> courseOptional = courseRepository.findById(course_id);
-			assert courseOptional.isPresent();
-			Optional<CourseStudent> courseStudentOptional = courseStudentRepository.findByStudentAndCourse(studentOptional.get(), courseOptional.get());
-			assert courseStudentOptional.isPresent();
-			return courseStudentOptional.get();
-		} catch (AssertionError e) {
-			throw new NotFoundException("Selected item was not found.");
-		}
-	}
-
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns students' activity regarding an exercise by exercise id and student id", tags = {"student"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{student_id}/exercise/{exercise_id}")
-	public SlugStudent getSlugStudent(@PathVariable("student_id") Long student_id, @PathVariable("exercise_id") Long exercise_id) {
-		try {
-			LOG.info("Reading slug {} student by id {}", exercise_id, student_id);
-			Optional<Student> studentOptional = studentRepository.findById(student_id);
-			assert studentOptional.isPresent();
-			Optional<Slug> slugOptional = slugRepository.findById(exercise_id);
-			assert slugOptional.isPresent();
-			Optional<SlugStudent> slugStudentOptional = slugStudentRepository.findByStudentAndSlug(studentOptional.get(), slugOptional.get());
-			assert slugStudentOptional.isPresent();
-			return slugStudentOptional.get();
 		} catch (AssertionError e) {
 			throw new NotFoundException("Selected item was not found.");
 		}

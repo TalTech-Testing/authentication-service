@@ -28,11 +28,6 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    @OneToMany(cascade = {CascadeType.ALL})
-    private Set<CourseStudent> students = new HashSet<>();
-
-    @NotNull
-    @Builder.Default
     private Integer totalCommits = 0;
 
     @NotNull
@@ -49,17 +44,7 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    @ElementCollection
-    private Set<CodeError> diagnosticCodeErrors = new HashSet<>();
-
-    @NotNull
-    @Builder.Default
     private Integer totalTestErrors = 0;
-
-    @NotNull
-    @Builder.Default
-    @ElementCollection
-    private Set<CodeError> testCodeErrors = new HashSet<>();
 
     @NotNull
     @Builder.Default

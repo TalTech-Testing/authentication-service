@@ -41,4 +41,8 @@ public class Submission {
     @NotNull
     private Long timestamp;
 
+	@Builder.Default
+	@NotNull
+	private boolean failed = false;
+
 }
