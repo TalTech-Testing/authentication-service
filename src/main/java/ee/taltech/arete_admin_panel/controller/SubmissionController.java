@@ -85,7 +85,7 @@ public class SubmissionController {
             parameters = {
                     @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
                             description = "gitlab token with structure: s\"{name} {password}\""),
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Tester-Token",
+                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Testing-Token",
                             description = "testing token with structure: s\"{name} {password}\"")
             },
             security = {
@@ -103,7 +103,7 @@ public class SubmissionController {
             parameters = {
                     @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
                             description = "gitlab token with structure: s\"{name} {password}\""),
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Tester-Token",
+                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Testing-Token",
                             description = "testing token with structure: s\"{name} {password}\"")
             },
             security = {
@@ -121,7 +121,7 @@ public class SubmissionController {
             parameters = {
                     @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
                             description = "gitlab token with structure: s\"{name} {password}\""),
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Tester-Token",
+                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Testing-Token",
                             description = "testing token with structure: s\"{name} {password}\"")
             },
             security = {
