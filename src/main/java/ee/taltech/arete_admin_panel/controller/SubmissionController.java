@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.naming.AuthenticationException;
 import java.util.Collection;
 
+@SecurityScheme(name = "X-Testing-Token", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @Tag(name = "submission", description = "submission service API", externalDocs = @ExternalDocumentation(description = "More detailed explanations and examples", url = "https://github.com/envomp/arete"))
 @RestController()
