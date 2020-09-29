@@ -84,9 +84,9 @@ public class SubmissionController {
 
     @Operation(
             parameters = {
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
                             description = "gitlab token with structure: s\"{name} {password}\""),
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Testing-Token",
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
                             description = "testing token with structure: s\"{name} {password}\"")
             },
             security = {
@@ -102,9 +102,9 @@ public class SubmissionController {
 
     @Operation(
             parameters = {
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
                             description = "gitlab token with structure: s\"{name} {password}\""),
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Testing-Token",
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
                             description = "testing token with structure: s\"{name} {password}\"")
             },
             security = {
@@ -120,9 +120,9 @@ public class SubmissionController {
 
     @Operation(
             parameters = {
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
                             description = "gitlab token with structure: s\"{name} {password}\""),
-                    @Parameter(in = ParameterIn.HEADER, required = true, name = "X-Testing-Token",
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
                             description = "testing token with structure: s\"{name} {password}\"")
             },
             security = {
