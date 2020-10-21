@@ -46,7 +46,7 @@ class LoadDatabase {
 	@Bean
 	CommandLineRunner initUserDatabase(UserService userService) {
 		return args -> {
-			if (userService.getAllUsers().stream().noneMatch(x -> x.getUsername().equals("admin"))) {
+			if (userService.getUser("admin").isEmpty()) {
 				if (System.getProperty("ADMIN_PASS", "<3").equals("false")) {
 					userService.addSuperUser("admin", "b0f8425ea1a133e0cd689b0bde8e8a8738c8e6b9120d8b68ef16289a341298e48c5c448220e25a3d3402302097f5ff82339cc3e9ffc50b6c6f15546b6d81a33e", "9a519963bc8f441eb73c71894edfb65");
 				} else { // admin
