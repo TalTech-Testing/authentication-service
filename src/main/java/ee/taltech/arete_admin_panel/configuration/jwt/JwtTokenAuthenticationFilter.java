@@ -1,6 +1,6 @@
 package ee.taltech.arete_admin_panel.configuration.jwt;
 
-import ee.taltech.arete_admin_panel.domain.User;
+import ee.taltech.arete_admin_panel.domain.UserEntity;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
 import ee.taltech.arete_admin_panel.service.UserService;
@@ -91,7 +91,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 			String username = parts[0];
 			UserResponseIdToken user = userService.authenticateUser(new AuthenticationDto(username, gitlabToken));
 
-			User userDetails = userService.getUser(user.getId());
+			UserEntity userDetails = userService.getUser(user.getId());
 			Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 			SecurityContextHolder.getContext().setAuthentication(authentication);
 		}

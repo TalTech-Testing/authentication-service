@@ -1,14 +1,11 @@
 package ee.taltech.arete_admin_panel.service;
 
-import arete.java.AreteClient;
-import arete.java.request.AreteRequest;
-import arete.java.request.AreteTestUpdate;
-import arete.java.response.ConsoleOutput;
-import arete.java.response.Error;
-import arete.java.response.SystemState;
-import arete.java.response.TestContext;
-import arete.java.response.UnitTest;
-import arete.java.response.*;
+import ee.taltech.arete.java.AreteClient;
+import ee.taltech.arete.java.TestStatus;
+import ee.taltech.arete.java.request.AreteRequest;
+import ee.taltech.arete.java.request.hook.AreteTestUpdate;
+import ee.taltech.arete.java.request.hook.Commit;
+import ee.taltech.arete.java.response.arete.*;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
 import org.slf4j.Logger;
@@ -90,13 +87,13 @@ public class AreteService {
 
 		if (!response.getFailed()) {
 			LOG.debug("getting course");
-			Course course = getCourse(response);
+			CourseEntity course = getCourse(response);
 
 			LOG.debug("getting slug");
-			Slug slug = getSlug(response, course);
+			SlugEntity slug = getSlug(response, course);
 
 			LOG.debug("getting student");
-			Student student = getStudent(response, course, slug);
+			StudentEntity student = getStudent(response, course, slug);
 
 			LOG.debug("update all");
 			updateStudentSlugCourse(response, student, slug, course);
@@ -134,7 +131,7 @@ public class AreteService {
 		}
 	}
 
-	private void updateStudentSlugCourse(AreteResponse response, Student student, Slug slug, Course course) {
+	private void updateStudentSlugCourse(AreteResponse response, StudentEntity student, SlugEntity slug, CourseEntity course) {
 
 		if (response.getStyle() == 100) {
 			slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
@@ -153,7 +150,7 @@ public class AreteService {
 		for (TestContext testContext : response.getTestSuites()) {
 			for (UnitTest unitTest : testContext.getUnitTests()) {
 				newTestsRan += 1;
-				if (unitTest.getStatus().equals(UnitTest.TestStatus.FAILED)) {
+				if (unitTest.getStatus().equals(TestStatus.FAILED)) {
 					newTestErrors += 1;
 					if (testErrors.containsKey(unitTest.getExceptionClass())) {
 						testErrors.put(unitTest.getExceptionClass(), testErrors.get(unitTest.getExceptionClass()) + 1);
@@ -161,7 +158,7 @@ public class AreteService {
 						testErrors.put(unitTest.getExceptionClass(), 1);
 					}
 				}
-				if (unitTest.getStatus().equals(UnitTest.TestStatus.PASSED)) {
+				if (unitTest.getStatus().equals(TestStatus.PASSED)) {
 					newTestPassed += 1;
 				}
 			}
@@ -200,10 +197,10 @@ public class AreteService {
 
 	}
 
-	private Slug getSlug(AreteResponse response, Course course) {
-		Slug slug;
-		Optional<Slug> optionalSlug = slugRepository.findByCourseUrlAndName(course.getGitUrl(), response.getSlug());
-		slug = optionalSlug.orElseGet(() -> Slug.builder()
+	private SlugEntity getSlug(AreteResponse response, CourseEntity course) {
+		SlugEntity slug;
+		Optional<SlugEntity> optionalSlug = slugRepository.findByCourseUrlAndName(course.getGitUrl(), response.getSlug());
+		slug = optionalSlug.orElseGet(() -> SlugEntity.builder()
 				.courseUrl(course.getGitUrl())
 				.name(response.getSlug())
 				.build());
@@ -211,10 +208,10 @@ public class AreteService {
 		return slug;
 	}
 
-	private Course getCourse(AreteResponse response) {
-		Course course;
-		Optional<Course> optionalCourse = courseRepository.findByGitUrl(response.getGitTestRepo());
-		course = optionalCourse.orElseGet(() -> Course.builder()
+	private CourseEntity getCourse(AreteResponse response) {
+		CourseEntity course;
+		Optional<CourseEntity> optionalCourse = courseRepository.findByGitUrl(response.getGitTestRepo());
+		course = optionalCourse.orElseGet(() -> CourseEntity.builder()
 				.gitUrl(response.getGitTestRepo())
 				.name(response.getRoot())
 				.build());
@@ -222,10 +219,10 @@ public class AreteService {
 		return course;
 	}
 
-	private Student getStudent(AreteResponse response, Course course, Slug slug) {
-		Student student;
-		Optional<Student> optionalStudent = studentRepository.findByUniid(response.getUniid());
-		student = optionalStudent.orElseGet(() -> Student.builder()
+	private StudentEntity getStudent(AreteResponse response, CourseEntity course, SlugEntity slug) {
+		StudentEntity student;
+		Optional<StudentEntity> optionalStudent = studentRepository.findByUniid(response.getUniid());
+		student = optionalStudent.orElseGet(() -> StudentEntity.builder()
 				.uniid(response.getUniid())
 				.firstTested(response.getTimestamp())
 				.lastTested(response.getTimestamp())
@@ -241,11 +238,13 @@ public class AreteService {
 	}
 
 	private void saveJob(AreteResponse response) {
-		Job job = Job.builder()
+		JobEntity job = JobEntity.builder()
 				.output(response.getOutput().replace("\n", "<br>"))
-				.consoleOutput(response.getConsoleOutputs().stream().map(ConsoleOutput::getContent).collect(Collectors.joining()).replace("\n", "<br>"))
+				.consoleOutput(response.getConsoleOutputs().stream()
+						.map(ConsoleOutput::getContent).collect(Collectors.joining())
+						.replace("\n", "<br>"))
 				.testSuites(response.getTestSuites().stream()
-						.map(x -> ee.taltech.arete_admin_panel.domain.TestContext.builder()
+						.map(x -> TestContextEntity.builder()
 								.endDate(x.getEndDate())
 								.file(x.getFile())
 								.grade(x.getGrade())
@@ -255,7 +254,7 @@ public class AreteService {
 								.weight(x.getWeight())
 								.unitTests(
 										x.getUnitTests().stream()
-												.map(y -> ee.taltech.arete_admin_panel.domain.UnitTest.builder()
+												.map(y -> UnitTestEntity.builder()
 														.exceptionClass(y.getExceptionClass())
 														.exceptionMessage(y.getExceptionMessage())
 														.groupsDependedUpon(y.getGroupsDependedUpon())
@@ -291,8 +290,8 @@ public class AreteService {
 		jobRepository.save(job);
 	}
 
-	public Submission saveSubmission(AreteResponse response) {
-		Submission submission = Submission.builder()
+	public SubmissionEntity saveSubmission(AreteResponse response) {
+		SubmissionEntity submission = SubmissionEntity.builder()
 				.uniid(response.getUniid())
 				.slug(response.getSlug())
 				.hash(response.getHash())
@@ -319,7 +318,7 @@ public class AreteService {
 	}
 
 	public void makeRequestWebhook(AreteTestUpdate update, String testRepository) {
-		AreteTestUpdate.Commit latest = update.getCommits().get(0);
+		Commit latest = update.getCommits().get(0);
 
 		Set<String> slugs = new HashSet<>();
 		slugs.addAll(latest.getAdded());
@@ -329,7 +328,7 @@ public class AreteService {
 				.eMail(latest.getAuthor().getEmail())
 				.uniid(latest.getAuthor().getName())
 				.gitStudentRepo(update.getProject().getUrl())
-				.gitTestSource(testRepository)
+				.gitTestRepo(testRepository)
 				.slugs(slugs)
 				.build();
 
@@ -363,28 +362,28 @@ public class AreteService {
 
 	/////// CACHING
 
-	public Course updateCourse(Course course, Long id) {
+	public CourseEntity updateCourse(CourseEntity course, Long id) {
 		LOG.info("Updating course cache: {}", id);
 		courseRepository.save(course);
 		cacheService.updateCourseList(course);
 		return course;
 	}
 
-	public Slug updateSlug(Slug slug, Long id) {
+	public SlugEntity updateSlug(SlugEntity slug, Long id) {
 		LOG.info("Updating slug cache: {}", id);
 		slugRepository.save(slug);
 		cacheService.updateSlugList(slug);
 		return slug;
 	}
 
-	public Student updateStudent(Student student, Long id) {
+	public StudentEntity updateStudent(StudentEntity student, Long id) {
 		LOG.info("Updating student cache: {}", id);
 		studentRepository.save(student);
 		cacheService.updateStudentList(student);
 		return student;
 	}
 
-	public void updateSubmissions(Submission submission, String hash) {
+	public void updateSubmissions(SubmissionEntity submission, String hash) {
 		LOG.info("Updating submission cache: {}", hash);
 		submissionRepository.save(submission);
 		cacheService.updateSubmissionList(submission);

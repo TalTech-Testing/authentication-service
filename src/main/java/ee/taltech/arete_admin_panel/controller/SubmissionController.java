@@ -1,10 +1,10 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import arete.java.request.AreteRequest;
-import arete.java.request.AreteTestUpdate;
-import arete.java.response.AreteResponse;
-import ee.taltech.arete_admin_panel.domain.Job;
-import ee.taltech.arete_admin_panel.domain.Submission;
+import ee.taltech.arete.java.request.AreteRequest;
+import ee.taltech.arete.java.request.hook.AreteTestUpdate;
+import ee.taltech.arete.java.response.arete.AreteResponse;
+import ee.taltech.arete_admin_panel.domain.JobEntity;
+import ee.taltech.arete_admin_panel.domain.SubmissionEntity;
 import ee.taltech.arete_admin_panel.repository.JobRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
@@ -51,14 +51,14 @@ public class SubmissionController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached submissions", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<Submission> getSubmissions() {
+	public Collection<SubmissionEntity> getSubmissions() {
 		return cacheService.getSubmissionList();
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{hash}")
-	public Collection<Job> getSubmission(@PathVariable("hash") String hash) {
+	public Collection<JobEntity> getSubmission(@PathVariable("hash") String hash) {
 		LOG.info("Reading submission by hash {}", hash);
 		return jobRepository.findTop10ByHashOrderByIdDesc(hash);
 	}

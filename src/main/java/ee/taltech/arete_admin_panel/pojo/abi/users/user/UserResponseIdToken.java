@@ -1,7 +1,6 @@
 package ee.taltech.arete_admin_panel.pojo.abi.users.user;
 
 import ee.taltech.arete_admin_panel.domain.Role;
-import ee.taltech.arete_admin_panel.domain.User;
 import lombok.*;
 
 import java.util.List;

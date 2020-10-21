@@ -21,8 +21,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;
 
-@AutoConfigureTestDatabase
 @RunWith(SpringRunner.class)
+@AutoConfigureTestDatabase
 @SpringBootTest(
 		classes = AreteAdminPanelApplication.class,
 		webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -38,15 +38,19 @@ public class UserControllerTests {
 	@LocalServerPort
 	private int port;
 
+
 	@Before
-	public void init() {
+	public void beforeEach() {
 		RestAssured.port = port;
 		RestAssured.basePath = "/services/arete/api/v2";
 	}
 
-
 	@Test
 	public void adminCanLogIn() {
+
+		userService.getAllUsers().stream()
+				.filter(x -> !x.getUsername().equals("admin"))
+				.forEach(x -> userService.removeUser(x.getUsername()));
 
 		userService.addSuperUser("username", "password");
 
@@ -61,6 +65,10 @@ public class UserControllerTests {
 	@Test
 	public void userCanLogIn() {
 
+		userService.getAllUsers().stream()
+				.filter(x -> !x.getUsername().equals("admin"))
+				.forEach(x -> userService.removeUser(x.getUsername()));
+
 		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addNonAdminUser(auth);
 
@@ -72,6 +80,10 @@ public class UserControllerTests {
 
 	@Test
 	public void userCantAddNewUsers() {
+
+		userService.getAllUsers().stream()
+				.filter(x -> !x.getUsername().equals("admin"))
+				.forEach(x -> userService.removeUser(x.getUsername()));
 
 		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addNonAdminUser(auth);
@@ -91,6 +103,10 @@ public class UserControllerTests {
 
 	@Test
 	public void adminCanAddNewUsers() {
+
+		userService.getAllUsers().stream()
+				.filter(x -> !x.getUsername().equals("admin"))
+				.forEach(x -> userService.removeUser(x.getUsername()));
 
 		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addSuperUser("username", "password");

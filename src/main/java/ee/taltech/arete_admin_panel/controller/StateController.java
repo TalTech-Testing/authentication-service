@@ -1,6 +1,6 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import ee.taltech.arete_admin_panel.domain.SystemState;
+import ee.taltech.arete.java.response.arete.SystemState;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.StateService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,7 +50,7 @@ public class StateController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Return testers' state", tags = {"state"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@GetMapping("/tester")
-	public arete.java.response.SystemState getTesterState() {
+	public SystemState getTesterState() {
 		return areteService.getTesterState();
 	}
 

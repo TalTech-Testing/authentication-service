@@ -56,10 +56,10 @@ public class StudentController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns student with id", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public Student getStudent(@PathVariable("id") Long id) {
+	public StudentEntity getStudent(@PathVariable("id") Long id) {
 		try {
 			LOG.info("Reading student by id {}", id);
-			Optional<Student> studentOptional = studentRepository.findById(id);
+			Optional<StudentEntity> studentOptional = studentRepository.findById(id);
 			assert studentOptional.isPresent();
 			return studentOptional.get();
 		} catch (AssertionError e) {

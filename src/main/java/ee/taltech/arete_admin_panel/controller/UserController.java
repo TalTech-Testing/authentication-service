@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
-@Tag(name = "user", description = "User authentication")
+@Tag(name = "user", description = "UserEntity authentication")
 @RestController()
 @RequestMapping("services/arete/api/v2/user")
 public class UserController {

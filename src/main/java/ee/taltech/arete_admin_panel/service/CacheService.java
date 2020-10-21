@@ -1,7 +1,10 @@
 package ee.taltech.arete_admin_panel.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.taltech.arete_admin_panel.domain.*;
+import ee.taltech.arete_admin_panel.domain.CourseEntity;
+import ee.taltech.arete_admin_panel.domain.SlugEntity;
+import ee.taltech.arete_admin_panel.domain.StudentEntity;
+import ee.taltech.arete_admin_panel.domain.SubmissionEntity;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
@@ -10,12 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
+import java.util.*;
 
 @Service
 public class CacheService {
@@ -31,31 +29,31 @@ public class CacheService {
 	private final SlugTableDtoRepository slugTableDtoRepository;
 	private final SubmissionRepository submissionRepository;
 
-	HashMap<Long, Submission> submissionCache = new HashMap<>();
-	HashMap<Long, StudentTableDto> studentCache = new HashMap<>();
-	HashMap<Long, CourseTableDto> courseCache = new HashMap<>();
-	HashMap<Long, SlugTableDto> slugCache = new HashMap<>();
+	Map<Long, SubmissionEntity> submissionCache = new LinkedHashMap<>(10000, 0.75f, false);
+	Map<Long, StudentTableDto> studentCache = new LinkedHashMap<>(10000, 0.75f, false);
+	Map<Long, CourseTableDto> courseCache = new LinkedHashMap<>(10000, 0.75f, false);
+	Map<Long, SlugTableDto> slugCache = new LinkedHashMap<>(10000, 0.75f, false);
 
 
-	public void updateSubmissionList(Submission submission) {
+	public void updateSubmissionList(SubmissionEntity submission) {
 		LOG.debug("Update submission cache");
 		submissionCache.put(submission.getId(), submission);
 
 	}
 
-	public void updateStudentList(Student student) {
+	public void updateStudentList(StudentEntity student) {
 		LOG.debug("Update student cache");
 		StudentTableDto studentTableDto = objectMapper.convertValue(student, StudentTableDto.class);
 		studentCache.put(studentTableDto.getId(), studentTableDto);
 	}
 
-	public void updateCourseList(Course course) {
+	public void updateCourseList(CourseEntity course) {
 		LOG.debug("Update course cache");
 		CourseTableDto courseTableDto = objectMapper.convertValue(course, CourseTableDto.class);
 		courseCache.put(courseTableDto.getId(), courseTableDto);
 	}
 
-	public void updateSlugList(Slug slug) {
+	public void updateSlugList(SlugEntity slug) {
 		LOG.debug("Update slug cache");
 		SlugTableDto slugTableDto = objectMapper.convertValue(slug, SlugTableDto.class);
 		slugCache.put(slugTableDto.getId(), slugTableDto);
@@ -70,7 +68,7 @@ public class CacheService {
 		this.slugTableDtoRepository = slugTableDtoRepository;
 		this.submissionRepository = submissionRepository;
 
-		submissionRepository.findTop100ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
+		submissionRepository.findTop10000ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
 		LOG.info("Loaded submissions to cache");
 		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
 		LOG.info("Loaded students to cache");
@@ -80,7 +78,7 @@ public class CacheService {
 		LOG.info("Loaded slugs to cache");
 	}
 
-	public Collection<Submission> getSubmissionList() {
+	public Collection<SubmissionEntity> getSubmissionList() {
 		LOG.info("Reading all submissions from cache");
 		return submissionCache.values();
 	}
@@ -100,7 +98,7 @@ public class CacheService {
 		return slugCache.values();
 	}
 
-	public List<StudentTableDto> getAllStudents() {
+	private List<StudentTableDto> getAllStudents() {
 		LOG.info("Reading all students from cache");
 		return new ArrayList<>(studentTableDtoRepository.findAll());
 	}

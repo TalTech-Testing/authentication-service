@@ -118,6 +118,13 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.7.0</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Secure backend API -->
 
         <dependency>
@@ -176,15 +183,12 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <!--Communication with Arete-->
+        <!--Arete client-->
         <dependency>
-            <groupId>ee.taltech.arete</groupId>
-            <artifactId>arete-java</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/java/arete-java.jar</systemPath>
+            <groupId>ee.taltech.arete.java</groupId>
+            <artifactId>client</artifactId>
+            <version>1.0.2</version>
         </dependency>
-
     </dependencies>
 
     <build>

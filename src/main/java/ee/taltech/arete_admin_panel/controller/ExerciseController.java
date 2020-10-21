@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import arete.java.request.AreteTestUpdate;
-import ee.taltech.arete_admin_panel.domain.Slug;
+import ee.taltech.arete.java.request.hook.AreteTestUpdate;
+import ee.taltech.arete_admin_panel.domain.SlugEntity;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.repository.SlugRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javassist.NotFoundException;
@@ -59,10 +58,10 @@ public class ExerciseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns exercise by id", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public Slug getSlugsById(@PathVariable("id") Long id) {
+	public SlugEntity getSlugsById(@PathVariable("id") Long id) {
 		try {
 			LOG.info("Reading slug by id {}", id);
-			Optional<Slug> slugOptional = slugRepository.findById(id);
+			Optional<SlugEntity> slugOptional = slugRepository.findById(id);
 			assert slugOptional.isPresent();
 			return slugOptional.get();
 		} catch (AssertionError e) {
