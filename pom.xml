@@ -234,6 +234,12 @@
 
     <repositories>
         <repository>
+            <id>github</id>
+            <name>GitHub</name>
+            <url>https://maven.pkg.github.com/envomp/maven-packages/</url>
+        </repository>
+
+        <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
             <url>https://repo.spring.io/milestone</url>
