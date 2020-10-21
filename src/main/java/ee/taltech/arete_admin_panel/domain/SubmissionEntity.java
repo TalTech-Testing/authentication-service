@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 @Table(name = "submission")
 public class SubmissionEntity {
 
+    @Column(name = "submission_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

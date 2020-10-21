@@ -21,6 +21,7 @@ public class ConsoleOutputEntity {
     @Column(columnDefinition = "TEXT")
     String content;
 
+    @Column(name = "console_output_id")
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

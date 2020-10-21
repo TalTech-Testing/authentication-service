@@ -15,6 +15,7 @@ import javax.persistence.*;
 @Entity
 public class FileEntity {
 
+    @Column(name = "file_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

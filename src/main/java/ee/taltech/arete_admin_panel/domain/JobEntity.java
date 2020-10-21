@@ -16,6 +16,7 @@ import java.util.Set;
 @Table(name = "job")
 public class JobEntity {
 
+    @Column(name = "job_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

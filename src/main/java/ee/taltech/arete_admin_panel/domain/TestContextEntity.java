@@ -18,6 +18,7 @@ import java.util.List;
 @JsonClassDescription("Test results from test file")
 public class TestContextEntity {
 
+    @Column(name = "test_content_id")
     @OneToMany(cascade = {CascadeType.ALL})
     @JsonPropertyDescription("List of unittests tested")
     List<UnitTestEntity> unitTests;

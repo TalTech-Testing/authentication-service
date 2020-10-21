@@ -63,6 +63,7 @@ public class UnitTestEntity {
     @Column(columnDefinition = "TEXT")
     String exceptionMessage;
 
+    @Column(name = "unit_test_id")
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

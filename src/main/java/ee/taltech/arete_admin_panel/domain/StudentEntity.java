@@ -17,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class StudentEntity {
 
+    @Column(name = "student_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

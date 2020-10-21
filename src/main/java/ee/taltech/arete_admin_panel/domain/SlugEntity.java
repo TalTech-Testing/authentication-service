@@ -16,6 +16,7 @@ import java.util.Set;
 @Table(name = "slug")
 public class SlugEntity {
 
+    @Column(name = "slug_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
