@@ -70,7 +70,7 @@ public class ExerciseController {
 	}
 
 	@Operation(
-			parameters = {@Parameter(in = ParameterIn.HEADER, required = true, name = "X-Gitlab-Token",
+			parameters = {@Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
 					description = "gitlab token with structure: s\"{name} {password}\"")},
 			security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Gitlab-Token")},
 			summary = "Update an exercise",

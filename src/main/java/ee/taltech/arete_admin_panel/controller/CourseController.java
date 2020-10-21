@@ -72,7 +72,7 @@ public class CourseController {
 	}
 
 	@Operation(
-			parameters = {@Parameter(in = ParameterIn.HEADER, required = true, name = "X-Docker-Token", description = "docker token with structure: s\"{name} {password}\"")},
+			parameters = {@Parameter(in = ParameterIn.HEADER, name = "X-Docker-Token", description = "docker token with structure: s\"{name} {password}\"")},
 			security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Docker-Token")},
 			summary = "Update an image on which testing takes place",
 			tags = {"course"})
