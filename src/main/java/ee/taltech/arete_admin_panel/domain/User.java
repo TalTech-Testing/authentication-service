@@ -22,9 +22,8 @@ import static java.util.stream.Collectors.toList;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "users")
-public class UserEntity implements UserDetails {
+public class User implements UserDetails {
 
-    @Column(name = "user_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -84,7 +83,7 @@ public class UserEntity implements UserDetails {
     }
 
 
-    public UserEntity(String username, String password) {
+    public User(String username, String password) {
         SHA512 sha512 = new SHA512();
         String salt = sha512.generateHash();
         String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);
@@ -95,7 +94,7 @@ public class UserEntity implements UserDetails {
         this.roles.add(Role.USER);
     }
 
-	public UserEntity(String username, String password, Role role) {
+	public User(String username, String password, Role role) {
 		SHA512 sha512 = new SHA512();
 		String salt = sha512.generateHash();
 		String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);

@@ -15,13 +15,12 @@ import javax.persistence.*;
 @Table(name = "console_output")
 @Entity
 @JsonClassDescription("Stderr or Stdout")
-public class ConsoleOutputEntity {
+public class ConsoleOutput {
 
     @JsonPropertyDescription("Std message")
     @Column(columnDefinition = "TEXT")
     String content;
 
-    @Column(name = "console_output_id")
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

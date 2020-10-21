@@ -16,7 +16,7 @@ import java.util.List;
 @Table(name = "unit_test")
 @Entity
 @JsonClassDescription("Unit test")
-public class UnitTestEntity {
+public class UnitTest {
 
     @JsonPropertyDescription("Groups of unittests this unittest depends on. If any test fails in that group, this test is skipped")
     @ElementCollection
@@ -63,7 +63,6 @@ public class UnitTestEntity {
     @Column(columnDefinition = "TEXT")
     String exceptionMessage;
 
-    @Column(name = "unit_test_id")
     @JsonIgnore
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

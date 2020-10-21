@@ -14,9 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "job")
-public class JobEntity {
+public class Job {
 
-    @Column(name = "job_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -45,7 +44,7 @@ public class JobEntity {
     private String commitMessage;
 
     @OneToMany(cascade = {CascadeType.ALL})
-    private List<TestContextEntity> testSuites;
+    private List<TestContext> testSuites;
 
     @ElementCollection
     @CollectionTable(name = "docker_extra", joinColumns = @JoinColumn(name = "id"))

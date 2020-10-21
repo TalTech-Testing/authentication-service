@@ -13,9 +13,8 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Table(name = "file")
 @Entity
-public class FileEntity {
+public class File {
 
-    @Column(name = "file_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

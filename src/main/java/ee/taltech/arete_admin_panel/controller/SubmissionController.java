@@ -1,10 +1,10 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import ee.taltech.arete.java.request.AreteRequest;
-import ee.taltech.arete.java.request.hook.AreteTestUpdate;
-import ee.taltech.arete.java.response.arete.AreteResponse;
-import ee.taltech.arete_admin_panel.domain.JobEntity;
-import ee.taltech.arete_admin_panel.domain.SubmissionEntity;
+import ee.taltech.arete.java.request.AreteRequestDTO;
+import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
+import ee.taltech.arete.java.response.arete.AreteResponseDTO;
+import ee.taltech.arete_admin_panel.domain.Job;
+import ee.taltech.arete_admin_panel.domain.Submission;
 import ee.taltech.arete_admin_panel.repository.JobRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
@@ -49,26 +49,26 @@ public class SubmissionController {
         this.authenticationManager = authenticationManager;
     }
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached submissions", tags = {"submission"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/all")
-	public Collection<SubmissionEntity> getSubmissions() {
-		return cacheService.getSubmissionList();
-	}
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached submissions", tags = {"submission"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/all")
+    public Collection<Submission> getSubmissions() {
+        return cacheService.getSubmissionList();
+    }
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{hash}")
-	public Collection<JobEntity> getSubmission(@PathVariable("hash") String hash) {
-		LOG.info("Reading submission by hash {}", hash);
-		return jobRepository.findTop10ByHashOrderByIdDesc(hash);
-	}
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/{hash}")
+    public Collection<Job> getSubmission(@PathVariable("hash") String hash) {
+        LOG.info("Reading submission by hash {}", hash);
+        return jobRepository.findTop10ByHashOrderByIdDesc(hash);
+    }
 
     @SneakyThrows
     @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Add a new submission to database", tags = {"submission"})
     @ResponseStatus(HttpStatus.OK)
     @PostMapping(path = "")
-    public void parseJob(@RequestBody AreteResponse areteResponse) {
+    public void parseJob(@RequestBody AreteResponseDTO areteResponse) {
         if (!areteResponse.getReturnExtra().get("shared_secret").asText().equals(System.getenv().getOrDefault("SHARED_SECRET", "Please make sure that shared_secret is set up properly"))) {
             throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
         }
@@ -78,7 +78,7 @@ public class SubmissionController {
     @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all currently running submissions", tags = {"submission"})
     @ResponseStatus(HttpStatus.ACCEPTED)
     @GetMapping("/active")
-    public AreteRequest[] getActiveSubmissions() {
+    public AreteRequestDTO[] getActiveSubmissions() {
         return areteService.getActiveSubmissions();
     }
 
@@ -96,7 +96,7 @@ public class SubmissionController {
             }, summary = "Create a new submission which will be tested synchronously", tags = {"submission"})
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/:testSync")
-    public AreteResponse makeRequestSync(@RequestBody AreteRequest areteRequest) {
+    public AreteResponseDTO makeRequestSync(@RequestBody AreteRequestDTO areteRequest) {
         return areteService.makeRequestSync(areteRequest);
     }
 
@@ -114,7 +114,7 @@ public class SubmissionController {
             }, summary = "Create a new submission which will be tested asynchronously", tags = {"submission"})
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/:testAsync")
-    public void makeRequestAsync(@RequestBody AreteRequest areteRequest) {
+    public void makeRequestAsync(@RequestBody AreteRequestDTO areteRequest) {
         areteService.makeRequestAsync(areteRequest);
     }
 
@@ -134,7 +134,7 @@ public class SubmissionController {
             tags = {"submission"})
     @ResponseStatus(HttpStatus.ACCEPTED)
     @PostMapping("/:webhook/withTests")
-    public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdate areteTestUpdate, @RequestParam(name = "testRepository") String testRepository) {
+    public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdateDTO areteTestUpdate, @RequestParam(name = "testRepository") String testRepository) {
         areteService.makeRequestWebhook(areteTestUpdate, testRepository);
     }
 }

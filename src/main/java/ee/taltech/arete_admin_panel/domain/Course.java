@@ -14,9 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "course")
-public class CourseEntity {
+public class Course {
 
-    @Column(name = "course_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

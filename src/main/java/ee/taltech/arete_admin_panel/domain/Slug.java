@@ -14,9 +14,8 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "slug")
-public class SlugEntity {
+public class Slug {
 
-    @Column(name = "slug_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -12,9 +12,8 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "submission")
-public class SubmissionEntity {
+public class Submission {
 
-    @Column(name = "submission_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

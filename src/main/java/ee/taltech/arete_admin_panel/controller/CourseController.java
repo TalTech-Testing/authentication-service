@@ -1,6 +1,6 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import ee.taltech.arete_admin_panel.domain.CourseEntity;
+import ee.taltech.arete_admin_panel.domain.Course;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
 import ee.taltech.arete_admin_panel.repository.CourseRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
@@ -60,10 +60,10 @@ public class CourseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public CourseEntity getCoursesById(@PathVariable("id") Long id) {
+	public Course getCoursesById(@PathVariable("id") Long id) {
 		try {
 			LOG.info("Reading course by id {}", id);
-			Optional<CourseEntity> courseOptional = courseRepository.findById(id);
+			Optional<Course> courseOptional = courseRepository.findById(id);
 			assert courseOptional.isPresent();
 			return courseOptional.get();
 		} catch (AssertionError e) {

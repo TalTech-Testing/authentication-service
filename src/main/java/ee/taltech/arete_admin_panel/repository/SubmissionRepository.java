@@ -1,14 +1,14 @@
 package ee.taltech.arete_admin_panel.repository;
 
-import ee.taltech.arete_admin_panel.domain.SubmissionEntity;
+import ee.taltech.arete_admin_panel.domain.Submission;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface SubmissionRepository extends JpaRepository<SubmissionEntity, Long> {
+public interface SubmissionRepository extends JpaRepository<Submission, Long> {
 
-    List<SubmissionEntity> findTop500ByOrderByIdDesc();
-	List<SubmissionEntity> findTop10000ByOrderByIdDesc();
+    List<Submission> findTop500ByOrderByIdDesc();
+	List<Submission> findTop10000ByOrderByIdDesc();
 }

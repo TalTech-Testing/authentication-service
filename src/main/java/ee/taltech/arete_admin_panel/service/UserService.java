@@ -3,7 +3,7 @@ package ee.taltech.arete_admin_panel.service;
 import ee.taltech.arete_admin_panel.algorithms.SHA512;
 import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.domain.Role;
-import ee.taltech.arete_admin_panel.domain.UserEntity;
+import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.exception.UserNotFoundException;
 import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
@@ -43,14 +43,14 @@ public class UserService {
 	}
 
 	public void addSuperUser(String username, String password) {
-		UserEntity savedUser = userRepository.save(new UserEntity(username, password, Role.ADMIN));
+		User savedUser = userRepository.save(new User(username, password, Role.ADMIN));
 
 		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
 	}
 
 	public void addSuperUser(String username, String passwordHash, String salt) {
-		UserEntity savedUser = userRepository.save(
-				UserEntity.builder()
+		User savedUser = userRepository.save(
+				User.builder()
 						.username(username)
 						.passwordHash(passwordHash)
 						.salt(salt)
@@ -61,18 +61,18 @@ public class UserService {
 	}
 
 	public long saveAnyUser(FullUserDto user) {
-		UserEntity savedUser = userRepository.save(new UserEntity(user.getUsername(), user.getPassword(), user.getRole()));
+		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getRole()));
 		LOG.info(savedUser.getUsername() + " successfully saved into DB");
 		return savedUser.getId();
 	}
 
 	public long saveNonAdminUser(AuthenticationDto user) {
-		UserEntity savedUser = userRepository.save(new UserEntity(user.getUsername(), user.getPassword()));
+		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword()));
 		LOG.info(savedUser.getUsername() + " successfully saved into DB");
 		return savedUser.getId();
 	}
 
-	public UserEntity getUser(long id) {
+	public User getUser(long id) {
 		return userRepository
 				.findById(id)
 				.map(
@@ -82,12 +82,12 @@ public class UserService {
 						})
 				.orElseThrow(
 						() -> {
-							LOG.error(String.format("UserEntity with id %d was not found.", id));
+							LOG.error(String.format("User with id %d was not found.", id));
 							return new UserNotFoundException("The user with the id " + id + " couldn't be found in the database.");
 						});
 	}
 
-	public UserEntity getUser(String username) {
+	public User getUser(String username) {
 		return userRepository
 				.findByUsername(username)
 				.map(
@@ -97,16 +97,16 @@ public class UserService {
 						})
 				.orElseThrow(
 						() -> {
-							LOG.error(String.format("UserEntity with username %s was not found.", username));
+							LOG.error(String.format("User with username %s was not found.", username));
 							return new UserNotFoundException("The user with the username: " + username + " couldn't be found in the database.");
 						});
 	}
 
 	public long getHome(String username) {
-		Optional<UserEntity> user = userRepository.findByUsername(username);
+		Optional<User> user = userRepository.findByUsername(username);
 		if (user.isEmpty()) {
-			LOG.error(String.format("UserEntity with username %s was not found.", username));
-			throw new UserNotFoundException(String.format("UserEntity with username %s was not found.", username));
+			LOG.error(String.format("User with username %s was not found.", username));
+			throw new UserNotFoundException(String.format("User with username %s was not found.", username));
 		}
 		return user.get().getId();
 	}
@@ -122,7 +122,7 @@ public class UserService {
 				.build()).collect(Collectors.toList());
 	}
 
-	public void saveUser(UserEntity user) {
+	public void saveUser(User user) {
 		userRepository.saveAndFlush(user);
 	}
 
@@ -132,7 +132,7 @@ public class UserService {
 
 	public UserResponseIdToken authenticateUser(@RequestBody AuthenticationDto userDto) {
 		LOG.info("Authenticating user {}", userDto.getUsername());
-		UserEntity user = getUser(userDto.getUsername());
+		User user = getUser(userDto.getUsername());
 
 		SHA512 sha512 = new SHA512();
 		String passwordHash = sha512.get_SHA_512_SecurePassword(userDto.getPassword(), user.getSalt());
@@ -152,7 +152,7 @@ public class UserService {
 
 	public void updateUserProperties(@RequestBody UserDto userDto) {
 		LOG.info("Update user: {}", userDto);
-		UserEntity user = getUser(userDto.getUsername());
+		User user = getUser(userDto.getUsername());
 
 		if (userDto.getColor() != null) {
 			user.setColor(userDto.getColor());
@@ -180,7 +180,7 @@ public class UserService {
 			getUser(userDto.getUsername());
 		} catch (UserNotFoundException e) {
 			long userId = saveAnyUser(userDto);
-			UserEntity user = getUser(userId);
+			User user = getUser(userId);
 
 			return UserResponseIdToken.builder()
 					.username(user.getUsername())
@@ -191,7 +191,7 @@ public class UserService {
 					.build();
 		}
 
-		throw new DuplicateKeyException("UserEntity with that username already present");
+		throw new DuplicateKeyException("User with that username already present");
 	}
 
 	public UserResponseIdToken addNonAdminUser(@RequestBody AuthenticationDto userDto) {
@@ -201,7 +201,7 @@ public class UserService {
 			getUser(userDto.getUsername());
 		} catch (UserNotFoundException e) {
 			long userId = saveNonAdminUser(userDto);
-			UserEntity user = getUser(userId);
+			User user = getUser(userId);
 
 			return UserResponseIdToken.builder()
 					.username(user.getUsername())
@@ -220,7 +220,7 @@ public class UserService {
 	}
 
 	public Authentication getAuthentication(String token) {
-		UserEntity userDetails = getUser(getUsername(token));
+		User userDetails = getUser(getUsername(token));
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
 	}
 }

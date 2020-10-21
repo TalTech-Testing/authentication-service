@@ -16,12 +16,11 @@ import java.util.List;
 @Table(name = "text_context")
 @Entity
 @JsonClassDescription("Test results from test file")
-public class TestContextEntity {
+public class TestContext {
 
-    @Column(name = "test_content_id")
     @OneToMany(cascade = {CascadeType.ALL})
     @JsonPropertyDescription("List of unittests tested")
-    List<UnitTestEntity> unitTests;
+    List<UnitTest> unitTests;
 
     @Column(length = 1023)
     @JsonPropertyDescription("Test name")

@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import ee.taltech.arete.java.request.hook.AreteTestUpdate;
-import ee.taltech.arete_admin_panel.domain.SlugEntity;
+import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
+import ee.taltech.arete_admin_panel.domain.Slug;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.repository.SlugRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
@@ -58,10 +58,10 @@ public class ExerciseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns exercise by id", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public SlugEntity getSlugsById(@PathVariable("id") Long id) {
+	public Slug getSlugsById(@PathVariable("id") Long id) {
 		try {
 			LOG.info("Reading slug by id {}", id);
-			Optional<SlugEntity> slugOptional = slugRepository.findById(id);
+			Optional<Slug> slugOptional = slugRepository.findById(id);
 			assert slugOptional.isPresent();
 			return slugOptional.get();
 		} catch (AssertionError e) {
@@ -77,14 +77,14 @@ public class ExerciseController {
 			tags = {"exercise"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("")
-	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdate areteTestUpdate) {
+	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdateDTO areteTestUpdate) {
 		areteService.updateTests(areteTestUpdate);
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an exercise", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PutMapping("")
-	public void makeRequestAsync(@RequestBody AreteTestUpdate areteTestUpdate) {
+	public void makeRequestAsync(@RequestBody AreteTestUpdateDTO areteTestUpdate) {
 		areteService.updateTests(areteTestUpdate);
 	}
 

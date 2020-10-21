@@ -1,10 +1,10 @@
 package ee.taltech.arete_admin_panel.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.taltech.arete_admin_panel.domain.CourseEntity;
-import ee.taltech.arete_admin_panel.domain.SlugEntity;
-import ee.taltech.arete_admin_panel.domain.StudentEntity;
-import ee.taltech.arete_admin_panel.domain.SubmissionEntity;
+import ee.taltech.arete_admin_panel.domain.Course;
+import ee.taltech.arete_admin_panel.domain.Slug;
+import ee.taltech.arete_admin_panel.domain.Student;
+import ee.taltech.arete_admin_panel.domain.Submission;
 import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
@@ -29,31 +29,31 @@ public class CacheService {
 	private final SlugTableDtoRepository slugTableDtoRepository;
 	private final SubmissionRepository submissionRepository;
 
-	Map<Long, SubmissionEntity> submissionCache = new LinkedHashMap<>(10000, 0.75f, false);
+	Map<Long, Submission> submissionCache = new LinkedHashMap<>(10000, 0.75f, false);
 	Map<Long, StudentTableDto> studentCache = new LinkedHashMap<>(10000, 0.75f, false);
 	Map<Long, CourseTableDto> courseCache = new LinkedHashMap<>(10000, 0.75f, false);
 	Map<Long, SlugTableDto> slugCache = new LinkedHashMap<>(10000, 0.75f, false);
 
 
-	public void updateSubmissionList(SubmissionEntity submission) {
+	public void updateSubmissionList(Submission submission) {
 		LOG.debug("Update submission cache");
 		submissionCache.put(submission.getId(), submission);
 
 	}
 
-	public void updateStudentList(StudentEntity student) {
+	public void updateStudentList(Student student) {
 		LOG.debug("Update student cache");
 		StudentTableDto studentTableDto = objectMapper.convertValue(student, StudentTableDto.class);
 		studentCache.put(studentTableDto.getId(), studentTableDto);
 	}
 
-	public void updateCourseList(CourseEntity course) {
+	public void updateCourseList(Course course) {
 		LOG.debug("Update course cache");
 		CourseTableDto courseTableDto = objectMapper.convertValue(course, CourseTableDto.class);
 		courseCache.put(courseTableDto.getId(), courseTableDto);
 	}
 
-	public void updateSlugList(SlugEntity slug) {
+	public void updateSlugList(Slug slug) {
 		LOG.debug("Update slug cache");
 		SlugTableDto slugTableDto = objectMapper.convertValue(slug, SlugTableDto.class);
 		slugCache.put(slugTableDto.getId(), slugTableDto);
@@ -78,7 +78,7 @@ public class CacheService {
 		LOG.info("Loaded slugs to cache");
 	}
 
-	public Collection<SubmissionEntity> getSubmissionList() {
+	public Collection<Submission> getSubmissionList() {
 		LOG.info("Reading all submissions from cache");
 		return submissionCache.values();
 	}
