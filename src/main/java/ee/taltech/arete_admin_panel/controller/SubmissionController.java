@@ -105,8 +105,23 @@ public class SubmissionController {
 			}, summary = "Create a new submission which will be tested synchronously", tags = {"submission"})
 	@ResponseStatus(HttpStatus.ACCEPTED)
 	@PostMapping("/:testSync")
-	public AreteResponseDTO makeRequestSync(@RequestBody AreteRequestDTO areteRequest) {
-		return areteService.makeRequestSync(areteRequest);
+	@SneakyThrows
+	public AreteResponseDTO makeRequestSync(HttpEntity<String> httpEntity) {
+		AreteRequestDTO requestDTO = supportOldValues(httpEntity);
+		return areteService.makeRequestSync(requestDTO);
+	}
+
+	private AreteRequestDTO supportOldValues(HttpEntity<String> httpEntity) throws com.fasterxml.jackson.core.JsonProcessingException {
+		UPDATE hack = objectMapper.readValue(httpEntity.getBody(), UPDATE.class);
+		ObjectNode obj = objectMapper.readValue(httpEntity.getBody(), ObjectNode.class);
+		obj.remove("dockerExtra");
+		AreteRequestDTO requestDTO = objectMapper.readValue(objectMapper.writeValueAsString(obj), AreteRequestDTO.class);
+		requestDTO.setGitTestRepo(hack.getGitTestSource());
+		if (hack.getDockerExtra() == null) {
+			hack.setDockerExtra(new String[]{});
+		}
+		requestDTO.setDockerExtra(String.join(",", hack.getDockerExtra()));
+		return requestDTO;
 	}
 
 	@Operation(
@@ -125,15 +140,7 @@ public class SubmissionController {
 	@PostMapping("/:testAsync")
 	@SneakyThrows
 	public void makeRequestAsync(HttpEntity<String> httpEntity) {
-		UPDATE hack = objectMapper.readValue(httpEntity.getBody(), UPDATE.class);
-		ObjectNode obj = objectMapper.readValue(httpEntity.getBody(), ObjectNode.class);
-		obj.remove("dockerExtra");
-		AreteRequestDTO requestDTO = objectMapper.readValue(objectMapper.writeValueAsString(obj), AreteRequestDTO.class);
-		requestDTO.setGitTestRepo(hack.getGitTestSource());
-		if (hack.getDockerExtra() == null) {
-			hack.setDockerExtra(new String[]{});
-		}
-		requestDTO.setDockerExtra(String.join(",", hack.getDockerExtra()));
+		AreteRequestDTO requestDTO = supportOldValues(httpEntity);
 		areteService.makeRequestAsync(requestDTO);
 	}
 
