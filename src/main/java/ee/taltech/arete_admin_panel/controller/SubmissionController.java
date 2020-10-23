@@ -126,10 +126,13 @@ public class SubmissionController {
 	@SneakyThrows
 	public void makeRequestAsync(HttpEntity<String> httpEntity) {
 		UPDATE hack = objectMapper.readValue(httpEntity.getBody(), UPDATE.class);
-		ObjectNode obj = objectMapper.valueToTree(httpEntity.getBody());
+		ObjectNode obj = objectMapper.readValue(httpEntity.getBody(), ObjectNode.class);
 		obj.remove("dockerExtra");
-		AreteRequestDTO requestDTO = objectMapper.readValue(obj.asText(), AreteRequestDTO.class);
+		AreteRequestDTO requestDTO = objectMapper.readValue(objectMapper.writeValueAsString(obj), AreteRequestDTO.class);
 		requestDTO.setGitTestRepo(hack.getGitTestSource());
+		if (hack.getDockerExtra() == null) {
+			hack.setDockerExtra(new String[]{});
+		}
 		requestDTO.setDockerExtra(String.join(",", hack.getDockerExtra()));
 		areteService.makeRequestAsync(requestDTO);
 	}
