@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Table(name = "text_context")
 @Entity
-@JsonClassDescription("Test results from test file")
+@JsonClassDescription("UPDATE results from test file")
 public class TestContext {
 
     @OneToMany(cascade = {CascadeType.ALL})
@@ -23,17 +23,17 @@ public class TestContext {
     List<UnitTest> unitTests;
 
     @Column(length = 1023)
-    @JsonPropertyDescription("Test name")
+    @JsonPropertyDescription("UPDATE name")
     String name;
 
     @Column(length = 1023)
-    @JsonPropertyDescription("Test file path")
+    @JsonPropertyDescription("UPDATE file path")
     String file;
 
-    @JsonPropertyDescription("Test start time")
+    @JsonPropertyDescription("UPDATE start time")
     Long startDate;
 
-    @JsonPropertyDescription("Test end time")
+    @JsonPropertyDescription("UPDATE end time")
     Long endDate;
 
 //	String mode;

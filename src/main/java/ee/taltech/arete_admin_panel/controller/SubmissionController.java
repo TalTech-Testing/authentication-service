@@ -1,6 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
 import ee.taltech.arete.java.response.arete.AreteResponseDTO;
@@ -124,9 +125,12 @@ public class SubmissionController {
 	@PostMapping("/:testAsync")
 	@SneakyThrows
 	public void makeRequestAsync(HttpEntity<String> httpEntity) {
-		Test hack = objectMapper.readValue(httpEntity.getBody(), Test.class);
-		AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
+		UPDATE hack = objectMapper.readValue(httpEntity.getBody(), UPDATE.class);
+		ObjectNode obj = objectMapper.valueToTree(httpEntity.getBody());
+		obj.remove("dockerExtra");
+		AreteRequestDTO requestDTO = objectMapper.readValue(obj.asText(), AreteRequestDTO.class);
 		requestDTO.setGitTestRepo(hack.getGitTestSource());
+		requestDTO.setDockerExtra(String.join(",", hack.getDockerExtra()));
 		areteService.makeRequestAsync(requestDTO);
 	}
 

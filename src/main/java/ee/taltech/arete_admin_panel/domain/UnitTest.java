@@ -28,7 +28,7 @@ public class UnitTest {
     @JsonPropertyDescription("One of the following (success, partial_success, passed, skipped, not_run, failiure, failed, not_set, unknown")
     String status;
 
-    @JsonPropertyDescription("Test weight")
+    @JsonPropertyDescription("UPDATE weight")
     Integer weight;
 
     @JsonPropertyDescription("Boolean whether to show exception message to student or not")
@@ -52,7 +52,7 @@ public class UnitTest {
     String stackTrace;
 
     @Column(length = 1023)
-    @JsonPropertyDescription("Test name")
+    @JsonPropertyDescription("UPDATE name")
     String name;
 
     @Column(length = 1023)

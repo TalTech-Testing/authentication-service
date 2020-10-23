@@ -9,6 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Test {
+public class UPDATE {
 	private String gitTestSource;
+	private String[] dockerExtra;
 }
