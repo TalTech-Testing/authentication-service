@@ -66,7 +66,6 @@ public class UserService {
 				.username(user.getUsername())
 				.color(user.getColor())
 				.id(user.getId())
-				.password(user.getPasswordHash())
 				.roles(user.getRoles())
 				.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
 				.build()).collect(Collectors.toList());
