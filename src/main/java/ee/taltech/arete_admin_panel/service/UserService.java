@@ -9,7 +9,7 @@ import ee.taltech.arete_admin_panel.exception.UserWrongCredentials;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.FullUserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseDTO;
 import ee.taltech.arete_admin_panel.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import org.slf4j.Logger;
@@ -60,66 +60,19 @@ public class UserService {
 		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
 	}
 
-	public long saveAnyUser(FullUserDto user) {
-		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getRole()));
-		LOG.info(savedUser.getUsername() + " successfully saved into DB");
-		return savedUser.getId();
-	}
-
-	public long saveNonAdminUser(AuthenticationDto user) {
-		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword()));
-		LOG.info(savedUser.getUsername() + " successfully saved into DB");
-		return savedUser.getId();
-	}
-
-	public User getUser(long id) {
-		return userRepository
-				.findById(id)
-				.map(
-						user -> {
-							LOG.info("Reading user with id " + id + " from database.");
-							return user;
-						})
-				.orElseThrow(
-						() -> {
-							LOG.error(String.format("User with id %d was not found.", id));
-							return new UserNotFoundException("The user with the id " + id + " couldn't be found in the database.");
-						});
-	}
-
-	public Optional<User> getUser(String username) {
-		return userRepository.findByUsername(username);
-	}
-
-	public long getHome(String username) {
-		Optional<User> user = userRepository.findByUsername(username);
-		if (user.isEmpty()) {
-			LOG.error(String.format("User with username %s was not found.", username));
-			throw new UserNotFoundException(String.format("User with username %s was not found.", username));
-		}
-		return user.get().getId();
-	}
-
-	public List<UserResponseIdToken> getAllUsers() {
+	public List<UserResponseDTO> getAllUsers() {
 		LOG.info("getting all users");
-		return userRepository.findAll().stream().map(user -> UserResponseIdToken.builder()
+		return userRepository.findAll().stream().map(user -> UserResponseDTO.builder()
 				.username(user.getUsername())
 				.color(user.getColor())
 				.id(user.getId())
+				.password(user.getPasswordHash())
 				.roles(user.getRoles())
 				.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
 				.build()).collect(Collectors.toList());
 	}
 
-	public void saveUser(User user) {
-		userRepository.saveAndFlush(user);
-	}
-
-	public void removeUser(String username) {
-		userRepository.deleteByUsername(username);
-	}
-
-	public UserResponseIdToken authenticateUser(@RequestBody AuthenticationDto userDto) {
+	public UserResponseDTO authenticateUser(@RequestBody AuthenticationDto userDto) {
 		LOG.info("Authenticating user {}", userDto.getUsername());
 		Optional<User> userOptional = getUser(userDto.getUsername());
 
@@ -132,10 +85,11 @@ public class UserService {
 				throw new UserWrongCredentials("Wrong login.");
 			}
 
-			return UserResponseIdToken.builder()
+			return UserResponseDTO.builder()
 					.username(user.getUsername())
 					.color(user.getColor())
 					.id(user.getId())
+					.password(userDto.getPassword())
 					.roles(user.getRoles())
 					.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
 					.build();
@@ -143,6 +97,10 @@ public class UserService {
 			throw new UserNotFoundException("user with username: " + userDto.getUsername() + " was not found.");
 		}
 
+	}
+
+	public Optional<User> getUser(String username) {
+		return userRepository.findByUsername(username);
 	}
 
 	public void updateUserProperties(@RequestBody UserDto userDto) {
@@ -158,6 +116,10 @@ public class UserService {
 
 			saveUser(user);
 		}
+	}
+
+	public void saveUser(User user) {
+		userRepository.saveAndFlush(user);
 	}
 
 	public AuthenticationDto deleteNonAdminUser(@RequestBody AuthenticationDto userDto) {
@@ -180,28 +142,43 @@ public class UserService {
 		return userDto;
 	}
 
-	public UserResponseIdToken addUser(@RequestBody FullUserDto userDto) {
-		LOG.info("Add user: {}", userDto.getUsername());
+	public void removeUser(String username) {
+		userRepository.deleteByUsername(username);
+	}
 
-		try {
-			getUser(userDto.getUsername());
-		} catch (UserNotFoundException e) {
+	public UserResponseDTO addUser(@RequestBody FullUserDto userDto) {
+		LOG.info("Add user: {}", userDto.getUsername());
+		if (getUser(userDto.getUsername()).isPresent()) {
+			throw new DuplicateKeyException("User with that username already present");
+		} else {
 			long userId = saveAnyUser(userDto);
 			User user = getUser(userId);
 
-			return UserResponseIdToken.builder()
+			return UserResponseDTO.builder()
 					.username(user.getUsername())
 					.color(user.getColor())
 					.id(user.getId())
+					.password(userDto.getPassword())
 					.roles(user.getRoles())
 					.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
 					.build();
 		}
 
-		throw new DuplicateKeyException("User with that username already present");
 	}
 
-	public UserResponseIdToken addNonAdminUser(@RequestBody AuthenticationDto userDto) {
+	public long saveAnyUser(FullUserDto user) {
+		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getRole()));
+		LOG.info(savedUser.getUsername() + " successfully saved into DB");
+		return savedUser.getId();
+	}
+
+	public User getUser(long id) {
+		return userRepository
+				.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("The user with the id " + id + " couldn't be found in the database."));
+	}
+
+	public UserResponseDTO addNonAdminUser(@RequestBody AuthenticationDto userDto) {
 		LOG.info("Add user: {}", userDto.getUsername());
 
 		if (getUser(userDto.getUsername()).isPresent()) {
@@ -210,23 +187,30 @@ public class UserService {
 			long userId = saveNonAdminUser(userDto);
 			User user = getUser(userId);
 
-			return UserResponseIdToken.builder()
+			return UserResponseDTO.builder()
 					.username(user.getUsername())
 					.color(user.getColor())
 					.id(user.getId())
+					.password(userDto.getPassword())
 					.roles(user.getRoles())
 					.token(jwtTokenProvider.createToken(user.getUsername(), user.getRoles().stream().map(Enum::toString).collect(Collectors.toList())))
 					.build();
 		}
 	}
 
-	public String getUsername(String token) {
-		return Jwts.parser().setSigningKey(jwtTokenProvider.getSecretKey()).parseClaimsJws(token).getBody().getSubject();
+	public long saveNonAdminUser(AuthenticationDto user) {
+		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword()));
+		LOG.info(savedUser.getUsername() + " successfully saved into DB");
+		return savedUser.getId();
 	}
 
 	public Authentication getAuthentication(String token) {
 		User userDetails = getUser(getUsername(token)).orElseThrow(() -> new UserNotFoundException("suitable user wasn't found"));
 		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+	}
+
+	public String getUsername(String token) {
+		return Jwts.parser().setSigningKey(jwtTokenProvider.getSecretKey()).parseClaimsJws(token).getBody().getSubject();
 	}
 }
 

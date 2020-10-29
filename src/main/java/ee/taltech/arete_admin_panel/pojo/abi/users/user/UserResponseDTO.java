@@ -10,7 +10,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserResponseIdToken {
+public class UserResponseDTO {
 
     private long id;
 
@@ -21,6 +21,8 @@ public class UserResponseIdToken {
     private String username;
 
     private String color;
+
+    private String password;
 
 }
 

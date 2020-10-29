@@ -3,7 +3,7 @@ package ee.taltech.arete_admin_panel.controller;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.FullUserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseDTO;
 import ee.taltech.arete_admin_panel.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -41,14 +41,14 @@ public class UserController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Gets all users", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public List<UserResponseIdToken> getAllUsers() {
+	public List<UserResponseDTO> getAllUsers() {
 		return userService.getAllUsers();
 	}
 
 	@Operation(summary = "Generates a JWT upon authenticating user input", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = "/auth")
-	public UserResponseIdToken authenticate(@RequestBody AuthenticationDto userDto) {
+	public UserResponseDTO authenticate(@RequestBody AuthenticationDto userDto) {
 		return userService.authenticateUser(userDto);
 	}
 
@@ -56,7 +56,7 @@ public class UserController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Adds a new non admin user to database", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = "")
-	public UserResponseIdToken addUser(@RequestBody AuthenticationDto userDto) {
+	public UserResponseDTO addUser(@RequestBody AuthenticationDto userDto) {
 		return userService.addNonAdminUser(userDto);
 	}
 
@@ -64,7 +64,7 @@ public class UserController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Adds a new user to database", tags = {"user"})
 	@ResponseStatus(HttpStatus.OK)
 	@PostMapping(path = "/any")
-	public UserResponseIdToken addAnyUser(@RequestBody FullUserDto userDto) {
+	public UserResponseDTO addAnyUser(@RequestBody FullUserDto userDto) {
 		return userService.addUser(userDto);
 	}
 

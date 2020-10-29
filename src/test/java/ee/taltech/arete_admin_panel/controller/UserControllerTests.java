@@ -3,7 +3,7 @@ package ee.taltech.arete_admin_panel.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.AreteAdminPanelApplication;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseIdToken;
+import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseDTO;
 import ee.taltech.arete_admin_panel.service.UserService;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -56,7 +56,7 @@ public class UserControllerTests {
 
 		AuthenticationDto auth = new AuthenticationDto("username", "password");
 
-		UserResponseIdToken token = getUserToken(auth);
+		UserResponseDTO token = getUserToken(auth);
 
 		assert token.getUsername().equals("username");
 		assert token.getToken() != null;
@@ -72,7 +72,7 @@ public class UserControllerTests {
 		AuthenticationDto auth = new AuthenticationDto("username", "password");
 		userService.addNonAdminUser(auth);
 
-		UserResponseIdToken token = getUserToken(auth);
+		UserResponseDTO token = getUserToken(auth);
 
 		assert token.getUsername().equals("username");
 		assert token.getToken() != null;
@@ -89,7 +89,7 @@ public class UserControllerTests {
 		userService.addNonAdminUser(auth);
 		AuthenticationDto newUser = new AuthenticationDto("user", "password");
 
-		UserResponseIdToken token = getUserToken(auth);
+		UserResponseDTO token = getUserToken(auth);
 
 		given()
 				.when()
@@ -112,7 +112,7 @@ public class UserControllerTests {
 		userService.addSuperUser("username", "password");
 		AuthenticationDto newUser = new AuthenticationDto("user", "password");
 
-		UserResponseIdToken token = getUserToken(auth);
+		UserResponseDTO token = getUserToken(auth);
 
 		given()
 				.when()
@@ -124,7 +124,7 @@ public class UserControllerTests {
 				.statusCode(is(HttpStatus.SC_OK));
 	}
 
-	private UserResponseIdToken getUserToken(AuthenticationDto auth) {
+	private UserResponseDTO getUserToken(AuthenticationDto auth) {
 		return given()
 				.when()
 				.body(auth)
@@ -134,7 +134,7 @@ public class UserControllerTests {
 				.statusCode(is(HttpStatus.SC_OK))
 				.extract()
 				.body()
-				.as(UserResponseIdToken.class);
+				.as(UserResponseDTO.class);
 	}
 
 }
