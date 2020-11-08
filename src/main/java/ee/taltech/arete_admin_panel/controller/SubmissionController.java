@@ -116,7 +116,9 @@ public class SubmissionController {
 		ObjectNode obj = objectMapper.readValue(httpEntity.getBody(), ObjectNode.class);
 		obj.remove("dockerExtra");
 		AreteRequestDTO requestDTO = objectMapper.readValue(objectMapper.writeValueAsString(obj), AreteRequestDTO.class);
-		requestDTO.setGitTestRepo(hack.getGitTestSource());
+		if (requestDTO.getGitTestRepo() == null) {
+			requestDTO.setGitTestRepo(hack.getGitTestSource());
+		}
 		return requestDTO;
 	}
 
