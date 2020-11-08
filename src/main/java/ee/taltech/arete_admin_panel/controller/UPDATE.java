@@ -11,5 +11,4 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UPDATE {
 	private String gitTestSource;
-	private String[] dockerExtra;
 }
