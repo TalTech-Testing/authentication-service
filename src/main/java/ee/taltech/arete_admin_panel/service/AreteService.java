@@ -1,5 +1,6 @@
 package ee.taltech.arete_admin_panel.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete.java.AreteClient;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
@@ -7,6 +8,7 @@ import ee.taltech.arete.java.request.hook.CommitDTO;
 import ee.taltech.arete.java.response.arete.*;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
@@ -88,8 +90,12 @@ public class AreteService {
 		}
 	}
 
+	@SneakyThrows
 	public void parseAreteResponseDTO(AreteResponseDTO response) {
 		setDefaultValuesIfNull(response);
+
+		System.out.println(new ObjectMapper().writeValueAsString(response));
+
 		saveSubmission(response);
 		saveJob(response);
 
