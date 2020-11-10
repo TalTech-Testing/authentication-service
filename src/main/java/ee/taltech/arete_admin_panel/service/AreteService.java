@@ -192,7 +192,7 @@ public class AreteService {
 				.timestamp(response.getTimestamp())
 				.uniid(response.getUniid())
 				.slug(response.getSlug())
-				.root(response.getRoot())
+				.root(response.getRoot() == null ? response.getSlug() : response.getRoot())
 				.testingPlatform(response.getTestingPlatform())
 				.priority(response.getPriority())
 				.hash(response.getHash())
@@ -204,6 +204,7 @@ public class AreteService {
 				.dockerExtra(Set.of(response.getDockerExtra()))
 				.systemExtra(response.getSystemExtra())
 				.build();
+
 
 		LOG.info("Saving job");
 		jobRepository.save(job);
