@@ -70,7 +70,8 @@ public class AreteService {
 				try {
 					halted = true;
 					parseAreteResponseDTO(response);
-				} catch (Exception ignored) {
+				} catch (Exception e) {
+					e.printStackTrace();
 				} finally {
 					halted = false;
 					antiStuckQueue = 20;
