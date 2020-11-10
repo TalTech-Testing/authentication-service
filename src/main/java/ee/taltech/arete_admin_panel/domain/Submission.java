@@ -30,19 +30,17 @@ public class Submission {
     @NotNull
     private String uniid = "NaN"; // gitlab namespace: envomp
 
-    @NotNull
     private String root; // gitlab path for student: iti0102-2019
 
     private String gitStudentRepo;
 
-    @NotNull
     private String gitTestSource;
 
     @NotNull
     private Long timestamp;
 
-	@Builder.Default
 	@NotNull
+	@Builder.Default
 	private boolean failed = false;
 
 }

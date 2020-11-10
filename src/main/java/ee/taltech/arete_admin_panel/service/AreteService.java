@@ -137,6 +137,14 @@ public class AreteService {
 		if (response.getOutput() == null) {
 			response.setOutput("no output");
 		}
+
+		if (response.getRoot() == null) {
+			response.setRoot(response.getSlug());
+		}
+
+		if (response.getTimestamp() == null) {
+			response.setTimestamp(System.currentTimeMillis());
+		}
 	}
 
 	public Submission saveSubmission(AreteResponseDTO response) {
@@ -192,7 +200,7 @@ public class AreteService {
 				.timestamp(response.getTimestamp())
 				.uniid(response.getUniid())
 				.slug(response.getSlug())
-				.root(response.getRoot() == null ? response.getSlug() : response.getRoot())
+				.root(response.getRoot())
 				.testingPlatform(response.getTestingPlatform())
 				.priority(response.getPriority())
 				.hash(response.getHash())

@@ -56,8 +56,7 @@ public class Job {
     private Integer dockerTimeout;
 
     @NotNull
-	@Builder.Default
-    private Long timestamp = System.currentTimeMillis();
+    private Long timestamp;
 
     private Integer priority;
 
