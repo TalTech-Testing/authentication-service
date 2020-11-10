@@ -93,9 +93,6 @@ public class AreteService {
 	@SneakyThrows
 	public void parseAreteResponseDTO(AreteResponseDTO response) {
 		setDefaultValuesIfNull(response);
-
-		System.out.println(new ObjectMapper().writeValueAsString(response));
-
 		saveSubmission(response);
 		saveJob(response);
 
