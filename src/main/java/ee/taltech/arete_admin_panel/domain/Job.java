@@ -25,7 +25,6 @@ public class Job {
 
     private String gitStudentRepo;
 
-    @NotNull
     private String gitTestRepo;
 
     @NotNull
@@ -57,7 +56,7 @@ public class Job {
     private Integer dockerTimeout;
 
     @NotNull
-    private Long timestamp;
+    private Long timestamp = System.currentTimeMillis();
 
     private Integer priority;
 
