@@ -10,10 +10,10 @@
     </parent>
     <packaging>jar</packaging>
     <groupId>ee.taltech</groupId>
-    <artifactId>arete-ui-back</artifactId>
+    <artifactId>authentication-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>arete-ui-back</name>
-    <description>Arete UI backend</description>
+    <name>authentication-service</name>
+    <description>Authentication service</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

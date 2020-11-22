@@ -2,8 +2,8 @@ version: '3.4'
 
 services:
 
-  arete_ui_back_db:
-    container_name: postgres_arete_ui
+  postgres:
+    container_name: postgres
     image: postgres:11.5
     restart: unless-stopped
     environment:
@@ -13,27 +13,27 @@ services:
     ports:
       - "5433:5432"
 
-  arete_ui_adminer:
-    container_name: adminer_arete_ui
+  arete:
+    container_name: adminer
     image: adminer
     restart: unless-stopped
     ports:
       - "8190:8080"
 
-  arete_ui_back:
-    container_name: arete_ui_back
-    image: arete_ui_back:latest
+  authentication_service:
+    container_name: authentication_service
+    image: authentication_service:latest
     restart: unless-stopped
     network_mode: "host" # communication to arete testing service
     build:
       context: .
     env_file:
-      - ..env #Change to .env to run locally
+      - .env
     environment:
       ADMIN_PASS: ${ADMIN_PASS:-false} # false means that one hardcoded pass will be used
       SHARED_SECRET: ${SHARED_SECRET:-0fpvg4Bv1CfIjn4DyHhzd70ftjwOcTZ0SqpE9wprzLjMbbA8H5pvVirtJvE4rBvVj0z8UW0n}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
     depends_on:
-      - arete_ui_back_db
+      - postgres
     ports:
       - "8001:8001"

@@ -2,14 +2,14 @@ version: '3.4'
 
 services:
 
-  arete_ui_back:
-    container_name: arete_ui_back
-    image: arete_ui_back:latest
+  authentication_service:
+    container_name: authentication_service
+    image: authentication_service:latest
     restart: unless-stopped
     network_mode: "host" # communication to arete testing service
     build:
       context: .
     env_file:
-      - ..env #Change to .env to run locally
+      - .env
     ports:
       - "8001:8001"
