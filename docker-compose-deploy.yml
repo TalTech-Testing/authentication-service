@@ -1,25 +1,6 @@
 version: '3.4'
 
 services:
-
-  postgres:
-    container_name: postgres
-    image: postgres:11.5
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: arete
-      POSTGRES_DB: arete
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
-    ports:
-      - "5433:5432"
-
-  arete:
-    container_name: adminer
-    image: adminer
-    restart: unless-stopped
-    ports:
-      - "8190:8080"
-
   authentication_service:
     container_name: authentication_service
     image: authentication_service:latest
@@ -33,7 +14,7 @@ services:
       ADMIN_PASS: ${ADMIN_PASS:-false} # false means that one hardcoded pass will be used
       SHARED_SECRET: ${SHARED_SECRET:-0fpvg4Bv1CfIjn4DyHhzd70ftjwOcTZ0SqpE9wprzLjMbbA8H5pvVirtJvE4rBvVj0z8UW0n}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
-    depends_on:
+    external_link:
       - postgres
     ports:
       - "8001:8001"
