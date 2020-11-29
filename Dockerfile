@@ -8,9 +8,9 @@ RUN chmod +x mvnw && ./mvnw clean install -DskipTests
 
 MAINTAINER enrico.vompa@gmail.com
 
-ENV JAVA_OPTS="-Xms8192m -Xmx8192m"
+ENV JAVA_OPTS="-Xms8192m -Xmx8192m -Djava.security.egd=file:/dev/./urandom -jar"
 
 # Fire up our Spring Boot app by default
-ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS -Djava.security.egd=file:/dev/./urandom -jar /authentication_service/target/authentication-service-0.0.1-SNAPSHOT.jar" ]
+ENTRYPOINT [ "sh", "-c", "java $JAVA_OPTS /authentication_service/target/authentication-service-1.0.jar" ]
 
 EXPOSE 8001:8001
