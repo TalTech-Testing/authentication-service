@@ -1,6 +1,40 @@
 ### Arete backend
 
-Backend API documentation is available at: https://cs.ttu.ee/services/arete/api/v2/swagger-ui.html 
-and at: https://arete-back.herokuapp.com/services/arete/api/v2/swagger-ui.html
+Backend API documentation is available at: (cs.ttu.ee)[https://cs.ttu.ee/services/arete/api/v2/swagger-ui.html] 
+and at: [heroku](https://arete-back.herokuapp.com/services/arete/api/v2/swagger-ui.html)
 
-Extra documentation at https://github.com/envomp/Arete-setup 
+Extra documentation at [gitlab pages](https://ained.pages.taltech.ee/it-doc/arete/index.html#)
+
+# Running locally
+
+Prerequisites:
+
+- Java 11+
+- Docker
+- docker-compose
+
+Running tests:
+
+if Windows
+````cmd
+mvnw.cmd test
+````
+else
+````cmd
+./mvnw test
+````
+
+Running the application:
+
+if Windows
+````cmd
+docker-compose up -d
+mvnw.cmd package
+java -jar target/authentication_service-1.0.jar
+````
+else
+````cmd
+docker-compose up -d
+./mvnw package
+java -jar target/authentication_service-1.0.jar
+````

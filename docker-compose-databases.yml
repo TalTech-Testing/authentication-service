@@ -1,0 +1,21 @@
+version: '3.4'
+
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:11.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: arete
+      POSTGRES_DB: arete
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
+    ports:
+      - "5433:5432"
+
+  arete:
+    container_name: adminer
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - "8190:8080"

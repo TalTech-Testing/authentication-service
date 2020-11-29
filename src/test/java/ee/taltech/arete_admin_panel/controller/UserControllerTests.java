@@ -32,9 +32,6 @@ public class UserControllerTests {
 	@Autowired
 	private UserService userService;
 
-	@Autowired
-	private ObjectMapper objectMapper;
-
 	@LocalServerPort
 	private int port;
 
