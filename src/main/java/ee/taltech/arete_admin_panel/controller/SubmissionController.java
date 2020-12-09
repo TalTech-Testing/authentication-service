@@ -107,19 +107,8 @@ public class SubmissionController {
 	@PostMapping("/:testSync")
 	@SneakyThrows
 	public AreteResponseDTO makeRequestSync(HttpEntity<String> httpEntity) {
-		AreteRequestDTO requestDTO = supportOldValues(httpEntity);
+		AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
 		return areteService.makeRequestSync(requestDTO);
-	}
-
-	private AreteRequestDTO supportOldValues(HttpEntity<String> httpEntity) throws com.fasterxml.jackson.core.JsonProcessingException {
-		UPDATE hack = objectMapper.readValue(httpEntity.getBody(), UPDATE.class);
-		ObjectNode obj = objectMapper.readValue(httpEntity.getBody(), ObjectNode.class);
-		obj.remove("dockerExtra");
-		AreteRequestDTO requestDTO = objectMapper.readValue(objectMapper.writeValueAsString(obj), AreteRequestDTO.class);
-		if (requestDTO.getGitTestRepo() == null) {
-			requestDTO.setGitTestRepo(hack.getGitTestSource());
-		}
-		return requestDTO;
 	}
 
 	@Operation(
@@ -138,7 +127,7 @@ public class SubmissionController {
 	@PostMapping("/:testAsync")
 	@SneakyThrows
 	public void makeRequestAsync(HttpEntity<String> httpEntity) {
-		AreteRequestDTO requestDTO = supportOldValues(httpEntity);
+		AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
 		areteService.makeRequestAsync(requestDTO);
 	}
 

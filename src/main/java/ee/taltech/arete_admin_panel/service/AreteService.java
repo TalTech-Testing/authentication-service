@@ -133,10 +133,6 @@ public class AreteService {
 			response.setTestSuites(new ArrayList<>());
 		}
 
-		if (response.getConsoleOutputs() == null) {
-			response.setConsoleOutputs(new ArrayList<>());
-		}
-
 		if (response.getOutput() == null) {
 			response.setOutput("no output");
 		}
@@ -170,9 +166,7 @@ public class AreteService {
 	private void saveJob(AreteResponseDTO response) {
 		Job job = Job.builder()
 				.output(response.getOutput().replace("\n", "<br>"))
-				.consoleOutput(response.getConsoleOutputs().stream()
-						.map(ConsoleOutputDTO::getContent).collect(Collectors.joining())
-						.replace("\n", "<br>"))
+				.consoleOutput(response.getConsoleOutputs().replace("\n", "<br>"))
 				.testSuites(response.getTestSuites().stream()
 						.map(x -> TestContext.builder()
 								.endDate(x.getEndDate())
