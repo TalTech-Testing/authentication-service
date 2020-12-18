@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.domain;
 
 public enum Role {
-	ADMIN("ADMIN"), USER("USER"), HOOK("HOOK"), TESTER("TESTER");
+	ADMIN("ADMIN"), USER("USER"), DEVELOPER("DEVELOPER"), HOOK("HOOK"), TESTER("TESTER");
 
 	private final String value;
 

@@ -52,21 +52,21 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.DELETE, "/services/arete/api/v2/user").hasAnyAuthority("ADMIN") // TODO: people can delete their accounts and admin can delete every ones (except admin)
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/user/all").hasAuthority("ADMIN") // admin can see users
 
-				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
-				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "HOOK", "TESTER") // TODO: people can run tests
+				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see their stuff and admin can see all
+				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "DEVELOPER", "HOOK", "TESTER") // TODO: people can run tests
 
-				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/student/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
+				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/student/**").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see their stuff and admin can see all
 
-				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/state").hasAnyAuthority("ADMIN") // TODO: people can see state
-				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/state/**").hasAnyAuthority("ADMIN") // TODO: people can see state
+				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/state").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see state
+				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/state/**").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see state
 
-				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/exercise/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
-				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/exercise").hasAuthority("ADMIN") // admin can update tests
-				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/exercise").hasAnyAuthority("HOOK", "ADMIN") // admin and hook can update tests
+				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/exercise/**").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see their stuff and admin can see all
+				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/exercise").hasAnyAuthority("ADMIN", "DEVELOPER") // admin can update tests
+				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/exercise").hasAnyAuthority("HOOK", "ADMIN", "DEVELOPER") // admin and hook can update tests
 
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
 				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN") // admin docker images
-				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/course/**").hasAnyAuthority("HOOK", "ADMIN") // admin and hook can update course docker images
+				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN", "DEVELOPER", "HOOK") // admin and hook can update course docker images
 
 				.anyRequest().authenticated()
 				.and()
