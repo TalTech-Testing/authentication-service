@@ -11,38 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 class LoadDatabase {
 
-	private static String getRandomHash() {
-		return RandomStringUtils.random(64, true, true).toLowerCase();
-	}
-
-//    @Bean
-//    CommandLineRunner initSubmissionAndJobDatabase(AreteService areteService) {
-//        return args -> {
-//
-//            for (int i = 0; i < 10; i++) {
-//                String answer = Files.readString(Paths.get("C:\\Users\\envomp\\IdeaProjects\\arete-ui-back\\src\\main\\java\\ee\\taltech\\arete_admin_panel\\repository\\areteResponse.json"));
-//                ObjectMapper objectMapper = new ObjectMapper();
-//                areteService.parseAreteResponse(objectMapper.readValue(answer, AreteResponse.class));
-//
-//            }
-//        };
-//    }
-//
-//    @Bean
-//    CommandLineRunner initSubmissionAndJobDatabase(CourseStudentRepository courseStudentRepository, StudentRepository studentRepository, SlugStudentRepository slugStudentRepository) {
-//        return args -> {
-//
-//            for (SlugStudent slugStudent : slugStudentRepository.findAll()) {
-//
-//                slugStudent.setUniid(slugStudent.getStudent().getUniid());
-//                slugStudent.getStudent().getTimestamps().addAll(slugStudent.getTimestamps());
-//                slugStudentRepository.saveAndFlush(slugStudent);
-//
-//            }
-//
-//        };
-//    }
-
 	@Bean
 	CommandLineRunner initUserDatabase(UserService userService) {
 		return args -> {

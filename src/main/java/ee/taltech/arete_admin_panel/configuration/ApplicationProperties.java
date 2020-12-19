@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class ApplicationProperties {
-	private String url = System.getProperty("TESTER_URL", "http://localhost:8098");
+	private String url = System.getProperty("TESTER_URL", "http://127.0.0.1:8098");
 
 	@Bean
 	@Scope("prototype")
