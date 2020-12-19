@@ -49,6 +49,8 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 						LOG.info(MessageFormat.format("Authenticated user: {0} with authorities: {1}", userService.getUsername(token), auth.getAuthorities()));
 						SecurityContextHolder.getContext().setAuthentication(auth);
 					}
+				} else {
+					filterAuthorization(request);
 				}
 			} else {
 				filterTestingTokens(request);
@@ -60,6 +62,13 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 		} finally {
 			filterChain.doFilter(req, res);
 		}
+	}
+
+	private void filterAuthorization(HttpServletRequest request) {
+
+		String token = request.getHeader("Authorization");
+		filterHooks(token, "Authorization");
+
 	}
 
 	private void filterTestingTokens(HttpServletRequest request) {
