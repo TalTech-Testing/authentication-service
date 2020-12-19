@@ -1,7 +1,6 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
 import ee.taltech.arete.java.response.arete.AreteResponseDTO;
@@ -82,13 +81,6 @@ public class SubmissionController {
 			throw new AuthenticationException("Authentication failed for submission ran for " + areteResponse.getUniid() + " with hash " + areteResponse.getHash());
 		}
 		areteService.enqueueAreteResponse(areteResponse);
-	}
-
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all currently running submissions", tags = {"submission"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/active")
-	public AreteRequestDTO[] getActiveSubmissions() {
-		return areteService.getActiveSubmissions();
 	}
 
 	@Operation(

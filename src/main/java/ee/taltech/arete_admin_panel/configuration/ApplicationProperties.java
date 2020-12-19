@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import ee.taltech.arete.java.AreteClient;
+import ee.taltech.arete.java.LoadBalancerClient;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -30,8 +30,8 @@ public class ApplicationProperties {
 	}
 
 	@Bean
-	public AreteClient client() {
-		return new AreteClient(url);
+	public LoadBalancerClient client() {
+		return new LoadBalancerClient(url);
 	}
 }
 

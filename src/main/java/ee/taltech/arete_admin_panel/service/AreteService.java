@@ -1,6 +1,6 @@
 package ee.taltech.arete_admin_panel.service;
 
-import ee.taltech.arete.java.AreteClient;
+import ee.taltech.arete.java.LoadBalancerClient;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
 import ee.taltech.arete.java.request.hook.CommitDTO;
@@ -33,7 +33,7 @@ public class AreteService {
 	private final SlugRepository slugRepository;
 	private final SubmissionRepository submissionRepository;
 	private final JobRepository jobRepository;
-	private final AreteClient areteClient;
+	private final LoadBalancerClient areteClient;
 
 	private Queue<AreteResponseDTO> jobQueue = new LinkedList<>();
 	private int antiStuckQueue = 20;
@@ -370,19 +370,9 @@ public class AreteService {
 		areteClient.updateTests(areteTestUpdate);
 	}
 
-	public String getTesterLogs() {
-		logger.info("Reading tester logs");
-		return areteClient.requestLogs();
-	}
-
 	public SystemStateDTO getTesterState() {
 		logger.info("Reading tester state");
 		return areteClient.requestState();
-	}
-
-	public AreteRequestDTO[] getActiveSubmissions() {
-		logger.info("Reading all active submissions");
-		return areteClient.requestActiveSubmissions();
 	}
 
 }

@@ -35,7 +35,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 			String token = jwtTokenProvider.resolveToken(request);
 
 			if (token != null && !token.contains(" ")) {
-				logger.info(MessageFormat.format("Trying to authenticate Authentication: {0}", token));
+				logger.info(MessageFormat.format("Trying to authenticate Authorization: {0}", token));
 
 				if (jwtTokenProvider.validateToken(token)) {
 					Authentication auth = userService.getAuthentication(token);
