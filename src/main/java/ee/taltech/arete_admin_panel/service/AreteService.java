@@ -11,9 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +19,6 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-@EnableAsync
 @RequiredArgsConstructor
 public class AreteService {
 
@@ -35,47 +31,10 @@ public class AreteService {
 	private final JobRepository jobRepository;
 	private final LoadBalancerClient areteClient;
 
-	private Queue<AreteResponseDTO> jobQueue = new LinkedList<>();
-	private int antiStuckQueue = 20;
-	private Boolean halted = false;
-
-
-	public void enqueueAreteResponse(AreteResponseDTO response) {
-		logger.info("Saving job into DB for user: {} with hash: {} in: {} where queue has {} elements", response.getUniid(), response.getHash(), response.getRoot(), jobQueue.size());
-		jobQueue.add(response);
-	}
-
-	@Async
-	@Scheduled(fixedRate = 100)
-	public void asyncRunJob() {
-
-		AreteResponseDTO response = jobQueue.poll();
-
-		if (response != null) {
-			if (!halted) {
-				try {
-					halted = true;
-					parseAreteResponseDTO(response);
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					halted = false;
-					antiStuckQueue = 20;
-				}
-			} else {
-				jobQueue.add(response);
-				antiStuckQueue -= 1;
-			}
-		}
-
-		if (antiStuckQueue <= 0) {
-			antiStuckQueue = 20;
-			halted = false;
-		}
-	}
-
 	@SneakyThrows
 	public void parseAreteResponseDTO(AreteResponseDTO response) {
+		logger.info("Saving job into DB for user: {} with hash: {} in: {}", response.getUniid(), response.getHash(), response.getRoot());
+
 		setDefaultValuesIfNull(response);
 		saveSubmission(response);
 		saveJob(response);
