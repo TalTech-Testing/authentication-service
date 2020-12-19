@@ -12,9 +12,8 @@ import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseDTO;
 import ee.taltech.arete_admin_panel.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,23 +28,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
+	private final Logger logger;
 	private final UserRepository userRepository;
 	private final JwtTokenProvider jwtTokenProvider;
-
-	@Autowired
-	public UserService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
-		this.userRepository = userRepository;
-		this.jwtTokenProvider = jwtTokenProvider;
-	}
 
 	public void addSuperUser(String username, String password) {
 		User savedUser = userRepository.save(new User(username, password, Role.ADMIN));
 
-		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
+		logger.info(savedUser.getUsername() + " successfully saved into DB as admin");
 	}
 
 	public void addSuperUser(String username, String passwordHash, String salt) {
@@ -57,11 +50,11 @@ public class UserService {
 						.roles(new ArrayList<>(Collections.singletonList(Role.ADMIN)))
 						.build());
 
-		LOG.info(savedUser.getUsername() + " successfully saved into DB as admin");
+		logger.info(savedUser.getUsername() + " successfully saved into DB as admin");
 	}
 
 	public List<UserResponseDTO> getAllUsers() {
-		LOG.info("getting all users");
+		logger.info("getting all users");
 		return userRepository.findAll().stream().map(user -> UserResponseDTO.builder()
 				.username(user.getUsername())
 				.color(user.getColor())
@@ -72,7 +65,7 @@ public class UserService {
 	}
 
 	public UserResponseDTO authenticateUser(@RequestBody AuthenticationDto userDto) {
-		LOG.info("Authenticating user {}", userDto.getUsername());
+		logger.info("Authenticating user {}", userDto.getUsername());
 		Optional<User> userOptional = getUser(userDto.getUsername());
 
 		if (userOptional.isPresent()) {
@@ -103,7 +96,7 @@ public class UserService {
 	}
 
 	public void updateUserProperties(@RequestBody UserDto userDto) {
-		LOG.info("Update user: {}", userDto);
+		logger.info("Update user: {}", userDto);
 		Optional<User> userOptional = getUser(userDto.getUsername());
 
 		if (userOptional.isPresent()) {
@@ -122,7 +115,7 @@ public class UserService {
 	}
 
 	public AuthenticationDto deleteNonAdminUser(@RequestBody AuthenticationDto userDto) {
-		LOG.info("Delete user: {}", userDto);
+		logger.info("Delete user: {}", userDto);
 
 		Optional<User> userOptional = getUser(userDto.getUsername());
 
@@ -146,7 +139,7 @@ public class UserService {
 	}
 
 	public UserResponseDTO addUser(@RequestBody FullUserDto userDto) {
-		LOG.info("Add user: {}", userDto.getUsername());
+		logger.info("Add user: {}", userDto.getUsername());
 		if (getUser(userDto.getUsername()).isPresent()) {
 			throw new DuplicateKeyException("User with that username already present");
 		} else {
@@ -167,7 +160,7 @@ public class UserService {
 
 	public long saveAnyUser(FullUserDto user) {
 		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword(), user.getRole()));
-		LOG.info(savedUser.getUsername() + " successfully saved into DB");
+		logger.info(savedUser.getUsername() + " successfully saved into DB");
 		return savedUser.getId();
 	}
 
@@ -178,7 +171,7 @@ public class UserService {
 	}
 
 	public UserResponseDTO addNonAdminUser(@RequestBody AuthenticationDto userDto) {
-		LOG.info("Add user: {}", userDto.getUsername());
+		logger.info("Add user: {}", userDto.getUsername());
 
 		if (getUser(userDto.getUsername()).isPresent()) {
 			throw new DuplicateKeyException("User with that username already present");
@@ -199,7 +192,7 @@ public class UserService {
 
 	public long saveNonAdminUser(AuthenticationDto user) {
 		User savedUser = userRepository.save(new User(user.getUsername(), user.getPassword()));
-		LOG.info(savedUser.getUsername() + " successfully saved into DB");
+		logger.info(savedUser.getUsername() + " successfully saved into DB");
 		return savedUser.getId();
 	}
 

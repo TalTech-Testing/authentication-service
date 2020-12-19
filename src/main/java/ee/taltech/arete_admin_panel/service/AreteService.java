@@ -1,6 +1,5 @@
 package ee.taltech.arete_admin_panel.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete.java.AreteClient;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
@@ -8,6 +7,7 @@ import ee.taltech.arete.java.request.hook.CommitDTO;
 import ee.taltech.arete.java.response.arete.*;
 import ee.taltech.arete_admin_panel.domain.*;
 import ee.taltech.arete_admin_panel.repository.*;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,43 +21,27 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional()
+@Transactional
 @EnableAsync
+@RequiredArgsConstructor
 public class AreteService {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private final CacheService cacheService;
-
 	private final StudentRepository studentRepository;
-
 	private final CourseRepository courseRepository;
-
 	private final SlugRepository slugRepository;
-
 	private final SubmissionRepository submissionRepository;
-
 	private final JobRepository jobRepository;
-
-	private AreteClient areteClient = new AreteClient(System.getProperty("TESTER_URL", "http://localhost:8098"));
+	private final AreteClient areteClient;
 
 	private Queue<AreteResponseDTO> jobQueue = new LinkedList<>();
-
 	private int antiStuckQueue = 20;
-
 	private Boolean halted = false;
 
-	public AreteService(CacheService cacheService, StudentRepository studentRepository, CourseRepository courseRepository, SlugRepository slugRepository, JobRepository jobRepository, SubmissionRepository submissionRepository) {
-		this.cacheService = cacheService;
-		this.studentRepository = studentRepository;
-		this.courseRepository = courseRepository;
-		this.slugRepository = slugRepository;
-		this.jobRepository = jobRepository;
-		this.submissionRepository = submissionRepository;
-	}
 
 	public void enqueueAreteResponse(AreteResponseDTO response) {
-		LOG.info("Saving job into DB for user: {} with hash: {} in: {} where queue has {} elements", response.getUniid(), response.getHash(), response.getRoot(), jobQueue.size());
+		logger.info("Saving job into DB for user: {} with hash: {} in: {} where queue has {} elements", response.getUniid(), response.getHash(), response.getRoot(), jobQueue.size());
 		jobQueue.add(response);
 	}
 
@@ -97,16 +81,16 @@ public class AreteService {
 		saveJob(response);
 
 		if (!response.getFailed()) {
-			LOG.debug("getting course");
+			logger.debug("getting course");
 			Course course = getCourse(response);
 
-			LOG.debug("getting slug");
+			logger.debug("getting slug");
 			Slug slug = getSlug(response, course);
 
-			LOG.debug("getting student");
+			logger.debug("getting student");
 			Student student = getStudent(response, course, slug);
 
-			LOG.debug("update all");
+			logger.debug("update all");
 			updateStudentSlugCourse(response, student, slug, course);
 		}
 
@@ -211,7 +195,7 @@ public class AreteService {
 				.build();
 
 
-		LOG.info("Saving job");
+		logger.info("Saving job");
 		jobRepository.save(job);
 	}
 
@@ -322,34 +306,34 @@ public class AreteService {
 	}
 
 	public void updateSubmissions(Submission submission, String hash) {
-		LOG.info("Updating submission cache: {}", hash);
+		logger.info("Updating submission cache: {}", hash);
 		submissionRepository.saveAndFlush(submission);
 		cacheService.updateSubmissionList(submission);
 	}
 
 	public Course updateCourse(Course course, Long id) {
-		LOG.info("Updating course cache: {}", id);
+		logger.info("Updating course cache: {}", id);
 		courseRepository.saveAndFlush(course);
 		cacheService.updateCourseList(course);
 		return course;
 	}
 
 	public Slug updateSlug(Slug slug, Long id) {
-		LOG.info("Updating slug cache: {}", id);
+		logger.info("Updating slug cache: {}", id);
 		slugRepository.saveAndFlush(slug);
 		cacheService.updateSlugList(slug);
 		return slug;
 	}
 
 	public Student updateStudent(Student student, Long id) {
-		LOG.info("Updating student cache: {}", id);
+		logger.info("Updating student cache: {}", id);
 		studentRepository.saveAndFlush(student);
 		cacheService.updateStudentList(student);
 		return student;
 	}
 
 	public AreteResponseDTO makeRequestSync(AreteRequestDTO areteRequest) {
-		LOG.info("Forwarding a sync submission: {}", areteRequest);
+		logger.info("Forwarding a sync submission: {}", areteRequest);
 		return areteClient.requestSync(areteRequest);
 	}
 
@@ -372,32 +356,32 @@ public class AreteService {
 	}
 
 	public void makeRequestAsync(AreteRequestDTO areteRequest) {
-		LOG.info("Forwarding a async submission: {}", areteRequest);
+		logger.info("Forwarding a async submission: {}", areteRequest);
 		areteClient.requestAsync(areteRequest);
 	}
 
 	public void updateImage(String image) {
-		LOG.info("Updating image: {}", image);
+		logger.info("Updating image: {}", image);
 		areteClient.updateImage(image);
 	}
 
 	public void updateTests(AreteTestUpdateDTO areteTestUpdate) {
-		LOG.info("Updating tests: {}", areteTestUpdate);
+		logger.info("Updating tests: {}", areteTestUpdate);
 		areteClient.updateTests(areteTestUpdate);
 	}
 
 	public String getTesterLogs() {
-		LOG.info("Reading tester logs");
+		logger.info("Reading tester logs");
 		return areteClient.requestLogs();
 	}
 
 	public SystemStateDTO getTesterState() {
-		LOG.info("Reading tester state");
+		logger.info("Reading tester state");
 		return areteClient.requestState();
 	}
 
 	public AreteRequestDTO[] getActiveSubmissions() {
-		LOG.info("Reading all active submissions");
+		logger.info("Reading all active submissions");
 		return areteClient.requestActiveSubmissions();
 	}
 

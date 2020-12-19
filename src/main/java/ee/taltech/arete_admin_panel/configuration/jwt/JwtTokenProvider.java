@@ -1,6 +1,7 @@
 package ee.taltech.arete_admin_panel.configuration.jwt;
 
 import io.jsonwebtoken.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -10,14 +11,11 @@ import java.util.Date;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-	final JwtProperties jwtProperties;
+	private final JwtProperties jwtProperties;
 	private String secretKey;
-
-	public JwtTokenProvider(JwtProperties jwtProperties) {
-		this.jwtProperties = jwtProperties;
-	}
 
 	@PostConstruct
 	protected void init() {

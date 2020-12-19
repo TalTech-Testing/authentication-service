@@ -3,6 +3,8 @@ package ee.taltech.arete_admin_panel.configuration;
 import ee.taltech.arete_admin_panel.configuration.jwt.JwtSecurityConfigurer;
 import ee.taltech.arete_admin_panel.configuration.jwt.JwtTokenProvider;
 import ee.taltech.arete_admin_panel.service.UserService;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,15 +16,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 @EnableWebSecurity
+@AllArgsConstructor
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+	final Logger logger;
 	final UserService userService;
 	final JwtTokenProvider jwtTokenProvider;
-
-	public WebSecurityConfiguration(UserService userService, JwtTokenProvider jwtTokenProvider) {
-		this.userService = userService;
-		this.jwtTokenProvider = jwtTokenProvider;
-	}
 
 	@Bean
 	@Override
@@ -70,8 +69,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
 				.anyRequest().authenticated()
 				.and()
-				.apply(new JwtSecurityConfigurer(userService, jwtTokenProvider))
-		;
+				.apply(new JwtSecurityConfigurer(logger, userService, jwtTokenProvider));
 
 	}
 }

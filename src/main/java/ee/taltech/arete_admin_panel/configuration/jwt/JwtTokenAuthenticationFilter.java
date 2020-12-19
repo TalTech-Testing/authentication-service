@@ -4,8 +4,8 @@ import ee.taltech.arete_admin_panel.domain.User;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseDTO;
 import ee.taltech.arete_admin_panel.service.UserService;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,17 +19,12 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.text.MessageFormat;
 
+@AllArgsConstructor
 public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
+	private final Logger logger;
 	private final UserService userService;
 	private final JwtTokenProvider jwtTokenProvider;
-
-	public JwtTokenAuthenticationFilter(UserService userService, JwtTokenProvider jwtTokenProvider) {
-		this.userService = userService;
-		this.jwtTokenProvider = jwtTokenProvider;
-	}
 
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
@@ -39,26 +34,25 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 			HttpServletRequest request = (HttpServletRequest) req;
 			String token = jwtTokenProvider.resolveToken(request);
 
-			if (token != null) {
-				LOG.info(MessageFormat.format("Trying to authenticate Authentication: {0}", token));
+			if (token != null && !token.contains(" ")) {
+				logger.info(MessageFormat.format("Trying to authenticate Authentication: {0}", token));
 
 				if (jwtTokenProvider.validateToken(token)) {
 					Authentication auth = userService.getAuthentication(token);
 
 					if (auth != null) {
-						LOG.info(MessageFormat.format("Authenticated user: {0} with authorities: {1}", userService.getUsername(token), auth.getAuthorities()));
+						logger.info(MessageFormat.format("Authenticated user: {0} with authorities: {1}", userService.getUsername(token), auth.getAuthorities()));
 						SecurityContextHolder.getContext().setAuthentication(auth);
 					}
-				} else {
-					filterAuthorization(request);
 				}
 			} else {
+				filterAuthorization(request);
 				filterTestingTokens(request);
 				filterGitlabHooks(request);
 				filterDockerHooks(request);
 			}
 		} catch (Exception e) {
-			LOG.error("JWT authentication failed with message: {}", e.getMessage());
+			logger.error("JWT authentication failed with message: {}", e.getMessage());
 		} finally {
 			filterChain.doFilter(req, res);
 		}
@@ -94,7 +88,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 
 	private void filterHooks(String token, String name) {
 		if (token != null) {
-			LOG.info(MessageFormat.format("Trying to authenticate {0}: {1}", name, token));
+			logger.info(MessageFormat.format("Trying to authenticate {0}: {1}", name, token));
 			String[] parts = token.split(" ");
 			String gitlabToken = parts[1];
 			String username = parts[0];

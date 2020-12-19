@@ -13,7 +13,6 @@ import ee.taltech.arete_admin_panel.repository.SlugTableDtoRepository;
 import ee.taltech.arete_admin_panel.repository.StudentTableDtoRepository;
 import ee.taltech.arete_admin_panel.repository.SubmissionRepository;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,9 +23,7 @@ public class CacheService {
 	private final int CACHE_MAX_SIZE = 10000;
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
-
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
-
+	private final Logger logger;
 	private final StudentTableDtoRepository studentTableDtoRepository;
 
 	Map<Long, Submission> submissionCache = Collections
@@ -65,65 +62,66 @@ public class CacheService {
 	public CacheService(StudentTableDtoRepository studentTableDtoRepository,
 						CourseTableDtoRepository courseTableDtoRepository,
 						SlugTableDtoRepository slugTableDtoRepository,
-						SubmissionRepository submissionRepository) {
+						SubmissionRepository submissionRepository, Logger logger) {
 		this.studentTableDtoRepository = studentTableDtoRepository;
+		this.logger = logger;
 
 		submissionRepository.findTop10000ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
-		LOG.info("Loaded submissions to cache");
+		this.logger.info("Loaded submissions to cache");
 		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
-		LOG.info("Loaded students to cache");
+		this.logger.info("Loaded students to cache");
 		courseTableDtoRepository.findAll().forEach(x -> courseCache.put(x.getId(), x));
-		LOG.info("Loaded courses to cache");
+		this.logger.info("Loaded courses to cache");
 		slugTableDtoRepository.findAll().forEach(x -> slugCache.put(x.getId(), x));
-		LOG.info("Loaded slugs to cache");
+		this.logger.info("Loaded slugs to cache");
 	}
 
 	private List<StudentTableDto> getAllStudents() {
-		LOG.info("Reading all students from cache");
+		logger.info("Reading all students from cache");
 		return new ArrayList<>(studentTableDtoRepository.findAll());
 	}
 
 	public void updateSubmissionList(Submission submission) {
-		LOG.debug("Update submission cache");
+		logger.debug("Update submission cache");
 		submissionCache.put(submission.getId(), submission);
 
 	}
 
 	public void updateStudentList(Student student) {
-		LOG.debug("Update student cache");
+		logger.debug("Update student cache");
 		StudentTableDto studentTableDto = objectMapper.convertValue(student, StudentTableDto.class);
 		studentCache.put(studentTableDto.getId(), studentTableDto);
 	}
 
 	public void updateCourseList(Course course) {
-		LOG.debug("Update course cache");
+		logger.debug("Update course cache");
 		CourseTableDto courseTableDto = objectMapper.convertValue(course, CourseTableDto.class);
 		courseCache.put(courseTableDto.getId(), courseTableDto);
 	}
 
 	public void updateSlugList(Slug slug) {
-		LOG.debug("Update slug cache");
+		logger.debug("Update slug cache");
 		SlugTableDto slugTableDto = objectMapper.convertValue(slug, SlugTableDto.class);
 		slugCache.put(slugTableDto.getId(), slugTableDto);
 	}
 
 	public Collection<Submission> getSubmissionList() {
-		LOG.info("Reading all submissions from cache");
+		logger.info("Reading all submissions from cache");
 		return submissionCache.values();
 	}
 
 	public Collection<StudentTableDto> getStudentList() {
-		LOG.info("Reading all students from cache");
+		logger.info("Reading all students from cache");
 		return studentCache.values();
 	}
 
 	public Collection<CourseTableDto> getCourseList() {
-		LOG.info("Reading all courses from cache");
+		logger.info("Reading all courses from cache");
 		return courseCache.values();
 	}
 
 	public Collection<SlugTableDto> getSlugList() {
-		LOG.info("Reading all slugs from cache");
+		logger.info("Reading all slugs from cache");
 		return slugCache.values();
 	}
 }
