@@ -66,10 +66,10 @@ public class SubmissionController {
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
 	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{hash}")
-	public Collection<Job> getSubmission(@PathVariable("hash") String hash) {
-		LOG.info("Reading submission by hash {}", hash);
-		return jobRepository.findTop10ByHashOrderByIdDesc(hash);
+	@GetMapping(path = "/{hash}/{timestamp}")
+	public Job getSubmission(@PathVariable("hash") String hash, @PathVariable("timestamp") Long timestamp) {
+		LOG.info("Reading submission by hash {} and timestamp {}", hash, timestamp);
+		return jobRepository.findTop10ByHashAndTimestampOrderByIdDesc(hash, timestamp);
 	}
 
 	@SneakyThrows
