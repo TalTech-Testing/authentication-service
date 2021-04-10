@@ -26,6 +26,7 @@ public class SwaggerConfiguration {
 		servers.add(new Server().url("https://cs.ttu.ee/").description("TalTech"));
 		servers.add(new Server().url("https://arete-back.herokuapp.com/").description("Dev"));
 		servers.add(new Server().url("http://localhost:8002/").description("Local Dev"));
+		servers.add(new Server().url("http://localhost:8001/").description("Local Container Dev"));
 
 		return new OpenAPI()
 				.info(new Info()

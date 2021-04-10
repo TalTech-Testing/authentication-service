@@ -36,8 +36,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.csrf().disable()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 				.and()
-				.cors()
-				.and()
 				.authorizeRequests()
 				.antMatchers(HttpMethod.GET, "/error").permitAll() // error
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/docs/**").permitAll() // swagger
