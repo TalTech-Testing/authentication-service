@@ -40,7 +40,6 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.GET, "/error").permitAll() // error
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/docs/**").permitAll() // swagger
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/swagger-ui/**").permitAll() // swagger
-				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission").permitAll() // tester callback. Protected by shared secret
 
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/user/auth").permitAll() // login
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/user").hasAuthority("ADMIN") // people cant register
@@ -49,6 +48,7 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.DELETE, "/services/arete/api/v2/user").hasAnyAuthority("ADMIN") // TODO: people can delete their accounts and admin can delete every ones (except admin)
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/user/all").hasAuthority("ADMIN") // admin can see users
 
+				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission").hasAnyAuthority("ADMIN", "DEVELOPER", "TESTER") // tester callback.
 				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see their stuff and admin can see all
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/submission/**").hasAnyAuthority("ADMIN", "DEVELOPER", "HOOK", "TESTER") // TODO: people can run tests
 

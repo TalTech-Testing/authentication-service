@@ -12,7 +12,6 @@ services:
       - .env
     environment:
       ADMIN_PASS: ${ADMIN_PASS:-false} # false means that one hardcoded pass will be used
-      SHARED_SECRET: ${SHARED_SECRET:-0fpvg4Bv1CfIjn4DyHhzd70ftjwOcTZ0SqpE9wprzLjMbbA8H5pvVirtJvE4rBvVj0z8UW0n}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
     ports:
       - "8001:8001"
