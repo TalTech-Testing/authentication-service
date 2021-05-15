@@ -1,6 +1,6 @@
 ### Arete backend
 
-Backend API documentation is available at: (cs.ttu.ee)[https://cs.ttu.ee/services/arete/api/v2/swagger-ui/index.html?configUrl=/services/arete/api/v2/docs/swagger-config] 
+Backend API documentation is available at: [cs.ttu.ee](https://cs.ttu.ee/services/arete/api/v2/swagger-ui/index.html?configUrl=/services/arete/api/v2/docs/swagger-config)
 
 Extra documentation at [gitlab pages](https://ained.pages.taltech.ee/it-doc/arete/index.html#)
 
