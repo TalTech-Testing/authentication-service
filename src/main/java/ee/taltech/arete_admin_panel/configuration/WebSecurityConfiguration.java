@@ -61,8 +61,8 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/exercise").hasAnyAuthority("ADMIN", "DEVELOPER") // admin can update tests
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/exercise").hasAnyAuthority("HOOK", "ADMIN", "DEVELOPER") // admin and hook can update tests
 
-				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN") // TODO: people can see their stuff and admin can see all
-				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN") // admin docker images
+				.antMatchers(HttpMethod.GET, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN", "DEVELOPER") // TODO: people can see their stuff and admin can see all
+				.antMatchers(HttpMethod.PUT, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN", "DEVELOPER") // docker images
 				.antMatchers(HttpMethod.POST, "/services/arete/api/v2/course/**").hasAnyAuthority("ADMIN", "DEVELOPER", "HOOK") // admin and hook can update course docker images
 
 				.anyRequest().authenticated()
