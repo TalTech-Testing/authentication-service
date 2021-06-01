@@ -46,10 +46,9 @@ public class Slug {
     @Builder.Default
     private Integer totalTestErrors = 0;
 
-	@NotNull
-	@Builder.Default
-	@ElementCollection
-	private Set<String> students = new HashSet<>();
+    @NotNull
+    @Builder.Default
+    private Integer differentStudents = 0;
 
     @NotNull
     @Builder.Default
