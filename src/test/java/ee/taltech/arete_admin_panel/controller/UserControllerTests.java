@@ -1,6 +1,5 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete_admin_panel.AreteAdminPanelApplication;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.AuthenticationDto;
 import ee.taltech.arete_admin_panel.pojo.abi.users.user.UserResponseDTO;
