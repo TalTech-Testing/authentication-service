@@ -48,7 +48,8 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    private Integer differentStudents = 0;
+	@ElementCollection
+    private Set<String> students = new HashSet<>();
 
     @NotNull
     @Builder.Default

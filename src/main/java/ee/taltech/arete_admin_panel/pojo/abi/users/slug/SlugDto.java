@@ -6,16 +6,15 @@ import lombok.*;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Set;
 
-@Entity
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "slug")
-public class SlugTableDto {
+public class SlugDto {
 
 	@Id
 	long id;
@@ -32,7 +31,7 @@ public class SlugTableDto {
 
 	int totalDiagnosticErrors;
 
-	int differentStudents;
+	Set<String> students;
 
 	int commitsStyleOK;
 

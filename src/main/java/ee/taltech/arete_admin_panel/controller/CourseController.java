@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import ee.taltech.arete_admin_panel.domain.Course;
-import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseDto;
 import ee.taltech.arete_admin_panel.repository.CourseRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
@@ -52,7 +52,7 @@ public class CourseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<CourseTableDto> getCourses() {
+	public Collection<CourseDto> getCourses() {
 		return cacheService.getCourseList();
 	}
 

@@ -4,16 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Table(name = "course")
-public class CourseTableDto {
+public class CourseDto {
 
 	@Id
 	private Long id;
@@ -28,7 +28,7 @@ public class CourseTableDto {
 
     int totalDiagnosticErrors;
 
-    int differentStudents;
+    Set<String> students;
 
     int commitsStyleOK;
 

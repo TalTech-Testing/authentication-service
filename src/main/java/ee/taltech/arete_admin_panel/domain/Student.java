@@ -71,14 +71,6 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    private Integer differentSlugs = 0;
-
-    @NotNull
-    @Builder.Default
-    private Integer differentCourses = 0;
-
-    @NotNull
-    @Builder.Default
     private Integer commitsStyleOK = 0;
 
 }

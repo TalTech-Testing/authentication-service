@@ -5,17 +5,20 @@ import ee.taltech.arete_admin_panel.domain.Course;
 import ee.taltech.arete_admin_panel.domain.Slug;
 import ee.taltech.arete_admin_panel.domain.Student;
 import ee.taltech.arete_admin_panel.domain.Submission;
-import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
-import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
-import ee.taltech.arete_admin_panel.repository.CourseTableDtoRepository;
-import ee.taltech.arete_admin_panel.repository.SlugTableDtoRepository;
-import ee.taltech.arete_admin_panel.repository.StudentTableDtoRepository;
+import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentDto;
+import ee.taltech.arete_admin_panel.repository.CourseRepository;
+import ee.taltech.arete_admin_panel.repository.SlugRepository;
+import ee.taltech.arete_admin_panel.repository.StudentRepository;
 import ee.taltech.arete_admin_panel.repository.SubmissionRepository;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Service
 public class CacheService {
@@ -24,7 +27,6 @@ public class CacheService {
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 	private final Logger logger;
-	private final StudentTableDtoRepository studentTableDtoRepository;
 
 	Map<Long, Submission> submissionCache = Collections
 			.synchronizedMap(new LinkedHashMap<>(CACHE_MAX_SIZE, 0.75f, false) {
@@ -34,7 +36,7 @@ public class CacheService {
 				}
 			});
 
-	Map<Long, StudentTableDto> studentCache = Collections
+	Map<Long, StudentDto> studentCache = Collections
 			.synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
 				@Override
 				protected boolean removeEldestEntry(final Map.Entry eldest) {
@@ -42,7 +44,7 @@ public class CacheService {
 				}
 			});
 
-	Map<Long, CourseTableDto> courseCache = Collections
+	Map<Long, CourseDto> courseCache = Collections
 			.synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
 				@Override
 				protected boolean removeEldestEntry(final Map.Entry eldest) {
@@ -50,7 +52,7 @@ public class CacheService {
 				}
 			});
 
-	Map<Long, SlugTableDto> slugCache = Collections
+	Map<Long, SlugDto> slugCache = Collections
 			.synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
 				@Override
 				protected boolean removeEldestEntry(final Map.Entry eldest) {
@@ -59,26 +61,26 @@ public class CacheService {
 			});
 
 
-	public CacheService(StudentTableDtoRepository studentTableDtoRepository,
-						CourseTableDtoRepository courseTableDtoRepository,
-						SlugTableDtoRepository slugTableDtoRepository,
+	public CacheService(StudentRepository studentRepository,
+						CourseRepository courseRepository,
+						SlugRepository slugRepository,
 						SubmissionRepository submissionRepository, Logger logger) {
-		this.studentTableDtoRepository = studentTableDtoRepository;
 		this.logger = logger;
 
 		submissionRepository.findTop10000ByOrderByIdDesc().forEach(x -> submissionCache.put(x.getId(), x));
 		this.logger.info("Loaded submissions to cache");
-		getAllStudents().forEach(x -> studentCache.put(x.getId(), x));
-		this.logger.info("Loaded students to cache");
-		courseTableDtoRepository.findAll().forEach(x -> courseCache.put(x.getId(), x));
-		this.logger.info("Loaded courses to cache");
-		slugTableDtoRepository.findAll().forEach(x -> slugCache.put(x.getId(), x));
-		this.logger.info("Loaded slugs to cache");
-	}
 
-	private List<StudentTableDto> getAllStudents() {
-		logger.info("Reading all students from cache");
-		return new ArrayList<>(studentTableDtoRepository.findAll());
+		studentRepository.findTop10000ByOrderByIdDesc()
+				.forEach(x -> studentCache.put(x.getId(), objectMapper.convertValue(x, StudentDto.class)));
+		this.logger.info("Loaded students to cache");
+
+		courseRepository.findAll()
+				.forEach(x -> courseCache.put(x.getId(), objectMapper.convertValue(x, CourseDto.class)));
+		this.logger.info("Loaded courses to cache");
+
+		slugRepository.findAll()
+				.forEach(x -> slugCache.put(x.getId(), objectMapper.convertValue(x, SlugDto.class)));
+		this.logger.info("Loaded slugs to cache");
 	}
 
 	public void updateSubmissionList(Submission submission) {
@@ -89,20 +91,20 @@ public class CacheService {
 
 	public void updateStudentList(Student student) {
 		logger.debug("Update student cache");
-		StudentTableDto studentTableDto = objectMapper.convertValue(student, StudentTableDto.class);
-		studentCache.put(studentTableDto.getId(), studentTableDto);
+		StudentDto studentDto = objectMapper.convertValue(student, StudentDto.class);
+		studentCache.put(studentDto.getId(), studentDto);
 	}
 
 	public void updateCourseList(Course course) {
 		logger.debug("Update course cache");
-		CourseTableDto courseTableDto = objectMapper.convertValue(course, CourseTableDto.class);
-		courseCache.put(courseTableDto.getId(), courseTableDto);
+		CourseDto courseDto = objectMapper.convertValue(course, CourseDto.class);
+		courseCache.put(courseDto.getId(), courseDto);
 	}
 
 	public void updateSlugList(Slug slug) {
 		logger.debug("Update slug cache");
-		SlugTableDto slugTableDto = objectMapper.convertValue(slug, SlugTableDto.class);
-		slugCache.put(slugTableDto.getId(), slugTableDto);
+		SlugDto slugDto = objectMapper.convertValue(slug, SlugDto.class);
+		slugCache.put(slugDto.getId(), slugDto);
 	}
 
 	public Collection<Submission> getSubmissionList() {
@@ -110,17 +112,17 @@ public class CacheService {
 		return submissionCache.values();
 	}
 
-	public Collection<StudentTableDto> getStudentList() {
+	public Collection<StudentDto> getStudentList() {
 		logger.info("Reading all students from cache");
 		return studentCache.values();
 	}
 
-	public Collection<CourseTableDto> getCourseList() {
+	public Collection<CourseDto> getCourseList() {
 		logger.info("Reading all courses from cache");
 		return courseCache.values();
 	}
 
-	public Collection<SlugTableDto> getSlugList() {
+	public Collection<SlugDto> getSlugList() {
 		logger.info("Reading all slugs from cache");
 		return slugCache.values();
 	}

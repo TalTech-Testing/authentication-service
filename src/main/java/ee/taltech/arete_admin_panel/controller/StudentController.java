@@ -1,7 +1,7 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import ee.taltech.arete_admin_panel.domain.*;
-import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentTableDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.student.StudentDto;
 import ee.taltech.arete_admin_panel.repository.*;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +48,7 @@ public class StudentController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached students", tags = {"student"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<StudentTableDto> getStudents() {
+	public Collection<StudentDto> getStudents() {
 		return cacheService.getStudentList();
 	}
 
