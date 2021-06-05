@@ -1,8 +1,6 @@
 package ee.taltech.arete_admin_panel.controller;
 
 import ee.taltech.arete_admin_panel.domain.Course;
-import ee.taltech.arete_admin_panel.pojo.abi.users.course.CourseTableDto;
-import ee.taltech.arete_admin_panel.repository.CourseRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,20 +37,18 @@ public class CourseController {
 
 	private final AreteService areteService;
 	private final CacheService cacheService;
-	private final CourseRepository courseRepository;
 	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
-	public CourseController(AreteService areteService, CacheService cacheService, CourseRepository courseRepository, AuthenticationManager authenticationManager) {
+	public CourseController(AreteService areteService, CacheService cacheService, AuthenticationManager authenticationManager) {
 		this.areteService = areteService;
 		this.cacheService = cacheService;
-		this.courseRepository = courseRepository;
 		this.authenticationManager = authenticationManager;
 	}
 
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<CourseTableDto> getCourses() {
+	public Collection<Course> getCourses() {
 		return cacheService.getCourseList();
 	}
 
@@ -60,10 +56,10 @@ public class CourseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public Course getCoursesById(@PathVariable("id") Long id) {
+	public Course getCoursesById(@PathVariable("id") Integer id) {
 		try {
 			LOG.info("Reading course by id {}", id);
-			Optional<Course> courseOptional = courseRepository.findById(id);
+			Optional<Course> courseOptional = cacheService.getCourse(id);
 			assert courseOptional.isPresent();
 			return courseOptional.get();
 		} catch (AssertionError e) {

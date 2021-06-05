@@ -1,13 +1,17 @@
 package ee.taltech.arete_admin_panel.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete.java.LoadBalancerClient;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
 import ee.taltech.arete.java.request.hook.CommitDTO;
-import ee.taltech.arete.java.response.arete.*;
-import ee.taltech.arete_admin_panel.domain.*;
-import ee.taltech.arete_admin_panel.repository.*;
+import ee.taltech.arete.java.response.arete.AreteResponseDTO;
+import ee.taltech.arete.java.response.arete.SystemStateDTO;
+import ee.taltech.arete_admin_panel.domain.Job;
+import ee.taltech.arete_admin_panel.domain.Submission;
+import ee.taltech.arete_admin_panel.repository.JobRepository;
+import ee.taltech.arete_admin_panel.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.slf4j.Logger;
@@ -15,7 +19,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -23,11 +29,8 @@ import java.util.*;
 public class AreteService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private final ObjectMapper mapper = new ObjectMapper();
+	private final ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 	private final CacheService cacheService;
-	private final StudentRepository studentRepository;
-	private final CourseRepository courseRepository;
-	private final SlugRepository slugRepository;
 	private final SubmissionRepository submissionRepository;
 	private final JobRepository jobRepository;
 	private final LoadBalancerClient areteClient;
@@ -37,23 +40,9 @@ public class AreteService {
 		logger.info("Saving job into DB for user: {} with hash: {} in: {}", response.getUniid(), response.getHash(), response.getRoot());
 
 		setDefaultValuesIfNull(response);
-		saveSubmission(response);
+		Submission submission = saveSubmission(response);
 		saveJob(response);
-
-		if (!response.getFailed()) {
-			logger.debug("getting course");
-			Course course = getCourse(response);
-
-			logger.debug("getting slug");
-			Slug slug = getSlug(response, course);
-
-			logger.debug("getting student");
-			Student student = getStudent(response, course, slug);
-
-			logger.debug("update all");
-			updateStudentSlugCourse(response, student, slug, course);
-		}
-
+		cacheService.enqueueSubmission(submission);
 	}
 
 	private void setDefaultValuesIfNull(AreteResponseDTO response) {
@@ -98,6 +87,8 @@ public class AreteService {
 				.testingPlatform(response.getTestingPlatform())
 				.root(response.getRoot())
 				.timestamp(response.getTimestamp())
+				.style(response.getStyle())
+				.diagnosticErrors(response.getErrors().size())
 				.gitStudentRepo(response.getGitStudentRepo())
 				.gitTestSource(response.getGitTestRepo())
 				.failed(response.getFailed())
@@ -110,141 +101,13 @@ public class AreteService {
 	@SneakyThrows
 	private void saveJob(AreteResponseDTO response) {
 		Job job = mapper.readValue(mapper.writeValueAsString(response), Job.class);
-		logger.info("Saving job");
+		logger.info("Saving job {}", response.getHash());
 		jobRepository.save(job);
-	}
-
-	private Course getCourse(AreteResponseDTO response) {
-		Course course;
-		Optional<Course> optionalCourse = courseRepository.findByGitUrl(response.getGitTestRepo());
-		course = optionalCourse.orElseGet(() -> Course.builder()
-				.gitUrl(response.getGitTestRepo())
-				.name(response.getRoot())
-				.build());
-
-		return course;
-	}
-
-	private Slug getSlug(AreteResponseDTO response, Course course) {
-		Slug slug;
-		Optional<Slug> optionalSlug = slugRepository.findByCourseUrlAndName(course.getGitUrl(), response.getSlug());
-		slug = optionalSlug.orElseGet(() -> Slug.builder()
-				.courseUrl(course.getGitUrl())
-				.name(response.getSlug())
-				.build());
-
-		return slug;
-	}
-
-	private Student getStudent(AreteResponseDTO response, Course course, Slug slug) {
-		Student student;
-		Optional<Student> optionalStudent = studentRepository.findByUniid(response.getUniid());
-		student = optionalStudent.orElseGet(() -> Student.builder()
-				.uniid(response.getUniid())
-				.firstTested(response.getTimestamp())
-				.lastTested(response.getTimestamp())
-				.build());
-
-		if (student.getGitRepo() == null && response.getGitStudentRepo() != null) {
-			student.setGitRepo(response.getGitTestRepo());
-		}
-
-		student.getCourses().add(course.getGitUrl());
-		student.getSlugs().add(slug.getName());
-		return student;
-	}
-
-	private void updateStudentSlugCourse(AreteResponseDTO response, Student student, Slug slug, Course course) {
-
-		if (response.getStyle() == 100) {
-			slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
-			course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
-			student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
-		}
-
-		int newDiagnosticErrors = response.getErrors().size();
-
-		int newTestErrors = 0;
-		int newTestPassed = 0;
-		int newTestsRan = 0;
-
-		Map<String, Integer> testErrors = new HashMap<>();
-
-		for (TestContextDTO TestContextDTO : response.getTestSuites()) {
-			for (UnitTestDTO UnitTestDTO : TestContextDTO.getUnitTests()) {
-				newTestsRan += 1;
-				if (UnitTestDTO.getStatus().equals(TestStatus.FAILED)) {
-					newTestErrors += 1;
-					if (testErrors.containsKey(UnitTestDTO.getExceptionClass())) {
-						testErrors.put(UnitTestDTO.getExceptionClass(), testErrors.get(UnitTestDTO.getExceptionClass()) + 1);
-					} else {
-						testErrors.put(UnitTestDTO.getExceptionClass(), 1);
-					}
-				}
-				if (UnitTestDTO.getStatus().equals(TestStatus.PASSED)) {
-					newTestPassed += 1;
-				}
-			}
-		}
-
-		slug.setTotalCommits(slug.getTotalCommits() + 1);
-		course.setTotalCommits(course.getTotalCommits() + 1);
-		student.setTotalCommits(student.getTotalCommits() + 1);
-
-		slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
-		course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
-		student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
-
-		slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
-		course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
-		student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
-
-		slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
-		course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
-		student.setTotalTestsPassed(student.getTotalTestsPassed() + newTestPassed);
-
-		slug.setTotalTestsRan(slug.getTotalTestsRan() + newTestsRan);
-		course.setTotalTestsRan(course.getTotalTestsRan() + newTestsRan);
-		student.setTotalTestsRan(student.getTotalTestsRan() + newTestsRan);
-
-		student.getTimestamps().add(response.getTimestamp());
-		student.setLastTested(response.getTimestamp());
-
-
-		student.setDifferentCourses(student.getCourses().size());
-		student.setDifferentSlugs(student.getSlugs().size());
-
-		updateCourse(course, course.getId());
-		updateSlug(slug, slug.getId());
-		updateStudent(student, student.getId());
-
 	}
 
 	public void updateSubmissions(Submission submission, String hash) {
 		logger.info("Updating submission cache: {}", hash);
 		submissionRepository.saveAndFlush(submission);
-		cacheService.updateSubmissionList(submission);
-	}
-
-	public Course updateCourse(Course course, Long id) {
-		logger.info("Updating course cache: {}", id);
-		courseRepository.saveAndFlush(course);
-		cacheService.updateCourseList(course);
-		return course;
-	}
-
-	public Slug updateSlug(Slug slug, Long id) {
-		logger.info("Updating slug cache: {}", id);
-		slugRepository.saveAndFlush(slug);
-		cacheService.updateSlugList(slug);
-		return slug;
-	}
-
-	public Student updateStudent(Student student, Long id) {
-		logger.info("Updating student cache: {}", id);
-		studentRepository.saveAndFlush(student);
-		cacheService.updateStudentList(student);
-		return student;
 	}
 
 	public AreteResponseDTO makeRequestSync(AreteRequestDTO areteRequest) {

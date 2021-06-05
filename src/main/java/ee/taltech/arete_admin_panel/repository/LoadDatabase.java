@@ -1,8 +1,8 @@
 package ee.taltech.arete_admin_panel.repository;
 
+import ee.taltech.arete_admin_panel.service.CacheService;
 import ee.taltech.arete_admin_panel.service.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 class LoadDatabase {
 
 	@Bean
-	CommandLineRunner initUserDatabase(UserService userService) {
+	CommandLineRunner initDatabaseAndCache(UserService userService, SubmissionRepository submissionRepository, CacheService cacheService) {
 		return args -> {
 			if (userService.getUser("admin").isEmpty()) {
 				if (System.getProperty("ADMIN_PASS", "<3").equals("false")) {
@@ -21,6 +21,8 @@ class LoadDatabase {
 					userService.addSuperUser("admin", System.getProperty("ADMIN_PASS", "admin"));
 				}
 			}
+
+			submissionRepository.findAll().forEach(cacheService::enqueueSubmission);
 		};
 	}
 

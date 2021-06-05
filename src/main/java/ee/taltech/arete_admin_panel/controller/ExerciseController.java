@@ -2,8 +2,6 @@ package ee.taltech.arete_admin_panel.controller;
 
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
 import ee.taltech.arete_admin_panel.domain.Slug;
-import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
-import ee.taltech.arete_admin_panel.repository.SlugRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,13 +32,11 @@ public class ExerciseController {
 
 	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-	private final SlugRepository slugRepository;
 	private final CacheService cacheService;
 	private final AreteService areteService;
 	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
-	public ExerciseController(SlugRepository slugRepository, CacheService cacheService, AreteService areteService, AuthenticationManager authenticationManager) {
-		this.slugRepository = slugRepository;
+	public ExerciseController(CacheService cacheService, AreteService areteService, AuthenticationManager authenticationManager) {
 		this.cacheService = cacheService;
 		this.areteService = areteService;
 		this.authenticationManager = authenticationManager;
@@ -50,7 +46,7 @@ public class ExerciseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all exercises", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<SlugTableDto> getSlugs() {
+	public Collection<Slug> getSlugs() {
 		return cacheService.getSlugList();
 	}
 
@@ -58,10 +54,10 @@ public class ExerciseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns exercise by id", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/{id}")
-	public Slug getSlugsById(@PathVariable("id") Long id) {
+	public Slug getSlugsById(@PathVariable("id") Integer id) {
 		try {
 			LOG.info("Reading slug by id {}", id);
-			Optional<Slug> slugOptional = slugRepository.findById(id);
+			Optional<Slug> slugOptional = cacheService.getSlug(id);
 			assert slugOptional.isPresent();
 			return slugOptional.get();
 		} catch (AssertionError e) {

@@ -8,24 +8,18 @@ import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity
 @Getter
 @Setter
 @Builder
-@Table(name = "student")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Student {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Size(min = 1)
     @NotNull
     @Builder.Default
     private String uniid = "NaN"; // TalTech student identificator: envomp - Ago guarantee to be unique
 
+	// last used
     private String gitRepo;
 
     @NotNull
@@ -36,12 +30,10 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    @ElementCollection(fetch = FetchType.EAGER)
     private Set<Long> timestamps = new HashSet<>();
 
     @NotNull
     @Builder.Default
-    @ElementCollection
     private Set<String> courses = new HashSet<>();
 
     @NotNull
