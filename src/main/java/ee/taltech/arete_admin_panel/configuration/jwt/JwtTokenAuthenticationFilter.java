@@ -22,82 +22,82 @@ import java.text.MessageFormat;
 @AllArgsConstructor
 public class JwtTokenAuthenticationFilter extends GenericFilterBean {
 
-	private final Logger logger;
-	private final UserService userService;
-	private final JwtTokenProvider jwtTokenProvider;
+    private final Logger logger;
+    private final UserService userService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-	@Override
-	public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
-			throws IOException, ServletException, InvalidJwtAuthenticationException {
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain)
+            throws IOException, ServletException, InvalidJwtAuthenticationException {
 
-		try {
-			HttpServletRequest request = (HttpServletRequest) req;
-			String token = jwtTokenProvider.resolveToken(request);
+        try {
+            HttpServletRequest request = (HttpServletRequest) req;
+            String token = jwtTokenProvider.resolveToken(request);
 
-			if (token != null && !token.contains(" ")) {
-				logger.info(MessageFormat.format("Trying to authenticate Authorization: {0}", token));
+            if (token != null && !token.contains(" ")) {
+                logger.info(MessageFormat.format("Trying to authenticate Authorization: {0}", token));
 
-				if (jwtTokenProvider.validateToken(token)) {
-					Authentication auth = userService.getAuthentication(token);
+                if (jwtTokenProvider.validateToken(token)) {
+                    Authentication auth = userService.getAuthentication(token);
 
-					if (auth != null) {
-						logger.info(MessageFormat.format("Authenticated user: {0} with authorities: {1}", userService.getUsername(token), auth.getAuthorities()));
-						SecurityContextHolder.getContext().setAuthentication(auth);
-					}
-				}
-			} else {
-				filterAuthorization(request);
-				filterTestingTokens(request);
-				filterGitlabHooks(request);
-				filterDockerHooks(request);
-			}
-		} catch (Exception e) {
-			logger.error("JWT authentication failed with message: {}", e.getMessage());
-		} finally {
-			filterChain.doFilter(req, res);
-		}
-	}
+                    if (auth != null) {
+                        logger.info(MessageFormat.format("Authenticated user: {0} with authorities: {1}", userService.getUsername(token), auth.getAuthorities()));
+                        SecurityContextHolder.getContext().setAuthentication(auth);
+                    }
+                }
+            } else {
+                filterAuthorization(request);
+                filterTestingTokens(request);
+                filterGitlabHooks(request);
+                filterDockerHooks(request);
+            }
+        } catch (Exception e) {
+            logger.error("JWT authentication failed with message: {}", e.getMessage());
+        } finally {
+            filterChain.doFilter(req, res);
+        }
+    }
 
-	private void filterAuthorization(HttpServletRequest request) {
+    private void filterAuthorization(HttpServletRequest request) {
 
-		String token = request.getHeader("Authorization");
-		filterHooks(token, "Authorization");
+        String token = request.getHeader("Authorization");
+        filterHooks(token, "Authorization");
 
-	}
+    }
 
-	private void filterTestingTokens(HttpServletRequest request) {
+    private void filterTestingTokens(HttpServletRequest request) {
 
-		String token = request.getHeader("X-Testing-Token");
-		filterHooks(token, "X-Testing-Token");
+        String token = request.getHeader("X-Testing-Token");
+        filterHooks(token, "X-Testing-Token");
 
-	}
+    }
 
-	private void filterDockerHooks(HttpServletRequest request) {
+    private void filterDockerHooks(HttpServletRequest request) {
 
-		String token = request.getHeader("X-Docker-Token");
-		filterHooks(token, "X-Docker-Token");
+        String token = request.getHeader("X-Docker-Token");
+        filterHooks(token, "X-Docker-Token");
 
-	}
+    }
 
-	private void filterGitlabHooks(HttpServletRequest request) {
+    private void filterGitlabHooks(HttpServletRequest request) {
 
-		String token = request.getHeader("X-Gitlab-Token");
-		filterHooks(token, "X-Gitlab-Token");
+        String token = request.getHeader("X-Gitlab-Token");
+        filterHooks(token, "X-Gitlab-Token");
 
-	}
+    }
 
-	private void filterHooks(String token, String name) {
-		if (token != null) {
-			logger.info(MessageFormat.format("Trying to authenticate {0}: {1}", name, token));
-			String[] parts = token.split(" ");
-			String gitlabToken = parts[1];
-			String username = parts[0];
-			UserResponseDTO user = userService.authenticateUser(new AuthenticationDto(username, gitlabToken));
+    private void filterHooks(String token, String name) {
+        if (token != null) {
+            logger.info(MessageFormat.format("Trying to authenticate {0}: {1}", name, token));
+            String[] parts = token.split(" ");
+            String gitlabToken = parts[1];
+            String username = parts[0];
+            UserResponseDTO user = userService.authenticateUser(new AuthenticationDto(username, gitlabToken));
 
-			User userDetails = userService.getUser(user.getId());
-			Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-			SecurityContextHolder.getContext().setAuthentication(authentication);
-		}
+            User userDetails = userService.getUser(user.getId());
+            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
 
-	}
+    }
 }

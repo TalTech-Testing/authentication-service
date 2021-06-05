@@ -13,27 +13,27 @@ import java.time.Instant;
 @Component
 public class LoggingComponent extends HandlerInterceptorAdapter {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-	@Override
-	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 
-		long startTime = Instant.now().toEpochMilli();
-		request.setAttribute("startTime", startTime);
-		request.setAttribute("originalURL", request.getRequestURL().toString());
-		return true;
-	}
+        long startTime = Instant.now().toEpochMilli();
+        request.setAttribute("startTime", startTime);
+        request.setAttribute("originalURL", request.getRequestURL().toString());
+        return true;
+    }
 
-	@Override
-	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
 
-		long startTime = (Long) request.getAttribute("startTime");
-		String originalURL = (String) request.getAttribute("originalURL");
-		LOG.info(MessageFormat.format("Request URL::{0} {1}:: Status Code={2}:: Time Taken={3} ms",
-				request.getMethod(),
-				originalURL, // otherwise /error would be displayed
-				response.getStatus(),
-				Instant.now().toEpochMilli() - startTime)
-		);
-	}
+        long startTime = (Long) request.getAttribute("startTime");
+        String originalURL = (String) request.getAttribute("originalURL");
+        LOG.info(MessageFormat.format("Request URL::{0} {1}:: Status Code={2}:: Time Taken={3} ms",
+                request.getMethod(),
+                originalURL, // otherwise /error would be displayed
+                response.getStatus(),
+                Instant.now().toEpochMilli() - startTime)
+        );
+    }
 }

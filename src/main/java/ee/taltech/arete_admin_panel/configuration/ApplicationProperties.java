@@ -15,23 +15,23 @@ import org.springframework.stereotype.Component;
 @Getter
 @Setter
 public class ApplicationProperties {
-	private String url = System.getProperty("TESTER_URL", "http://127.0.0.1:8098");
+    private String url = System.getProperty("TESTER_URL", "http://127.0.0.1:8098");
 
-	@Bean
-	@Scope("prototype")
-	public Logger produceLogger(InjectionPoint injectionPoint) {
-		Class<?> classOnWired = injectionPoint.getMember().getDeclaringClass();
-		return LoggerFactory.getLogger(classOnWired);
-	}
+    @Bean
+    @Scope("prototype")
+    public Logger produceLogger(InjectionPoint injectionPoint) {
+        Class<?> classOnWired = injectionPoint.getMember().getDeclaringClass();
+        return LoggerFactory.getLogger(classOnWired);
+    }
 
-	@Bean
-	public ObjectMapper mapper() {
-		return new ObjectMapper();
-	}
+    @Bean
+    public ObjectMapper mapper() {
+        return new ObjectMapper();
+    }
 
-	@Bean
-	public LoadBalancerClient client() {
-		return new LoadBalancerClient(url);
-	}
+    @Bean
+    public LoadBalancerClient client() {
+        return new LoadBalancerClient(url);
+    }
 }
 

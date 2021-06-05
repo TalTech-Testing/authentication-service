@@ -11,8 +11,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @AllArgsConstructor
 public class JwtSecurityConfigurer extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
 
-	private final Logger logger;
-	private final UserService userService;
+    private final Logger logger;
+    private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override

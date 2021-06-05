@@ -11,11 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-	@Override
-	@SneakyThrows
-	public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
-		log.info("Jwt authentication failed:" + authException);
-		response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Jwt authentication failed");
-	}
+    @Override
+    @SneakyThrows
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) {
+        log.info("Jwt authentication failed:" + authException);
+        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Jwt authentication failed");
+    }
 
 }

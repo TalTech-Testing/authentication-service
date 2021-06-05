@@ -23,31 +23,31 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("services/arete/api/v2/state")
 public class StateController {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-	private final AreteService areteService;
-	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
-
-
-	public StateController(AreteService areteService, AuthenticationManager authenticationManager) {
-		this.areteService = areteService;
-		this.authenticationManager = authenticationManager;
-	}
-
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Return backends' state", tags = {"state"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("")
-	public SystemStateDTO getState() {
-		LOG.info("Reading state");
-		return new SystemStateDTO();
-	}
+    private final AreteService areteService;
+    private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Return testers' state", tags = {"state"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@GetMapping("/tester")
-	public SystemStateDTO getTesterState() {
-		return areteService.getTesterState();
-	}
+    public StateController(AreteService areteService, AuthenticationManager authenticationManager) {
+        this.areteService = areteService;
+        this.authenticationManager = authenticationManager;
+    }
+
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Return backends' state", tags = {"state"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("")
+    public SystemStateDTO getState() {
+        LOG.info("Reading state");
+        return new SystemStateDTO();
+    }
+
+
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Return testers' state", tags = {"state"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @GetMapping("/tester")
+    public SystemStateDTO getTesterState() {
+        return areteService.getTesterState();
+    }
 
 }

@@ -2,9 +2,8 @@ package ee.taltech.arete_admin_panel.domain;
 
 import lombok.*;
 
-import javax.persistence.*;
+import javax.persistence.ElementCollection;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,10 +15,13 @@ import java.util.Set;
 public class Student {
 
     @NotNull
+    private Integer id;
+
+    @NotNull
     @Builder.Default
     private String uniid = "NaN"; // TalTech student identificator: envomp - Ago guarantee to be unique
 
-	// last used
+    // last used
     private String gitRepo;
 
     @NotNull

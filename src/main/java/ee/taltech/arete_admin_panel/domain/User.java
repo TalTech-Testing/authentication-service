@@ -5,7 +5,6 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -44,8 +43,30 @@ public class User implements UserDetails {
     @NotNull
     @Builder.Default
     @ElementCollection(fetch = FetchType.EAGER)
-	@Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private List<Role> roles = new ArrayList<>();
+
+    public User(String username, String password) {
+        SHA512 sha512 = new SHA512();
+        String salt = sha512.generateHash();
+        String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.salt = salt;
+        this.roles = new ArrayList<>();
+        this.roles.add(Role.USER);
+    }
+
+    public User(String username, String password, Role role) {
+        SHA512 sha512 = new SHA512();
+        String salt = sha512.generateHash();
+        String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.salt = salt;
+        this.roles = new ArrayList<>();
+        this.roles.add(role);
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -81,28 +102,5 @@ public class User implements UserDetails {
     public boolean isEnabled() {
         return false;
     }
-
-
-    public User(String username, String password) {
-        SHA512 sha512 = new SHA512();
-        String salt = sha512.generateHash();
-        String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);
-        this.username = username;
-        this.passwordHash = passwordHash;
-        this.salt = salt;
-		this.roles = new ArrayList<>();
-        this.roles.add(Role.USER);
-    }
-
-	public User(String username, String password, Role role) {
-		SHA512 sha512 = new SHA512();
-		String salt = sha512.generateHash();
-		String passwordHash = sha512.get_SHA_512_SecurePassword(password, salt);
-		this.username = username;
-		this.passwordHash = passwordHash;
-		this.salt = salt;
-		this.roles = new ArrayList<>();
-		this.roles.add(role);
-	}
 
 }

@@ -10,10 +10,10 @@ import lombok.*;
 @AllArgsConstructor
 public class FullUserDto {
 
-	private String username;
+    private String username;
 
-	private String password;
+    private String password;
 
-	private Role role;
+    private Role role;
 
 }

@@ -24,64 +24,64 @@ import java.util.Optional;
 
 @SecurityScheme(name = "X-Docker-Token", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
 @SecurityScheme(name = "Authorization", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER,
-		description = "JWT Authorization header using the Bearer scheme.\n" +
-				"Enter 'Bearer'[space] and then your token in the text box below.\n" +
-				"Example: Bearer eyJhbGciOiJIUzUxMiIsIn...\n" +
-				"You will get the bearer from the account/login or account/register endpoint.")
+        description = "JWT Authorization header using the Bearer scheme.\n" +
+                "Enter 'Bearer'[space] and then your token in the text box below.\n" +
+                "Example: Bearer eyJhbGciOiJIUzUxMiIsIn...\n" +
+                "You will get the bearer from the account/login or account/register endpoint.")
 @Tag(name = "course", description = "course CRUD operations")
 @RestController()
 @RequestMapping({"test", "services/arete/api/v2/course"})
 public class CourseController {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-	private final AreteService areteService;
-	private final CacheService cacheService;
-	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
+    private final AreteService areteService;
+    private final CacheService cacheService;
+    private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
-	public CourseController(AreteService areteService, CacheService cacheService, AuthenticationManager authenticationManager) {
-		this.areteService = areteService;
-		this.cacheService = cacheService;
-		this.authenticationManager = authenticationManager;
-	}
+    public CourseController(AreteService areteService, CacheService cacheService, AuthenticationManager authenticationManager) {
+        this.areteService = areteService;
+        this.cacheService = cacheService;
+        this.authenticationManager = authenticationManager;
+    }
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/all")
-	public Collection<Course> getCourses() {
-		return cacheService.getCourseList();
-	}
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all courses", tags = {"course"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/all")
+    public Collection<Course> getCourses() {
+        return cacheService.getCourseList();
+    }
 
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{id}")
-	public Course getCoursesById(@PathVariable("id") Integer id) {
-		try {
-			LOG.info("Reading course by id {}", id);
-			Optional<Course> courseOptional = cacheService.getCourse(id);
-			assert courseOptional.isPresent();
-			return courseOptional.get();
-		} catch (AssertionError e) {
-			throw new NotFoundException("Selected item was not found.");
-		}
-	}
+    @SneakyThrows
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns course by id", tags = {"course"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/{id}")
+    public Course getCoursesById(@PathVariable("id") Integer id) {
+        try {
+            LOG.info("Reading course by id {}", id);
+            Optional<Course> courseOptional = cacheService.getCourse(id);
+            assert courseOptional.isPresent();
+            return courseOptional.get();
+        } catch (AssertionError e) {
+            throw new NotFoundException("Selected item was not found.");
+        }
+    }
 
-	@Operation(
-			parameters = {@Parameter(in = ParameterIn.HEADER, name = "X-Docker-Token", description = "docker token with structure: s\"{name} {password}\"")},
-			security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Docker-Token")},
-			summary = "Update an image on which testing takes place",
-			tags = {"course"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PostMapping("/{image}")
-	public void updateImageWithHook(@PathVariable("image") String image) {
-		areteService.updateImage(image);
-	}
+    @Operation(
+            parameters = {@Parameter(in = ParameterIn.HEADER, name = "X-Docker-Token", description = "docker token with structure: s\"{name} {password}\"")},
+            security = {@SecurityRequirement(name = "Authorization"), @SecurityRequirement(name = "X-Docker-Token")},
+            summary = "Update an image on which testing takes place",
+            tags = {"course"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/{image}")
+    public void updateImageWithHook(@PathVariable("image") String image) {
+        areteService.updateImage(image);
+    }
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PutMapping("/{image}")
-	public void updateImage(@PathVariable("image") String image) {
-		areteService.updateImage(image);
-	}
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Update an image on which testing takes place", tags = {"course"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PutMapping("/{image}")
+    public void updateImage(@PathVariable("image") String image) {
+        areteService.updateImage(image);
+    }
 }

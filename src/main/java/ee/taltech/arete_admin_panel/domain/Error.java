@@ -13,19 +13,19 @@ import javax.persistence.*;
 @Entity
 public class Error {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	private Integer columnNo;
+    private Integer columnNo;
 
-	private String fileName;
+    private String fileName;
 
-	private String hint;
+    private String hint;
 
-	private String kind;
+    private String kind;
 
-	private Integer lineNo;
+    private Integer lineNo;
 
-	private String message;
+    private String message;
 }

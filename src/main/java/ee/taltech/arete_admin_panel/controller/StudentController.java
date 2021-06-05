@@ -1,6 +1,6 @@
 package ee.taltech.arete_admin_panel.controller;
 
-import ee.taltech.arete_admin_panel.domain.*;
+import ee.taltech.arete_admin_panel.domain.Student;
 import ee.taltech.arete_admin_panel.service.CacheService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -25,37 +25,37 @@ import java.util.Optional;
 @RequestMapping("services/arete/api/v2/student")
 public class StudentController {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-	private final CacheService cacheService;
-	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
+    private final CacheService cacheService;
+    private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
-	public StudentController(AuthenticationManager authenticationManager, CacheService cacheService) {
-		this.authenticationManager = authenticationManager;
-		this.cacheService = cacheService;
-	}
+    public StudentController(AuthenticationManager authenticationManager, CacheService cacheService) {
+        this.authenticationManager = authenticationManager;
+        this.cacheService = cacheService;
+    }
 
 
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached students", tags = {"student"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/all")
-	public Collection<Student> getStudents() {
-		return cacheService.getStudentList();
-	}
+    @SneakyThrows
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached students", tags = {"student"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/all")
+    public Collection<Student> getStudents() {
+        return cacheService.getStudentList();
+    }
 
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns student with id", tags = {"student"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{id}")
-	public Student getStudent(@PathVariable("id") Integer id) {
-		try {
-			LOG.info("Reading student by id {}", id);
-			Optional<Student> studentOptional = cacheService.getStudent(id);
-			assert studentOptional.isPresent();
-			return studentOptional.get();
-		} catch (AssertionError e) {
-			throw new NotFoundException("Selected item was not found.");
-		}
-	}
+    @SneakyThrows
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns student with id", tags = {"student"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/{id}")
+    public Student getStudent(@PathVariable("id") Integer id) {
+        try {
+            LOG.info("Reading student by id {}", id);
+            Optional<Student> studentOptional = cacheService.getStudent(id);
+            assert studentOptional.isPresent();
+            return studentOptional.get();
+        } catch (AssertionError e) {
+            throw new NotFoundException("Selected item was not found.");
+        }
+    }
 }

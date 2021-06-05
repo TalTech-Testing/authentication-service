@@ -16,83 +16,83 @@ import java.util.Set;
 @Table(name = "job")
 public class Job {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@NotNull
-	private String testingPlatform;
+    @NotNull
+    private String testingPlatform;
 
-	private String gitStudentRepo;
+    private String gitStudentRepo;
 
-	private String gitTestRepo;
+    private String gitTestRepo;
 
-	@NotNull
-	private String hash;
+    @NotNull
+    private String hash;
 
-	@NotNull
-	@Builder.Default
-	private String uniid = "NaN"; // gitlab namespace: envomp
+    @NotNull
+    @Builder.Default
+    private String uniid = "NaN"; // gitlab namespace: envomp
 
-	private String email;
+    private String email;
 
-	private String type;
+    private String type;
 
-	private String version;
+    private String version;
 
-	@NotNull
-	private String root; // gitlab namespace with path for tester: iti0102-2019
+    @NotNull
+    private String root; // gitlab namespace with path for tester: iti0102-2019
 
-	@NotNull
-	private String slug;
+    @NotNull
+    private String slug;
 
-	private String commitMessage;
+    private String commitMessage;
 
-	@OneToMany(cascade = {CascadeType.ALL})
-	private List<TestContext> testSuites;
+    @OneToMany(cascade = {CascadeType.ALL})
+    private List<TestContext> testSuites;
 
-	@OneToMany(cascade = {CascadeType.ALL})
-	private List<Error> errors;
+    @OneToMany(cascade = {CascadeType.ALL})
+    private List<Error> errors;
 
-	private String dockerExtra;
+    private String dockerExtra;
 
-	private String dockerTestRoot;
+    private String dockerTestRoot;
 
-	private String dockerContentRoot;
+    private String dockerContentRoot;
 
-	@ElementCollection
-	@CollectionTable(name = "system_extra", joinColumns = @JoinColumn(name = "id"))
-	private Set<String> systemExtra;
+    @ElementCollection
+    @CollectionTable(name = "system_extra", joinColumns = @JoinColumn(name = "id"))
+    private Set<String> systemExtra;
 
-	private Integer dockerTimeout;
+    private Integer dockerTimeout;
 
-	@NotNull
-	private Long timestamp;
+    @NotNull
+    private Long timestamp;
 
-	private Long receivedTimestamp;
+    private Long receivedTimestamp;
 
-	private Long finishedTimestamp;
+    private Long finishedTimestamp;
 
-	private Integer priority;
+    private Integer priority;
 
-	private Integer totalCount;
+    private Integer totalCount;
 
-	private Integer totalPassedCount;
+    private Integer totalPassedCount;
 
-	private Integer style;
+    private Integer style;
 
-	private Double totalGrade;
+    private Double totalGrade;
 
-	private Boolean failed;
+    private Boolean failed;
 
-	@Column(columnDefinition = "TEXT")
-	private String output;
+    @Column(columnDefinition = "TEXT")
+    private String output;
 
-	@Column(columnDefinition = "TEXT")
-	private String consoleOutputs;
+    @Column(columnDefinition = "TEXT")
+    private String consoleOutputs;
 
-	@NotNull
-	@Builder.Default
-	private Integer analyzed = 0;
+    @NotNull
+    @Builder.Default
+    private Integer analyzed = 0;
 
 }

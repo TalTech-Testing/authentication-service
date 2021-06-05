@@ -2,10 +2,7 @@ package ee.taltech.arete_admin_panel.domain;
 
 import lombok.*;
 
-import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -13,6 +10,9 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Slug {
+
+    @NotNull
+    private Integer id;
 
     @NotNull
     private String name;

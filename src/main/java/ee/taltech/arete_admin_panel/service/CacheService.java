@@ -17,238 +17,235 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Service
 public class CacheService {
 
-	private final int CACHE_MAX_SIZE = 10000;
-	private final Logger logger;
+    private final int CACHE_MAX_SIZE = 10000;
+    private final Logger logger;
 
-	private final ConcurrentLinkedQueue<Submission> toProcess = new ConcurrentLinkedQueue<>();
-	private final AtomicBoolean isProcessing = new AtomicBoolean(false);
+    private final ConcurrentLinkedQueue<Submission> toProcess = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean isProcessing = new AtomicBoolean(false);
 
-	private final Map<Integer, Submission> submissionCache = Collections
-			.synchronizedMap(new LinkedHashMap<>(CACHE_MAX_SIZE, 0.75f, false) {
-				@Override
-				protected boolean removeEldestEntry(final Map.Entry eldest) {
-					return size() > CACHE_MAX_SIZE;
-				}
-			});
+    private final Map<Integer, Submission> submissionCache = Collections
+            .synchronizedMap(new LinkedHashMap<>(CACHE_MAX_SIZE, 0.75f, false) {
+                @Override
+                protected boolean removeEldestEntry(final Map.Entry eldest) {
+                    return size() > CACHE_MAX_SIZE;
+                }
+            });
 
-	private final Map<Integer, Student> studentCache = Collections
-			.synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
-				@Override
-				protected boolean removeEldestEntry(final Map.Entry eldest) {
-					return size() > CACHE_MAX_SIZE;
-				}
-			});
+    private final Map<Integer, Student> studentCache = Collections
+            .synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
+                @Override
+                protected boolean removeEldestEntry(final Map.Entry eldest) {
+                    return size() > CACHE_MAX_SIZE;
+                }
+            });
 
-	private final Map<Integer, Course> courseCache = Collections
-			.synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
-				@Override
-				protected boolean removeEldestEntry(final Map.Entry eldest) {
-					return size() > CACHE_MAX_SIZE;
-				}
-			});
+    private final Map<Integer, Course> courseCache = Collections
+            .synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
+                @Override
+                protected boolean removeEldestEntry(final Map.Entry eldest) {
+                    return size() > CACHE_MAX_SIZE;
+                }
+            });
 
-	private final Map<Integer, Slug> slugCache = Collections
-			.synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
-				@Override
-				protected boolean removeEldestEntry(final Map.Entry eldest) {
-					return size() > CACHE_MAX_SIZE;
-				}
-			});
+    private final Map<Integer, Slug> slugCache = Collections
+            .synchronizedMap(new LinkedHashMap<>(10000, 0.75f, false) {
+                @Override
+                protected boolean removeEldestEntry(final Map.Entry eldest) {
+                    return size() > CACHE_MAX_SIZE;
+                }
+            });
 
-	public CacheService(Logger logger) {
-		this.logger = logger;
-	}
+    public CacheService(Logger logger) {
+        this.logger = logger;
+    }
 
-	@SneakyThrows
-	public void enqueueSubmission(Submission submission) {
-		toProcess.add(submission);
-	}
+    @SneakyThrows
+    public void enqueueSubmission(Submission submission) {
+        logger.info("Enqueueing submission {}", submission.getHash());
+        toProcess.add(submission);
+    }
 
-	@Async
-	@Scheduled(fixedRate = 100)
-	public void process() {
-		if (isProcessing.get()) {
-			return;
-		}
-		isProcessing.set(true);
+    @Async
+    @Scheduled(fixedRate = 100)
+    public void process() {
+        if (isProcessing.get()) {
+            return;
+        }
+        isProcessing.set(true);
 
-		try {
-			toProcess.forEach(submission -> {
-				Course course = getCourse(submission);
-				Slug slug = getSlug(submission);
-				Student student = getStudent(submission);
+        try {
+            toProcess.forEach(submission -> {
+                Course course = getCourse(submission);
+                Slug slug = getSlug(submission);
+                Student student = getStudent(submission);
 
-				updateStudentSlugCourse(submission, student, slug, course);
+                updateStudentSlugCourse(submission, student, slug, course);
 
-				updateSubmissionCache(submission);
-				updateCourseCache(course);
-				updateSlugCache(slug);
-				updateStudentCache(student);
-			});
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+                updateSubmissionCache(submission);
+                updateCourseCache(course);
+                updateSlugCache(slug);
+                updateStudentCache(student);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		isProcessing.set(false);
-	}
+        isProcessing.set(false);
+    }
 
-	private Course getCourse(Submission submission) {
-		Course course;
-		Optional<Course> optionalCourse = getCourse(submission.getGitTestSource());
-		course = optionalCourse.orElseGet(() -> Course.builder()
-				.gitUrl(submission.getGitTestSource())
-				.name(submission.getRoot())
-				.build());
+    private Course getCourse(Submission submission) {
+        Optional<Course> optionalCourse = getCourse(submission.getGitTestSource());
+        return optionalCourse.orElseGet(() -> Course.builder()
+                .id(Objects.hash(Objects.hash(submission.getGitTestSource())))
+                .gitUrl(submission.getGitTestSource())
+                .name(submission.getRoot())
+                .build());
+    }
 
-		return course;
-	}
+    private Slug getSlug(Submission submission) {
+        Optional<Slug> optionalSlug = getSlug(submission.getSlug(), submission.getGitTestSource());
+        return optionalSlug.orElseGet(() -> Slug.builder()
+                .id(Objects.hash(Objects.hash(submission.getGitTestSource(), submission.getSlug())))
+                .courseUrl(submission.getGitTestSource())
+                .name(submission.getSlug())
+                .build());
+    }
 
-	private Slug getSlug(Submission submission) {
-		Slug slug;
-		Optional<Slug> optionalSlug = getSlug(submission.getSlug(), submission.getGitTestSource());
-		slug = optionalSlug.orElseGet(() -> Slug.builder()
-				.courseUrl(submission.getGitTestSource())
-				.name(submission.getSlug())
-				.build());
+    private Student getStudent(Submission submission) {
+        Optional<Student> optionalStudent = getStudent(submission.getUniid());
+        Student student = optionalStudent.orElseGet(() -> Student.builder()
+                .id(Objects.hash(submission.getUniid()))
+                .uniid(submission.getUniid())
+                .firstTested(submission.getTimestamp())
+                .lastTested(submission.getTimestamp())
+                .build());
 
-		return slug;
-	}
+        if (student.getGitRepo() == null && submission.getGitStudentRepo() != null) {
+            student.setGitRepo(submission.getGitTestSource());
+        }
 
-	private Student getStudent(Submission submission) {
-		Student student;
-		Optional<Student> optionalStudent = getStudent(submission.getUniid());
-		student = optionalStudent.orElseGet(() -> Student.builder()
-				.uniid(submission.getUniid())
-				.firstTested(submission.getTimestamp())
-				.lastTested(submission.getTimestamp())
-				.build());
+        student.getCourses().add(submission.getGitTestSource());
+        student.getSlugs().add(submission.getSlug());
+        return student;
+    }
 
-		if (student.getGitRepo() == null && submission.getGitStudentRepo() != null) {
-			student.setGitRepo(submission.getGitTestSource());
-		}
+    private void updateStudentSlugCourse(Submission submission, Student student, Slug slug, Course course) {
 
-		student.getCourses().add(submission.getGitTestSource());
-		student.getSlugs().add(submission.getSlug());
-		return student;
-	}
+        if (submission.getStyle() == 100) {
+            slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
+            course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
+            student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
+        }
 
-	private void updateStudentSlugCourse(Submission submission, Student student, Slug slug, Course course) {
+        int newDiagnosticErrors = submission.getDiagnosticErrors();
 
-		if (submission.getStyle() == 100) {
-			slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
-			course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
-			student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
-		}
+        int newTestErrors = 0;
+        int newTestPassed = 0;
+        int newTestsRan = 0;
 
-		int newDiagnosticErrors = submission.getDiagnosticErrors();
+        slug.setTotalCommits(slug.getTotalCommits() + 1);
+        course.setTotalCommits(course.getTotalCommits() + 1);
+        student.setTotalCommits(student.getTotalCommits() + 1);
 
-		int newTestErrors = 0;
-		int newTestPassed = 0;
-		int newTestsRan = 0;
+        slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
 
-		slug.setTotalCommits(slug.getTotalCommits() + 1);
-		course.setTotalCommits(course.getTotalCommits() + 1);
-		student.setTotalCommits(student.getTotalCommits() + 1);
+        slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
+        course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
+        student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
 
-		slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
-		course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
-		student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
+        slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
+        course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
+        student.setTotalTestsPassed(student.getTotalTestsPassed() + newTestPassed);
 
-		slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
-		course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
-		student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
+        slug.setTotalTestsRan(slug.getTotalTestsRan() + newTestsRan);
+        course.setTotalTestsRan(course.getTotalTestsRan() + newTestsRan);
+        student.setTotalTestsRan(student.getTotalTestsRan() + newTestsRan);
 
-		slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
-		course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
-		student.setTotalTestsPassed(student.getTotalTestsPassed() + newTestPassed);
+        student.getTimestamps().add(submission.getTimestamp());
+        student.setLastTested(submission.getTimestamp());
 
-		slug.setTotalTestsRan(slug.getTotalTestsRan() + newTestsRan);
-		course.setTotalTestsRan(course.getTotalTestsRan() + newTestsRan);
-		student.setTotalTestsRan(student.getTotalTestsRan() + newTestsRan);
+        student.setDifferentCourses(student.getCourses().size());
+        student.setDifferentSlugs(student.getSlugs().size());
+    }
 
-		student.getTimestamps().add(submission.getTimestamp());
-		student.setLastTested(submission.getTimestamp());
+    // update
 
-		student.setDifferentCourses(student.getCourses().size());
-		student.setDifferentSlugs(student.getSlugs().size());
-	}
+    public void updateStudentCache(Student student) {
+        logger.debug("Update student cache");
+        studentCache.put(Objects.hash(student.getUniid()), student);
+    }
 
-	// update
+    public void updateSlugCache(Slug slug) {
+        logger.debug("Update slug cache");
+        slugCache.put(Objects.hash(slug.getCourseUrl(), slug.getName()), slug);
+    }
 
-	public void updateStudentCache(Student student) {
-		logger.debug("Update student cache");
-		studentCache.put(Objects.hash(student.getUniid()), student);
-	}
+    public void updateSubmissionCache(Submission submission) {
+        logger.debug("Update submission cache");
+        submissionCache.put(Objects.hash(submission.getId()), submission);
+    }
 
-	public void updateSlugCache(Slug slug) {
-		logger.debug("Update slug cache");
-		slugCache.put(Objects.hash(slug.getCourseUrl(), slug.getName()), slug);
-	}
+    public void updateCourseCache(Course course) {
+        logger.debug("Update course cache");
+        courseCache.put(Objects.hash(course.getGitUrl()), course);
+    }
 
-	public void updateSubmissionCache(Submission submission) {
-		logger.debug("Update submission cache");
-		submissionCache.put(Objects.hash(submission.getId()), submission);
-	}
+    // singleton by values
 
-	public void updateCourseCache(Course course) {
-		logger.debug("Update course cache");
-		courseCache.put(Objects.hash(course.getGitUrl()), course);
-	}
+    public Optional<Course> getCourse(String gitUrl) {
+        logger.info("Getting course by url {}", gitUrl);
+        return Optional.ofNullable(courseCache.getOrDefault(Objects.hash(gitUrl), null));
+    }
 
-	// singleton by values
+    public Optional<Slug> getSlug(String name, String gitUrl) {
+        logger.info("Getting slug by name {} and url {}", name, gitUrl);
+        return Optional.ofNullable(slugCache.getOrDefault(Objects.hash(name, gitUrl), null));
+    }
 
-	public Optional<Course> getCourse(String gitUrl) {
-		logger.info("Getting course by url {}", gitUrl);
-		return Optional.ofNullable(courseCache.getOrDefault(Objects.hash(gitUrl), null));
-	}
+    public Optional<Student> getStudent(String uniid) {
+        logger.info("Getting student by uniid {}", uniid);
+        return Optional.ofNullable(studentCache.getOrDefault(Objects.hash(uniid), null));
+    }
 
-	public Optional<Slug> getSlug(String name, String gitUrl) {
-		logger.info("Getting slug by name {} and url {}", name, gitUrl);
-		return Optional.ofNullable(slugCache.getOrDefault(Objects.hash(name, gitUrl), null));
-	}
+    // collection
 
-	public Optional<Student> getStudent(String uniid) {
-		logger.info("Getting student by uniid {}", uniid);
-		return Optional.ofNullable(studentCache.getOrDefault(Objects.hash(uniid), null));
-	}
+    public Collection<Submission> getSubmissionList() {
+        logger.info("Reading all submissions from cache");
+        return submissionCache.values();
+    }
 
-	// collection
+    public Collection<Student> getStudentList() {
+        logger.info("Reading all students from cache");
+        return studentCache.values();
+    }
 
-	public Collection<Submission> getSubmissionList() {
-		logger.info("Reading all submissions from cache");
-		return submissionCache.values();
-	}
+    public Collection<Course> getCourseList() {
+        logger.info("Reading all courses from cache");
+        return courseCache.values();
+    }
 
-	public Collection<Student> getStudentList() {
-		logger.info("Reading all students from cache");
-		return studentCache.values();
-	}
+    public Collection<Slug> getSlugList() {
+        logger.info("Reading all slugs from cache");
+        return slugCache.values();
+    }
 
-	public Collection<Course> getCourseList() {
-		logger.info("Reading all courses from cache");
-		return courseCache.values();
-	}
+    // singleton by key
 
-	public Collection<Slug> getSlugList() {
-		logger.info("Reading all slugs from cache");
-		return slugCache.values();
-	}
+    public Optional<Student> getStudent(Integer id) {
+        return Optional.ofNullable(studentCache.getOrDefault(id, null));
+    }
 
-	// singleton by key
+    public Optional<Slug> getSlug(Integer id) {
+        return Optional.ofNullable(slugCache.getOrDefault(id, null));
+    }
 
-	public Optional<Student> getStudent(Integer id) {
-		return Optional.ofNullable(studentCache.getOrDefault(id, null));
-	}
+    public Optional<Course> getCourse(Integer id) {
+        return Optional.ofNullable(courseCache.getOrDefault(id, null));
+    }
 
-	public Optional<Slug> getSlug(Integer id) {
-		return Optional.ofNullable(slugCache.getOrDefault(id, null));
-	}
-
-	public Optional<Course> getCourse(Integer id) {
-		return Optional.ofNullable(courseCache.getOrDefault(id, null));
-	}
-
-	public Optional<Submission> getSubmission(Integer id) {
-		return Optional.ofNullable(submissionCache.getOrDefault(id, null));
-	}
+    public Optional<Submission> getSubmission(Integer id) {
+        return Optional.ofNullable(submissionCache.getOrDefault(id, null));
+    }
 }

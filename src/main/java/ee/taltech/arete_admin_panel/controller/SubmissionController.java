@@ -26,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.*;
 
-import javax.naming.AuthenticationException;
 import java.util.Collection;
 
 @SecurityScheme(name = "X-Testing-Token", type = SecuritySchemeType.APIKEY, in = SecuritySchemeIn.HEADER)
@@ -36,107 +35,107 @@ import java.util.Collection;
 @RequestMapping("services/arete/api/v2/submission")
 public class SubmissionController {
 
-	private final Logger LOG = LoggerFactory.getLogger(this.getClass());
+    private final Logger LOG = LoggerFactory.getLogger(this.getClass());
 
-	private final ObjectMapper objectMapper;
-	private final CacheService cacheService;
-	private final AreteService areteService;
-	private final JobRepository jobRepository;
-	private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
+    private final ObjectMapper objectMapper;
+    private final CacheService cacheService;
+    private final AreteService areteService;
+    private final JobRepository jobRepository;
+    private final AuthenticationManager authenticationManager; // dont delete <- this bean is used here for authentication
 
 
-	public SubmissionController(ObjectMapper objectMapper,
-								CacheService cacheService,
-								AreteService areteService,
-								JobRepository jobRepository,
-								AuthenticationManager authenticationManager) {
-		this.objectMapper = objectMapper;
-		this.cacheService = cacheService;
-		this.areteService = areteService;
-		this.jobRepository = jobRepository;
-		this.authenticationManager = authenticationManager;
-	}
+    public SubmissionController(ObjectMapper objectMapper,
+                                CacheService cacheService,
+                                AreteService areteService,
+                                JobRepository jobRepository,
+                                AuthenticationManager authenticationManager) {
+        this.objectMapper = objectMapper;
+        this.cacheService = cacheService;
+        this.areteService = areteService;
+        this.jobRepository = jobRepository;
+        this.authenticationManager = authenticationManager;
+    }
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached submissions", tags = {"submission"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/all")
-	public Collection<Submission> getSubmissions() {
-		return cacheService.getSubmissionList();
-	}
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all cached submissions", tags = {"submission"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/all")
+    public Collection<Submission> getSubmissions() {
+        return cacheService.getSubmissionList();
+    }
 
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
-	@ResponseStatus(HttpStatus.OK)
-	@GetMapping(path = "/{hash}/{timestamp}")
-	public Job getSubmission(@PathVariable("hash") String hash, @PathVariable("timestamp") Long timestamp) {
-		LOG.info("Reading submission by hash {} and timestamp {}", hash, timestamp);
-		return jobRepository.findTop10ByHashAndTimestampOrderByIdDesc(hash, timestamp);
-	}
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns a submission by hash", tags = {"submission"})
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(path = "/{hash}/{timestamp}")
+    public Job getSubmission(@PathVariable("hash") String hash, @PathVariable("timestamp") Long timestamp) {
+        LOG.info("Reading submission by hash {} and timestamp {}", hash, timestamp);
+        return jobRepository.findTop10ByHashAndTimestampOrderByIdDesc(hash, timestamp);
+    }
 
-	@SneakyThrows
-	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Add a new submission to database", tags = {"submission"})
-	@ResponseStatus(HttpStatus.OK)
-	@PostMapping(path = "")
-	public void parseJob(@RequestBody AreteResponseDTO areteResponse) {
-		areteService.parseAreteResponseDTO(areteResponse);
-	}
+    @SneakyThrows
+    @Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Add a new submission to database", tags = {"submission"})
+    @ResponseStatus(HttpStatus.OK)
+    @PostMapping(path = "")
+    public void parseJob(@RequestBody AreteResponseDTO areteResponse) {
+        areteService.parseAreteResponseDTO(areteResponse);
+    }
 
-	@Operation(
-			parameters = {
-					@Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
-							description = "gitlab token with structure: s\"{name} {password}\""),
-					@Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
-							description = "testing token with structure: s\"{name} {password}\"")
-			},
-			security = {
-					@SecurityRequirement(name = "Authorization"),
-					@SecurityRequirement(name = "X-Gitlab-Token"),
-					@SecurityRequirement(name = "X-Testing-Token")
-			}, summary = "Create a new submission which will be tested synchronously", tags = {"submission"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PostMapping("/:testSync")
-	@SneakyThrows
-	public AreteResponseDTO makeRequestSync(HttpEntity<String> httpEntity) {
-		AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
-		return areteService.makeRequestSync(requestDTO);
-	}
+    @Operation(
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
+                            description = "gitlab token with structure: s\"{name} {password}\""),
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
+                            description = "testing token with structure: s\"{name} {password}\"")
+            },
+            security = {
+                    @SecurityRequirement(name = "Authorization"),
+                    @SecurityRequirement(name = "X-Gitlab-Token"),
+                    @SecurityRequirement(name = "X-Testing-Token")
+            }, summary = "Create a new submission which will be tested synchronously", tags = {"submission"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:testSync")
+    @SneakyThrows
+    public AreteResponseDTO makeRequestSync(HttpEntity<String> httpEntity) {
+        AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
+        return areteService.makeRequestSync(requestDTO);
+    }
 
-	@Operation(
-			parameters = {
-					@Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
-							description = "gitlab token with structure: s\"{name} {password}\""),
-					@Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
-							description = "testing token with structure: s\"{name} {password}\"")
-			},
-			security = {
-					@SecurityRequirement(name = "Authorization"),
-					@SecurityRequirement(name = "X-Gitlab-Token"),
-					@SecurityRequirement(name = "X-Testing-Token")
-			}, summary = "Create a new submission which will be tested asynchronously", tags = {"submission"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PostMapping("/:testAsync")
-	@SneakyThrows
-	public void makeRequestAsync(HttpEntity<String> httpEntity) {
-		AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
-		areteService.makeRequestAsync(requestDTO);
-	}
+    @Operation(
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
+                            description = "gitlab token with structure: s\"{name} {password}\""),
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
+                            description = "testing token with structure: s\"{name} {password}\"")
+            },
+            security = {
+                    @SecurityRequirement(name = "Authorization"),
+                    @SecurityRequirement(name = "X-Gitlab-Token"),
+                    @SecurityRequirement(name = "X-Testing-Token")
+            }, summary = "Create a new submission which will be tested asynchronously", tags = {"submission"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:testAsync")
+    @SneakyThrows
+    public void makeRequestAsync(HttpEntity<String> httpEntity) {
+        AreteRequestDTO requestDTO = objectMapper.readValue(httpEntity.getBody(), AreteRequestDTO.class);
+        areteService.makeRequestAsync(requestDTO);
+    }
 
-	@Operation(
-			parameters = {
-					@Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
-							description = "gitlab token with structure: s\"{name} {password}\""),
-					@Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
-							description = "testing token with structure: s\"{name} {password}\"")
-			},
-			security = {
-					@SecurityRequirement(name = "Authorization"),
-					@SecurityRequirement(name = "X-Gitlab-Token"),
-					@SecurityRequirement(name = "X-Testing-Token")
-			},
-			summary = "Run tests from webhook",
-			tags = {"submission"})
-	@ResponseStatus(HttpStatus.ACCEPTED)
-	@PostMapping("/:webhook/withTests")
-	public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdateDTO areteTestUpdate, @RequestParam(name = "testRepository") String testRepository) {
-		areteService.makeRequestWebhook(areteTestUpdate, testRepository);
-	}
+    @Operation(
+            parameters = {
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Gitlab-Token",
+                            description = "gitlab token with structure: s\"{name} {password}\""),
+                    @Parameter(in = ParameterIn.HEADER, name = "X-Testing-Token",
+                            description = "testing token with structure: s\"{name} {password}\"")
+            },
+            security = {
+                    @SecurityRequirement(name = "Authorization"),
+                    @SecurityRequirement(name = "X-Gitlab-Token"),
+                    @SecurityRequirement(name = "X-Testing-Token")
+            },
+            summary = "Run tests from webhook",
+            tags = {"submission"})
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    @PostMapping("/:webhook/withTests")
+    public void makeRequestAsyncWebHook(@RequestBody AreteTestUpdateDTO areteTestUpdate, @RequestParam(name = "testRepository") String testRepository) {
+        areteService.makeRequestWebhook(areteTestUpdate, testRepository);
+    }
 }
