@@ -1,5 +1,6 @@
 package ee.taltech.arete_admin_panel.domain;
 
+import ee.taltech.arete.java.response.arete.ErrorDTO;
 import lombok.*;
 
 import javax.persistence.*;
@@ -16,61 +17,83 @@ import java.util.Set;
 @Table(name = "job")
 public class Job {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @NotNull
-    private String testingPlatform;
+	@NotNull
+	private String testingPlatform;
 
-    private String gitStudentRepo;
+	private String gitStudentRepo;
 
-    private String gitTestRepo;
+	private String gitTestRepo;
 
-    @NotNull
-    private String hash;
+	@NotNull
+	private String hash;
 
-    @NotNull
-    @Builder.Default
-    private String uniid = "NaN"; // gitlab namespace: envomp
+	@NotNull
+	@Builder.Default
+	private String uniid = "NaN"; // gitlab namespace: envomp
 
-    @NotNull
-    private String root; // gitlab namespace with path for tester: iti0102-2019
+	private String email;
 
-    @NotNull
-    private String slug;
+	private String type;
 
-    private String commitMessage;
+	private String version;
 
-    @OneToMany(cascade = {CascadeType.ALL})
-    private List<TestContext> testSuites;
+	@NotNull
+	private String root; // gitlab namespace with path for tester: iti0102-2019
 
-    @ElementCollection
-    @CollectionTable(name = "docker_extra", joinColumns = @JoinColumn(name = "id"))
-    private Set<String> dockerExtra;
+	@NotNull
+	private String slug;
 
-    @ElementCollection
-    @CollectionTable(name = "system_extra", joinColumns = @JoinColumn(name = "id"))
-    private Set<String> systemExtra;
+	private String commitMessage;
 
-    private Integer dockerTimeout;
+	@OneToMany(cascade = {CascadeType.ALL})
+	private List<TestContext> testSuites;
 
-    @NotNull
-    private Long timestamp;
+	@OneToMany(cascade = {CascadeType.ALL})
+	private List<Error> errors;
 
-    private Integer priority;
+	private String dockerExtra;
 
-    @NotNull
-    private Boolean failed;
+	private String dockerTestRoot;
 
-    @Column(columnDefinition = "TEXT")
-    private String output;
+	private String dockerContentRoot;
 
-    @Column(columnDefinition = "TEXT")
-    private String consoleOutput;
+	@ElementCollection
+	@CollectionTable(name = "system_extra", joinColumns = @JoinColumn(name = "id"))
+	private Set<String> systemExtra;
 
-    @NotNull
-    @Builder.Default
-    private Integer analyzed = 0;
+	private Integer dockerTimeout;
+
+	@NotNull
+	private Long timestamp;
+
+	private Long receivedTimestamp;
+
+	private Long finishedTimestamp;
+
+	private Integer priority;
+
+	private Integer totalCount;
+
+	private Integer totalPassedCount;
+
+	private Integer style;
+
+	private Double totalGrade;
+
+	private Boolean failed;
+
+	@Column(columnDefinition = "TEXT")
+	private String output;
+
+	@Column(columnDefinition = "TEXT")
+	private String consoleOutputs;
+
+	@NotNull
+	@Builder.Default
+	private Integer analyzed = 0;
 
 }
