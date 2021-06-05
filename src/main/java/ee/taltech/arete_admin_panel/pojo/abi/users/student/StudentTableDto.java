@@ -3,21 +3,19 @@ package ee.taltech.arete_admin_panel.pojo.abi.users.student;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-import java.util.HashSet;
-import java.util.Set;
 
+@Entity
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "student")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StudentDto {
+public class StudentTableDto {
 
 	@Id
     long id;
@@ -34,9 +32,9 @@ public class StudentDto {
 
     int totalDiagnosticErrors;
 
-    Set<String> courses;
+    int differentSlugs;
 
-	Set<String> slugs;
+    int differentCourses;
 
     int commitsStyleOK;
 

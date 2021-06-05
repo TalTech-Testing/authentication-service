@@ -195,9 +195,6 @@ public class AreteService {
 
 		student.getCourses().add(course.getGitUrl());
 		student.getSlugs().add(slug.getName());
-
-		course.getStudents().add(student.getUniid());
-		slug.getStudents().add(student.getUniid());
 		return student;
 	}
 
@@ -256,6 +253,10 @@ public class AreteService {
 
 		student.getTimestamps().add(response.getTimestamp());
 		student.setLastTested(response.getTimestamp());
+
+
+		student.setDifferentCourses(student.getCourses().size());
+		student.setDifferentSlugs(student.getSlugs().size());
 
 		updateCourse(course, course.getId());
 		updateSlug(slug, slug.getId());

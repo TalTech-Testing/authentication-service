@@ -2,7 +2,7 @@ package ee.taltech.arete_admin_panel.controller;
 
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
 import ee.taltech.arete_admin_panel.domain.Slug;
-import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugDto;
+import ee.taltech.arete_admin_panel.pojo.abi.users.slug.SlugTableDto;
 import ee.taltech.arete_admin_panel.repository.SlugRepository;
 import ee.taltech.arete_admin_panel.service.AreteService;
 import ee.taltech.arete_admin_panel.service.CacheService;
@@ -50,7 +50,7 @@ public class ExerciseController {
 	@Operation(security = {@SecurityRequirement(name = "Authorization")}, summary = "Returns all exercises", tags = {"exercise"})
 	@ResponseStatus(HttpStatus.OK)
 	@GetMapping(path = "/all")
-	public Collection<SlugDto> getSlugs() {
+	public Collection<SlugTableDto> getSlugs() {
 		return cacheService.getSlugList();
 	}
 
