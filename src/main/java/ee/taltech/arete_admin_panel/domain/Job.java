@@ -1,6 +1,5 @@
 package ee.taltech.arete_admin_panel.domain;
 
-import ee.taltech.arete.java.response.arete.ErrorDTO;
 import lombok.*;
 
 import javax.persistence.*;

@@ -1,5 +1,6 @@
 package ee.taltech.arete_admin_panel.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import ee.taltech.arete.java.LoadBalancerClient;
 import ee.taltech.arete.java.request.AreteRequestDTO;
 import ee.taltech.arete.java.request.hook.AreteTestUpdateDTO;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class AreteService {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final ObjectMapper mapper = new ObjectMapper();
 	private final CacheService cacheService;
 	private final StudentRepository studentRepository;
 	private final CourseRepository courseRepository;
@@ -106,54 +107,9 @@ public class AreteService {
 		return submission;
 	}
 
+	@SneakyThrows
 	private void saveJob(AreteResponseDTO response) {
-		Job job = Job.builder()
-				.output(response.getOutput().replace("\n", "<br>"))
-				.consoleOutput(response.getConsoleOutputs().replace("\n", "<br>"))
-				.testSuites(response.getTestSuites().stream()
-						.map(x -> TestContext.builder()
-								.endDate(x.getEndDate())
-								.file(x.getFile())
-								.grade(x.getGrade())
-								.name(x.getName())
-								.passedCount(x.getPassedCount())
-								.startDate(x.getStartDate())
-								.weight(x.getWeight())
-								.unitTests(
-										x.getUnitTests().stream()
-												.map(y -> UnitTest.builder()
-														.exceptionClass(y.getExceptionClass())
-														.exceptionMessage(y.getExceptionMessage())
-														.groupsDependedUpon(y.getGroupsDependedUpon())
-														.methodsDependedUpon(y.getMethodsDependedUpon())
-														.printExceptionMessage(y.getPrintExceptionMessage())
-														.printStackTrace(y.getPrintStackTrace())
-														.stackTrace(y.getStackTrace())
-														.name(y.getName())
-														.status(y.getStatus().toString())
-														.timeElapsed(y.getTimeElapsed())
-														.weight(y.getWeight())
-														.build())
-												.collect(Collectors.toList()))
-								.build())
-						.collect(Collectors.toList()))
-				.timestamp(response.getTimestamp())
-				.uniid(response.getUniid())
-				.slug(response.getSlug())
-				.root(response.getRoot())
-				.testingPlatform(response.getTestingPlatform())
-				.priority(response.getPriority())
-				.hash(response.getHash())
-				.commitMessage(response.getCommitMessage())
-				.failed(response.getFailed())
-				.gitStudentRepo(response.getGitStudentRepo())
-				.gitTestRepo(response.getGitTestRepo())
-				.dockerTimeout(response.getDockerTimeout())
-				.dockerExtra(Set.of(response.getDockerExtra()))
-				.systemExtra(response.getSystemExtra())
-				.build();
-
-
+		Job job = mapper.readValue(mapper.writeValueAsString(response), Job.class);
 		logger.info("Saving job");
 		jobRepository.save(job);
 	}
