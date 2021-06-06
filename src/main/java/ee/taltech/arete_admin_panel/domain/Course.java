@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
 
 @Data
 @Builder
@@ -40,11 +41,11 @@ public class Course {
 
     @NotNull
     @Builder.Default
-    private Integer totalTestErrors = 0;
+    private Integer differentStudents = 0;
 
     @NotNull
     @Builder.Default
-    private Integer differentStudents = 0;
+    private HashSet<String> students = new HashSet<>();
 
     @NotNull
     @Builder.Default

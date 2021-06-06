@@ -48,6 +48,10 @@ public class Submission {
 
     private Integer diagnosticErrors;
 
+    private Integer testsPassed;
+
+    private Integer testsRan;
+
     @NotNull
     @Builder.Default
     private Boolean failed = false;

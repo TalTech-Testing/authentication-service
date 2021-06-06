@@ -127,8 +127,6 @@ public class CacheService {
             student.setGitRepo(submission.getGitTestSource());
         }
 
-        student.getCourses().add(submission.getGitTestSource());
-        student.getSlugs().add(submission.getSlug());
         return student;
     }
 
@@ -141,10 +139,8 @@ public class CacheService {
         }
 
         int newDiagnosticErrors = submission.getDiagnosticErrors() == null ? 0 : submission.getDiagnosticErrors();
-
-        int newTestErrors = 0;
-        int newTestPassed = 0;
-        int newTestsRan = 0;
+        int newTestPassed = submission.getTestsPassed() == null ? 0 : submission.getTestsPassed();
+        int newTestsRan = submission.getTestsRan() == null ? 0 : submission.getTestsRan();
 
         slug.setTotalCommits(slug.getTotalCommits() + 1);
         course.setTotalCommits(course.getTotalCommits() + 1);
@@ -153,10 +149,6 @@ public class CacheService {
         slug.setTotalDiagnosticErrors(slug.getTotalDiagnosticErrors() + newDiagnosticErrors);
         course.setTotalDiagnosticErrors(course.getTotalDiagnosticErrors() + newDiagnosticErrors);
         student.setTotalDiagnosticErrors(student.getTotalDiagnosticErrors() + newDiagnosticErrors);
-
-        slug.setTotalTestErrors(slug.getTotalTestErrors() + newTestErrors);
-        course.setTotalTestErrors(course.getTotalTestErrors() + newTestErrors);
-        student.setTotalTestErrors(student.getTotalTestErrors() + newTestErrors);
 
         slug.setTotalTestsPassed(slug.getTotalTestsPassed() + newTestPassed);
         course.setTotalTestsPassed(course.getTotalTestsPassed() + newTestPassed);
@@ -171,6 +163,15 @@ public class CacheService {
 
         student.setDifferentCourses(student.getCourses().size());
         student.setDifferentSlugs(student.getSlugs().size());
+
+        student.getCourses().add(submission.getGitTestSource());
+        student.getSlugs().add(submission.getSlug());
+
+        slug.getStudents().add(submission.getUniid());
+        slug.setDifferentStudents(slug.getStudents().size());
+
+        course.getStudents().add(submission.getUniid());
+        course.setDifferentStudents(course.getStudents().size());
     }
 
     // update

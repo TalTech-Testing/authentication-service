@@ -69,6 +69,12 @@ public class AreteService {
         if (response.getOutput() == null) {
             response.setOutput("no output");
         }
+        response.setOutput(response.getOutput().replace("\n", "<br>"));
+
+        if (response.getConsoleOutputs() == null) {
+            response.setConsoleOutputs("no output");
+        }
+        response.setConsoleOutputs(response.getConsoleOutputs().replace("\n", "<br>"));
 
         if (response.getRoot() == null) {
             response.setRoot(response.getSlug());
@@ -89,6 +95,8 @@ public class AreteService {
                 .timestamp(response.getTimestamp())
                 .style(response.getStyle())
                 .diagnosticErrors(response.getErrors().size())
+                .testsPassed(response.getTotalPassedCount())
+                .testsRan(response.getTotalCount())
                 .gitStudentRepo(response.getGitStudentRepo())
                 .gitTestSource(response.getGitTestRepo())
                 .failed(response.getFailed())

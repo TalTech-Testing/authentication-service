@@ -88,7 +88,7 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String output;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", table = "console_output")
     private String consoleOutputs;
 
     @NotNull

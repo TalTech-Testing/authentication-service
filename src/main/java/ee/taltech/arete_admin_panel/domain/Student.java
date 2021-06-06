@@ -63,10 +63,6 @@ public class Student {
 
     @NotNull
     @Builder.Default
-    private Integer totalTestErrors = 0;
-
-    @NotNull
-    @Builder.Default
     private Integer differentSlugs = 0;
 
     @NotNull
