@@ -29,9 +29,8 @@ public class Submission {
     @NotNull
     private String slug;
 
-    @Builder.Default
     @NotNull
-    private String uniid = "NaN"; // gitlab namespace: envomp
+    private String uniid; // gitlab namespace: envomp
 
     private String root; // gitlab path for student: iti0102-2019
 

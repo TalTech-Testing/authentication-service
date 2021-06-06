@@ -50,6 +50,10 @@ public class AreteService {
             response.setUniid("NaN");
         }
 
+        if (response.getGitStudentRepo() == null) {
+            response.setGitStudentRepo("no repo");
+        }
+
         if (response.getErrors() == null) {
             response.setErrors(new ArrayList<>());
         }
