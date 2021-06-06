@@ -26,6 +26,7 @@ public class Submission {
     @NotNull
     private String hash; // references to job.
 
+    @NotNull
     private String slug;
 
     @Builder.Default
@@ -34,16 +35,18 @@ public class Submission {
 
     private String root; // gitlab path for student: iti0102-2019
 
+    @NotNull
     private String gitStudentRepo;
 
+    @NotNull
     private String gitTestSource;
 
     @NotNull
     private Long timestamp;
 
-    private Integer style;
+    private int style;
 
-    private Integer diagnosticErrors;
+    private int diagnosticErrors;
 
     @NotNull
     @Builder.Default
