@@ -68,7 +68,7 @@ public class SubmissionController {
     @GetMapping(path = "/{hash}/{timestamp}")
     public Job getSubmission(@PathVariable("hash") String hash, @PathVariable("timestamp") Long timestamp) {
         LOG.info("Reading submission by hash {} and timestamp {}", hash, timestamp);
-        return jobRepository.findTop10ByHashAndTimestampOrderByIdDesc(hash, timestamp);
+        return jobRepository.findByHashAndTimestamp(hash, timestamp);
     }
 
     @SneakyThrows

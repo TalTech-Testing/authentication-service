@@ -61,7 +61,7 @@ public class CacheService {
 
     @SneakyThrows
     public void enqueueSubmission(Submission submission) {
-        logger.info("Enqueueing submission {}", submission.getHash());
+        logger.debug("Enqueueing submission {}", submission.getHash());
         toProcess.add(submission);
     }
 
@@ -74,7 +74,10 @@ public class CacheService {
         isProcessing.set(true);
 
         try {
-            toProcess.forEach(submission -> {
+            while (toProcess.peek() != null) {
+                Submission submission = toProcess.poll();
+                logger.info("Processing submission {}", submission.getHash());
+
                 Course course = getCourse(submission);
                 Slug slug = getSlug(submission);
                 Student student = getStudent(submission);
@@ -85,7 +88,7 @@ public class CacheService {
                 updateCourseCache(course);
                 updateSlugCache(slug);
                 updateStudentCache(student);
-            });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -96,7 +99,7 @@ public class CacheService {
     private Course getCourse(Submission submission) {
         Optional<Course> optionalCourse = getCourse(submission.getGitTestSource());
         return optionalCourse.orElseGet(() -> Course.builder()
-                .id(Objects.hash(Objects.hash(submission.getGitTestSource())))
+                .id(Objects.hash(submission.getGitTestSource()))
                 .gitUrl(submission.getGitTestSource())
                 .name(submission.getRoot())
                 .build());
@@ -105,7 +108,7 @@ public class CacheService {
     private Slug getSlug(Submission submission) {
         Optional<Slug> optionalSlug = getSlug(submission.getSlug(), submission.getGitTestSource());
         return optionalSlug.orElseGet(() -> Slug.builder()
-                .id(Objects.hash(Objects.hash(submission.getGitTestSource(), submission.getSlug())))
+                .id(Objects.hash(submission.getSlug(), submission.getGitTestSource()))
                 .courseUrl(submission.getGitTestSource())
                 .name(submission.getSlug())
                 .build());
@@ -179,7 +182,7 @@ public class CacheService {
 
     public void updateSlugCache(Slug slug) {
         logger.debug("Update slug cache");
-        slugCache.put(Objects.hash(slug.getCourseUrl(), slug.getName()), slug);
+        slugCache.put(Objects.hash(slug.getName(), slug.getCourseUrl()), slug);
     }
 
     public void updateSubmissionCache(Submission submission) {

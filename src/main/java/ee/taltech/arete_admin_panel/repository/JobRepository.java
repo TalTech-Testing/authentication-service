@@ -12,6 +12,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     List<Job> findByHash(@Param("hash") String hash);
 
-    Job findTop10ByHashAndTimestampOrderByIdDesc(@Param("hash") String hash, @Param("timestamp") Long timestamp);
+    Job findByHashAndTimestamp(@Param("hash") String hash, @Param("timestamp") Long timestamp);
 
 }
