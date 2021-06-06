@@ -44,12 +44,12 @@ public class Submission {
     @NotNull
     private Long timestamp;
 
-    private int style;
+    private Integer style;
 
-    private int diagnosticErrors;
+    private Integer diagnosticErrors;
 
     @NotNull
     @Builder.Default
-    private boolean failed = false;
+    private Boolean failed = false;
 
 }

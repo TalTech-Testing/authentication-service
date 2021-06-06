@@ -134,13 +134,13 @@ public class CacheService {
 
     private void updateStudentSlugCourse(Submission submission, Student student, Slug slug, Course course) {
 
-        if (submission.getStyle() == 100) {
+        if (submission.getStyle() != null && submission.getStyle() == 100) {
             slug.setCommitsStyleOK(slug.getCommitsStyleOK() + 1);
             course.setCommitsStyleOK(course.getCommitsStyleOK() + 1);
             student.setCommitsStyleOK(student.getCommitsStyleOK() + 1);
         }
 
-        int newDiagnosticErrors = submission.getDiagnosticErrors();
+        int newDiagnosticErrors = submission.getDiagnosticErrors() == null ? 0 : submission.getDiagnosticErrors();
 
         int newTestErrors = 0;
         int newTestPassed = 0;
