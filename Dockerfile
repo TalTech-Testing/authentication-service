@@ -4,7 +4,7 @@ ADD . /authentication_service
 WORKDIR /authentication_service
 
 # Run Maven build
-RUN chmod +x mvnw && ./mvnw clean install -DskipTests
+RUN chmod +x mvnw && ./mvnw clean install
 
 MAINTAINER enrico.vompa@gmail.com
 
