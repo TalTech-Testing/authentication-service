@@ -11,7 +11,9 @@ services:
         env_file:
             - .env
         environment:
-            ADMIN_PASS: ${ADMIN_PASS:-false} # false means that one hardcoded pass will be used
+            ADMIN_PASS: ${ADMIN_PASS:-admin}
+            LOG_LEVEL: ${DATABASE_PASSWORD:-warn}
+            DATABASE_MIGRATION: ${DATABASE_MIGRATION:-update} # options are create-drop, update, create
             DATABASE_PASSWORD: ${DATABASE_PASSWORD:-v1jXKUpcHAm0dc3C2GNlFkjibEwzdkTbG0Vnld5RZ16Nriz86hQ0cQ2dC09lpVjg}
         ports:
             - "8001:8001"
